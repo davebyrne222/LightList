@@ -33,7 +33,7 @@ public class TaskViewModel: ObservableObject, IQueryAttributable
         }
     }
 
-    public int NoDaysRemaining => _task.DueDate.Subtract(DateTime.Today).Days;
+    public string NoDaysRemainingLbl => GetDaysRemainingLabel(_task.DueDate.Subtract(DateTime.Today).Days);
 
     public string Label
     {
@@ -72,7 +72,16 @@ public class TaskViewModel: ObservableObject, IQueryAttributable
         await Shell.Current.GoToAsync($"..?deleted={_task.Id}");
     }
     
-    // the query string parameters used in navigation are passed to the ApplyQueryAttributes method
+    private string GetDaysRemainingLabel(int noDaysRemaining)
+    {
+        switch(noDaysRemaining) {
+            case < 0: return "Overdue";
+            case 0: return "Today";
+            case 1: return $"{noDaysRemaining} Day";
+            default: return $"{noDaysRemaining} Days";
+        }   
+    }
+    
     void IQueryAttributable.ApplyQueryAttributes(IDictionary<string, object> query)
     {
         if (query.ContainsKey("load"))
