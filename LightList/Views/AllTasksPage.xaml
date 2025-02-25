@@ -37,7 +37,7 @@
                                     AlignItems="Center"
                                     JustifyContent="SpaceBetween">
                             <Label Text="{Binding Label}" FontSize="14" TextColor="Silver"/>
-                            <Label Text="{Binding DueDate}" FontSize="14" TextColor="Silver"/>
+                            <Label Text="{Binding NoDaysRemaining}" FontSize="14" TextColor="Silver"/>
                         </FlexLayout>
                     </StackLayout>
                 </Frame>

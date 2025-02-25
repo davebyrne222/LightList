@@ -32,6 +32,9 @@ public class TaskViewModel: ObservableObject, IQueryAttributable
             }
         }
     }
+
+    public int NoDaysRemaining => _task.DueDate.Subtract(DateTime.Today).Days;
+
     public string Label
     {
         get => _task.Label;
