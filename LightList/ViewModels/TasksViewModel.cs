@@ -30,7 +30,7 @@ public class TasksViewModel: IQueryAttributable
     private async System.Threading.Tasks.Task SelectTaskAsync(TaskViewModel task)
     {
         if (task != null)
-            await Shell.Current.GoToAsync($"{nameof(Views.TaskPage)}?load={task.Identifier}");
+            await Shell.Current.GoToAsync($"{nameof(Views.TaskPage)}?load={task.Id}");
     }
     
     void IQueryAttributable.ApplyQueryAttributes(IDictionary<string, object> query)
@@ -38,7 +38,7 @@ public class TasksViewModel: IQueryAttributable
         if (query.ContainsKey("deleted"))
         {
             string taskId = query["deleted"].ToString();
-            TaskViewModel matchedTask = AllTasks.Where((n) => n.Identifier == taskId).FirstOrDefault();
+            TaskViewModel matchedTask = AllTasks.Where((n) => n.Id == taskId).FirstOrDefault();
 
             // If task exists, delete it
             if (matchedTask != null)
@@ -47,7 +47,7 @@ public class TasksViewModel: IQueryAttributable
         else if (query.ContainsKey("saved"))
         {
             string taskId = query["saved"].ToString();
-            TaskViewModel matchedTask = AllTasks.Where((n) => n.Identifier == taskId).FirstOrDefault();
+            TaskViewModel matchedTask = AllTasks.Where((n) => n.Id == taskId).FirstOrDefault();
 
             // If task is found, update it
             if (matchedTask != null)

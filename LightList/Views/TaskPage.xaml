@@ -5,9 +5,17 @@
              x:Class="LightList.Views.TaskPage"
              Title="Task">
     <VerticalStackLayout Spacing="10" Margin="5">
-        <Editor x:Name="TextEditor"
+        <Editor x:Name="DescriptionEditor"
                 Placeholder="Enter your note"
                 Text="{Binding Text}"
+                HeightRequest="100" />
+        
+        <DatePicker x:Name="DueDatePicker" 
+                    Date="{Binding DueDate}" />
+        
+        <Editor x:Name="LabelEditor"
+                Placeholder="Enter your note"
+                Text="{Binding Label}"
                 HeightRequest="100" />
 
         <Grid ColumnDefinitions="*,*" ColumnSpacing="4">

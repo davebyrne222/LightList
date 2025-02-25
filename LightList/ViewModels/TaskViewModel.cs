@@ -20,8 +20,31 @@ public class TaskViewModel: ObservableObject, IQueryAttributable
             }
         }
     }
-    public DateTime Date => _task.Date;
-    public string Identifier => _task.Filename; // TODO: replace Filename with ID (or similar)
+    public DateTime DueDate
+    {
+        get => _task.DueDate;
+        set
+        {
+            if (_task.DueDate != value)
+            {
+                _task.DueDate = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+    public string Label
+    {
+        get => _task.Label;
+        set
+        {
+            if (_task.Label != value)
+            {
+                _task.Label = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+    public string Id => _task.Id;
     public ICommand SaveCommand { get; private set; }
     public ICommand DeleteCommand { get; private set; }
     private ITasksService TasksService { get; }
@@ -36,15 +59,14 @@ public class TaskViewModel: ObservableObject, IQueryAttributable
     
     private async Task Save()
     {
-        _task.Date = DateTime.Now;
         TasksService.SaveTask(_task);
-        await Shell.Current.GoToAsync($"..?saved={_task.Filename}");
+        await Shell.Current.GoToAsync($"..?saved={_task.Id}");
     }
 
     private async Task Delete()
     {
         TasksService.DeleteTask(_task);
-        await Shell.Current.GoToAsync($"..?deleted={_task.Filename}");
+        await Shell.Current.GoToAsync($"..?deleted={_task.Id}");
     }
     
     // the query string parameters used in navigation are passed to the ApplyQueryAttributes method
@@ -59,13 +81,14 @@ public class TaskViewModel: ObservableObject, IQueryAttributable
     
     public void Reload()
     {
-        _task = TasksService.GetTask(_task.Filename);
+        _task = TasksService.GetTask(_task.Id);
         RefreshProperties();
     }
 
     private void RefreshProperties()
     {
         OnPropertyChanged(nameof(Text));
-        OnPropertyChanged(nameof(Date));
+        OnPropertyChanged(nameof(DueDate));
+        OnPropertyChanged(nameof(Label));
     }
 }

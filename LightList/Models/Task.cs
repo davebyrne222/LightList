@@ -2,14 +2,21 @@ namespace LightList.Models;
 
 public class Task
 {
-    public string Filename { get; set; }
+    public string Id { get; set; }
     public string Text { get; set; }
-    public DateTime Date { get; set; }
+    public string Label { get; set; }
+    public DateTime CreateOnDate { get; set; }
+    public DateTime UpdatedOnDate { get; set; }
+    public DateTime DueDate { get; set; }
     
     public Task()
     {
-        Filename = $"{Path.GetRandomFileName()}.task.txt";
-        Date = DateTime.Now;
+        // Id = $"{Path.GetRandomFileName()}.task.txt";
+        Id = "";
         Text = "";
+        Label = "";
+        CreateOnDate = DateTime.Now;
+        UpdatedOnDate = DateTime.Now;
+        DueDate = DateTime.Now;
     }
 }

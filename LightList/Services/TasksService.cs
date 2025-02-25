@@ -12,9 +12,9 @@ public class TasksService: ITasksService
         _localRepository = localRepository;
     }
 
-    public Models.Task GetTask(string filename)
+    public Models.Task GetTask(string id)
     {
-        return _localRepository.Get(filename);
+        return _localRepository.Get(id);
     }
 
     public IEnumerable<Models.Task> GetTasks()
@@ -24,6 +24,7 @@ public class TasksService: ITasksService
 
     public void SaveTask(Models.Task task)
     {
+        task.UpdatedOnDate = DateTime.Now;
         _localRepository.Save(task);
     }
 
