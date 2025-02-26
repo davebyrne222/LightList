@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LightList.Views.Components.NavBar">
+    
+    <Grid Padding="10" BackgroundColor="Transparent"
+          RowDefinitions="Auto"
+          ColumnDefinitions="Auto, 1*, Auto">
+
+        <ImageButton 
+            Grid.Column="0" 
+            Source="{FontImageSource Glyph='&#xf46a;', FontFamily='Ionicons', Color=Black}"
+            Command="{Binding OpenMenuCommand}"
+            HorizontalOptions="Start"
+            Style="{StaticResource ActionBarButtonStyle}"
+            Rotation="90"/>
+            
+        <HorizontalStackLayout
+            Grid.Column="1"        
+            HorizontalOptions="Center"
+            VerticalOptions="Center"
+            Spacing="10">
+            <Button Text="All"
+                    Command="{Binding AllTasksCommand}"
+                    Style="{StaticResource SelectedFilterButtonStyle}" />
+            <Button Text="Due"
+                    Command="{Binding TasksByDueDateCommand}"
+                    Style="{StaticResource FilterButtonStyle}" />
+            <Button Text="Label"
+                    Command="{Binding TasksByLabelCommand}"
+                    Style="{StaticResource FilterButtonStyle}" />
+        </HorizontalStackLayout>
+            
+        <ImageButton 
+            Grid.Column="2" 
+            Source="{FontImageSource Glyph='&#xf489;', FontFamily='Ionicons', Color=Black}"
+            Command="{Binding AddTaskCommand}"
+            HorizontalOptions="End"
+            Style="{StaticResource ActionBarButtonStyle}"/>
+    </Grid>
+</ContentView>

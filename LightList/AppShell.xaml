@@ -5,13 +5,30 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:LightList.Views"
     Shell.FlyoutBehavior="Disabled">
+    
+    <ShellContent Route="AllTasksPage" ContentTemplate="{DataTemplate views:AllTasksPage}" />
+    <ShellContent Route="TaskPage" ContentTemplate="{DataTemplate views:TaskPage}" />
+    
+    <Shell.FlyoutContent>
+        <Grid Padding="20">
+            <Label Text="Sign In" FontSize="24" FontAttributes="Bold" HorizontalOptions="Center"/>
 
-    <TabBar>
-        <ShellContent
-            Title="Notes"
-            ContentTemplate="{DataTemplate views:AllTasksPage}"
-            Icon="{OnPlatform 'icon_notes.png', iOS='icon_notes_ios.png', MacCatalyst='icon_notes_ios.png'}" />
-        
-    </TabBar>
+            <!-- Username Input -->
+            <Entry Placeholder="Email" Text="{Binding Email}" Keyboard="Email"/>
 
+            <!-- Password Input -->
+            <Entry Placeholder="Password" Text="{Binding Password}" IsPassword="True"/>
+
+            <!-- Login Button -->
+            <Button Text="Sign In"
+                    Command="{Binding SignInCommand}"
+                    BackgroundColor="Blue" TextColor="White"/>
+
+            <!-- Sign-up Link -->
+            <Button Text="Create Account"
+                    Command="{Binding SignUpCommand}"
+                    BackgroundColor="Transparent" TextColor="Gray"/>
+        </Grid>
+    </Shell.FlyoutContent>
+    
 </Shell>

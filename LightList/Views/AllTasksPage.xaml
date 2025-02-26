@@ -1,47 +1,74 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="LightList.Views.AllTasksPage"
-             Title="Your Tasks"
-             NavigatedTo="ContentPage_NavigatedTo">
+             xmlns:components="clr-namespace:LightList.Views.Components"
+             NavigatedTo="ContentPage_NavigatedTo"
+             Shell.NavBarIsVisible="false">
+    
+    <Grid RowDefinitions="Auto, 60, *">
+        
+        <components:NavBar/>
+        
+        <FlexLayout Grid.Row="1"
+                    Direction="Row"
+                    AlignItems="Center"
+                    JustifyContent="Start"
+                    Grow="1">
+            <Label FontSize="22" Margin="10">All Tasks</Label>
+        </FlexLayout>
+        
+        <!-- <components:TaskListView -->
+        <!--     Grid.Row="2" -->
+        <!--     Tasks="{Binding AllTasks}" /> -->
+        
+        <CollectionView x:Name="TasksCollection"
+                        Grid.Row="2"
+                        ItemsSource="{Binding AllTasks}"
+                        Margin="20"
+                        SelectionMode="Single"
+                        SelectionChangedCommand="{Binding SelectTaskCommand}"
+                        SelectionChangedCommandParameter="{Binding Source={RelativeSource Self}, Path=SelectedItem}">
+            
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+            </CollectionView.ItemsLayout>
 
-    <!-- Add an item to the toolbar -->
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Add" Command="{Binding NewCommand}" IconImageSource="{FontImage Glyph='+', Color=Black, Size=22}" />
-    </ContentPage.ToolbarItems>
-
-    <!-- Display tasks in a list -->
-    <CollectionView x:Name="TasksCollection"
-                    ItemsSource="{Binding AllTasks}"
-                    Margin="20"
-                    SelectionMode="Single"
-                    SelectionChangedCommand="{Binding SelectTaskCommand}"
-                    SelectionChangedCommandParameter="{Binding Source={RelativeSource Self}, Path=SelectedItem}">
-        <!-- Designate how the collection of items are laid out -->
-        <CollectionView.ItemsLayout>
-            <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
-        </CollectionView.ItemsLayout>
-
-        <!-- Define the appearance of each item in the list -->
-        <CollectionView.ItemTemplate>
-            <DataTemplate>
-                <Frame BorderColor="White"
-                       CornerRadius="20"
-                       BackgroundColor="White">
-                    <StackLayout Spacing="10">
-                        <FlexLayout Direction="Column"
-                                    Grow="1">
-                            <Label Text="{Binding Text}" FontSize="22"/>
-                        </FlexLayout>
-                        <BoxView HeightRequest="1" Color="Gray"/>
-                        <FlexLayout Direction="Row"
-                                    AlignItems="Center"
-                                    JustifyContent="SpaceBetween">
-                            <Label Text="{Binding Label}" FontSize="14" TextColor="Silver"/>
-                            <Label Text="{Binding NoDaysRemainingLbl}" FontSize="14" TextColor="Silver"/>
-                        </FlexLayout>
-                    </StackLayout>
-                </Frame>
-            </DataTemplate>
-        </CollectionView.ItemTemplate>
-    </CollectionView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame BorderColor="White"
+                           CornerRadius="20"
+                           BackgroundColor="White">
+                        <StackLayout Spacing="10">
+                            <FlexLayout Direction="Column">
+                                <Label Text="{Binding Text}" FontSize="22"
+                                       LineBreakMode="TailTruncation"
+                                       MaxLines="2"/>
+                            </FlexLayout>
+                            <FlexLayout Direction="Row"
+                                        AlignItems="Center"
+                                        AlignContent="Center"
+                                        JustifyContent="SpaceBetween"
+                                        Margin="0, 10, 0, 0">
+                                <HorizontalStackLayout
+                                    HorizontalOptions="Start"
+                                    VerticalOptions="Center"
+                                    Spacing="10">
+                                    <Image BackgroundColor="Transparent" Rotation="270">
+                                        <Image.Source>
+                                            <FontImageSource Glyph="&#xf48d;"
+                                                             Color="LightGray"
+                                                             FontFamily="Ionicons"
+                                                             Size="18"/>
+                                        </Image.Source>
+                                    </Image>
+                                    <Label Text="{Binding Label}" FontSize="14" TextColor="Silver"/>    
+                                </HorizontalStackLayout>
+                                <Label Text="{Binding NoDaysRemainingLbl}" FontSize="14" TextColor="Silver"/>
+                            </FlexLayout>
+                        </StackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
 </ContentPage>

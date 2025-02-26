@@ -8,7 +8,6 @@ namespace LightList.ViewModels;
 public class TasksViewModel: IQueryAttributable
 {
     public ObservableCollection<TaskViewModel> AllTasks { get; }
-    public ICommand NewCommand { get; }
     public ICommand SelectTaskCommand { get; }
     private ITaskViewModelFactory TaskViewModelFactory { get; }
     private ITasksService TasksService { get; }
@@ -18,15 +17,9 @@ public class TasksViewModel: IQueryAttributable
         TaskViewModelFactory = taskViewModelFactory;
         TasksService = tasksService;
         AllTasks = new ObservableCollection<TaskViewModel>(TasksService.GetTasks().Select(n => TaskViewModelFactory.Create(n)));
-        NewCommand = new AsyncRelayCommand(NewTaskAsync);
         SelectTaskCommand = new AsyncRelayCommand<TaskViewModel>(SelectTaskAsync);
     }
     
-    private async System.Threading.Tasks.Task NewTaskAsync()
-    {
-        await Shell.Current.GoToAsync(nameof(Views.TaskPage));
-    }
-
     private async System.Threading.Tasks.Task SelectTaskAsync(TaskViewModel task)
     {
         if (task != null)

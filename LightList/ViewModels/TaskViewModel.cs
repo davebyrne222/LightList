@@ -32,9 +32,7 @@ public class TaskViewModel: ObservableObject, IQueryAttributable
             }
         }
     }
-
     public string NoDaysRemainingLbl => GetDaysRemainingLabel(_task.DueDate.Subtract(DateTime.Today).Days);
-
     public string Label
     {
         get => _task.Label;
@@ -63,13 +61,13 @@ public class TaskViewModel: ObservableObject, IQueryAttributable
     private async Task Save()
     {
         TasksService.SaveTask(_task);
-        await Shell.Current.GoToAsync($"..?saved={_task.Id}");
+        await Shell.Current.GoToAsync($"///AllTasksPage?saved={_task.Id}");
     }
 
     private async Task Delete()
     {
         TasksService.DeleteTask(_task);
-        await Shell.Current.GoToAsync($"..?deleted={_task.Id}");
+        await Shell.Current.GoToAsync($"///AllTasksPage?deleted={_task.Id}");
     }
     
     private string GetDaysRemainingLabel(int noDaysRemaining)

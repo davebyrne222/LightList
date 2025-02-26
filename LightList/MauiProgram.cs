@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using LightList.Models;
 using LightList.Repositories;
 using LightList.Services;
 using LightList.ViewModels;
@@ -18,6 +17,7 @@ public static class MauiProgram
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                fonts.AddFont("ionicons.ttf", "Ionicons");
             });
         
         // Register Repositories
