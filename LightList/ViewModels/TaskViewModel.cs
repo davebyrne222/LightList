@@ -1,6 +1,9 @@
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using LightList.Messages;
 using LightList.Services;
 
 namespace LightList.ViewModels;
@@ -50,24 +53,35 @@ public class TaskViewModel: ObservableObject, IQueryAttributable
     public ICommand DeleteCommand { get; private set; }
     private ITasksService TasksService { get; }
     
-    public TaskViewModel(ITasksService tasksService, Models.Task task)
+    private readonly IMessenger _messenger;
+    
+    public TaskViewModel(ITasksService tasksService, IMessenger messenger, Models.Task task)
     {
         TasksService = tasksService;
+        _messenger = messenger;
         _task = task;
-        SaveCommand = new AsyncRelayCommand(Save);
-        DeleteCommand = new AsyncRelayCommand(Delete);
+        SaveCommand = new AsyncRelayCommand(SaveTaskAsync);
+        DeleteCommand = new AsyncRelayCommand(DeleteTaskAsync);
     }
     
-    private async Task Save()
+    private async Task SaveTaskAsync()
     {
         TasksService.SaveTask(_task);
-        await Shell.Current.GoToAsync($"///AllTasksPage?saved={_task.Id}");
+        _messenger.Send(new TaskSavedMessage(_task.Id));
+        
+        Debug.WriteLine($"Task saved: {_task.Id}");
+
+        await Shell.Current.GoToAsync($"..");
     }
 
-    private async Task Delete()
+    private async Task DeleteTaskAsync()
     {
         TasksService.DeleteTask(_task);
-        await Shell.Current.GoToAsync($"///AllTasksPage?deleted={_task.Id}");
+        _messenger.Send(new TaskDeletedMessage(_task.Id));
+        
+        Debug.WriteLine($"Task Deleted: {_task.Id}");
+        
+        await Shell.Current.GoToAsync($"..");
     }
     
     private string GetDaysRemainingLabel(int noDaysRemaining)

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Extensions.Logging;
 using LightList.Repositories;
 using LightList.Services;
 using LightList.ViewModels;
@@ -25,6 +26,9 @@ public static class MauiProgram
 
         // Register Services
         builder.Services.AddSingleton<ITasksService, TasksService>();
+        
+        // Messenger
+        builder.Services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
         
         // Register Models
         builder.Services.AddTransient<Models.Task>();

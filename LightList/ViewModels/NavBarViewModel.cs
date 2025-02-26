@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Windows.Input;
 
 namespace LightList.ViewModels;
@@ -21,26 +22,31 @@ public class NavBarViewModel
 
     private void OpenMenu()
     {
+        Debug.WriteLine("Openning Flyout");
         Shell.Current.FlyoutIsPresented = true;
     }
 
     private async void AddTask()
     {
-        await Shell.Current.GoToAsync($"///{nameof(Views.TaskPage)}");
+        Debug.WriteLine($"Navigating to {nameof(Views.TaskPage)}");
+        await Shell.Current.GoToAsync(nameof(Views.TaskPage));
     }
     
     private async void ViewAllTasks()
     {
-        await Shell.Current.GoToAsync($"///{nameof(Views.AllTasksPage)}");
+        Debug.WriteLine($"Navigating to {nameof(Views.TaskPage)}");
+        await Shell.Current.GoToAsync(nameof(Views.AllTasksPage));
     }
     
     private async void ViewTasksByDueDate()
     {
-        await Shell.Current.GoToAsync($"///{nameof(Views.AllTasksPage)}");
+        Debug.WriteLine($"Navigating to {nameof(Views.TaskPage)}");
+        await Shell.Current.GoToAsync(nameof(Views.AllTasksPage));
     }
     
     private async void ViewTasksByLabel()
     {
-        await Shell.Current.GoToAsync($"///{nameof(Views.AllTasksPage)}");
+        Debug.WriteLine($"Navigating to {nameof(Views.TaskPage)}");
+        await Shell.Current.GoToAsync(nameof(Views.AllTasksPage));
     }
 }
