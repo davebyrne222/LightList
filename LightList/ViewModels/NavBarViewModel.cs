@@ -22,7 +22,7 @@ public class NavBarViewModel
 
     private void OpenMenu()
     {
-        Debug.WriteLine("Openning Flyout");
+        Debug.WriteLine("Opening Flyout");
         Shell.Current.FlyoutIsPresented = true;
     }
 

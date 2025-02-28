@@ -4,11 +4,17 @@ using LightList.Repositories;
 using LightList.Services;
 using LightList.ViewModels;
 using LightList.Views;
+using LightList.Views.Components;
 
 namespace LightList;
 
 public static class MauiProgram
 {
+    static IServiceProvider serviceProvider;
+
+    public static TService GetService<TService>()
+        => serviceProvider.GetService<TService>();
+    
     public static MauiApp CreateMauiApp()
     {
         var builder = MauiApp.CreateBuilder();
@@ -34,18 +40,27 @@ public static class MauiProgram
         builder.Services.AddTransient<Models.Task>();
         
         // Register ViewModels
-        builder.Services.AddSingleton<TasksViewModel>();
+        builder.Services.AddSingleton<AllTasksViewModel>();
+        builder.Services.AddSingleton<NavBarViewModel>();
         builder.Services.AddSingleton<ITaskViewModelFactory, TaskViewModelFactory>();
         builder.Services.AddTransient<TaskViewModel>();
+        builder.Services.AddTransient<TaskListViewModel>();
 
         // Register Views
         builder.Services.AddSingleton<AllTasksPage>();
         builder.Services.AddTransient<TaskPage>();
-
+        
+        // Register View Components
+        builder.Services.AddTransient<TaskListView>();
+        builder.Services.AddSingleton<NavBar>();
+        
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
 
-        return builder.Build();
+        var app = builder.Build();
+        serviceProvider = app.Services;
+        
+        return app;
     }
 }
