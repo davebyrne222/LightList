@@ -44,7 +44,6 @@ public static class MauiProgram
         builder.Services.AddSingleton<NavBarViewModel>();
         builder.Services.AddSingleton<ITaskViewModelFactory, TaskViewModelFactory>();
         builder.Services.AddTransient<TaskViewModel>();
-        builder.Services.AddTransient<TaskListViewModel>();
 
         // Register Views
         builder.Services.AddSingleton<AllTasksPage>();
