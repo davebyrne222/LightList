@@ -20,7 +20,7 @@ public class NavBarViewModel
         TasksByLabelCommand = new Command(ViewTasksByLabel);
     }
 
-    private void OpenMenu()
+    private static void OpenMenu()
     {
         Debug.WriteLine("Opening Flyout");
         Shell.Current.FlyoutIsPresented = true;
@@ -28,25 +28,25 @@ public class NavBarViewModel
 
     private async void AddTask()
     {
-        Debug.WriteLine($"Navigating to {nameof(Views.TaskPage)}");
+        Debug.WriteLine($"---[NavBarViewModel.AddTask] Navigating to {nameof(Views.TaskPage)}");
         await Shell.Current.GoToAsync(nameof(Views.TaskPage));
     }
     
     private async void ViewAllTasks()
     {
-        Debug.WriteLine($"Navigating to {nameof(Views.TaskPage)}");
+        Debug.WriteLine($"---[NavBarViewModel.ViewAllTasks] Navigating to {nameof(Views.AllTasksPage)}");
         await Shell.Current.GoToAsync(nameof(Views.AllTasksPage));
     }
     
     private async void ViewTasksByDueDate()
     {
-        Debug.WriteLine($"Navigating to {nameof(Views.TaskPage)}");
-        await Shell.Current.GoToAsync(nameof(Views.AllTasksPage));
+        Debug.WriteLine($"---[NavBarViewModel.ViewTasksByDueDate] Navigating to {nameof(Views.TasksByDueDatePage)}");
+        await Shell.Current.GoToAsync(nameof(Views.TasksByDueDatePage));
     }
     
     private async void ViewTasksByLabel()
     {
-        Debug.WriteLine($"Navigating to {nameof(Views.TaskPage)}");
-        await Shell.Current.GoToAsync(nameof(Views.AllTasksPage));
+        Debug.WriteLine($"---[NavBarViewModel.ViewTasksByLabel] Navigating to {nameof(Views.TasksByLabelPage)}");
+        await Shell.Current.GoToAsync(nameof(Views.TasksByLabelPage));
     }
 }

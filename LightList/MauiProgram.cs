@@ -40,14 +40,19 @@ public static class MauiProgram
         builder.Services.AddTransient<Models.Task>();
         
         // Register ViewModels
-        builder.Services.AddSingleton<AllTasksViewModel>();
         builder.Services.AddSingleton<NavBarViewModel>();
-        builder.Services.AddSingleton<ITaskViewModelFactory, TaskViewModelFactory>();
         builder.Services.AddTransient<TaskViewModel>();
-
+        builder.Services.AddSingleton<ITaskViewModelFactory, TaskViewModelFactory>();
+        builder.Services.AddSingleton<BaseTasksViewModel>();
+        builder.Services.AddSingleton<AllTasksViewModel>();
+        builder.Services.AddTransient<TasksByDueDateViewModel>();
+        builder.Services.AddTransient<TasksByLabelViewModel>();
+        
         // Register Views
-        builder.Services.AddSingleton<AllTasksPage>();
         builder.Services.AddTransient<TaskPage>();
+        builder.Services.AddSingleton<AllTasksPage>();
+        builder.Services.AddTransient<TasksByDueDatePage>();
+        builder.Services.AddTransient<TasksByLabelPage>();
         
         // Register View Components
         builder.Services.AddTransient<TaskListView>();
