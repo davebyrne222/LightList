@@ -9,8 +9,8 @@
         <converters:NavBtnStyleConverter x:Key="NavBtnStyleConverter" />
     </ContentView.Resources>
 
-    <Grid Padding="10" BackgroundColor="Transparent"
-          RowDefinitions="Auto"
+    <Grid Padding="20" BackgroundColor="Transparent"
+          RowDefinitions="60"
           ColumnDefinitions="Auto, 1*, Auto">
 
         <ImageButton
@@ -24,7 +24,6 @@
         <HorizontalStackLayout
             Grid.Column="1"
             HorizontalOptions="Center"
-            VerticalOptions="Center"
             Spacing="10">
             <Button Text="All"
                     Command="{Binding NavigateCommand}"
