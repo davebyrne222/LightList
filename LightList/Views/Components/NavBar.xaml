@@ -2,14 +2,19 @@
 
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:LightList.Converters"
              x:Class="LightList.Views.Components.NavBar">
+    
+    <ContentView.Resources>
+        <converters:NavBtnStyleConverter x:Key="NavBtnStyleConverter" />
+    </ContentView.Resources>
     
     <Grid Padding="10" BackgroundColor="Transparent"
           RowDefinitions="Auto"
           ColumnDefinitions="Auto, 1*, Auto">
 
-        <ImageButton 
-            Grid.Column="0" 
+        <ImageButton
+            Grid.Column="0"
             Source="{FontImageSource Glyph='&#xf46a;', FontFamily='Ionicons', Color=Black}"
             Command="{Binding OpenMenuCommand}"
             HorizontalOptions="Start"
@@ -23,13 +28,13 @@
             Spacing="10">
             <Button Text="All"
                     Command="{Binding AllTasksCommand}"
-                    Style="{StaticResource SelectedFilterButtonStyle}" />
+                    Style="{Binding SelectedView, Converter={StaticResource NavBtnStyleConverter}, ConverterParameter=All}"/>
             <Button Text="Due"
                     Command="{Binding TasksByDueDateCommand}"
-                    Style="{StaticResource FilterButtonStyle}" />
+                    Style="{Binding SelectedView, Converter={StaticResource NavBtnStyleConverter}, ConverterParameter=Due}" />
             <Button Text="Label"
                     Command="{Binding TasksByLabelCommand}"
-                    Style="{StaticResource FilterButtonStyle}" />
+                    Style="{Binding SelectedView, Converter={StaticResource NavBtnStyleConverter}, ConverterParameter=Label}" />
         </HorizontalStackLayout>
             
         <ImageButton 

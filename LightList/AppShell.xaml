@@ -3,8 +3,10 @@
     x:Class="LightList.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:views="clr-namespace:LightList.Views">
-    
+    xmlns:views="clr-namespace:LightList.Views"
+    Shell.NavBarIsVisible="False"
+    Shell.NavBarHasShadow="True">
+
     <ShellContent Route="AllTasksPage" ContentTemplate="{DataTemplate views:AllTasksPage}" />
     <ShellContent Route="TasksByDueDatePage" ContentTemplate="{DataTemplate views:TasksByDueDatePage}" />
     <ShellContent Route="TasksByLabelPage" ContentTemplate="{DataTemplate views:TasksByLabelPage}" />

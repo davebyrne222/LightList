@@ -1,10 +1,23 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows.Input;
 
 namespace LightList.ViewModels;
 
-public class NavBarViewModel
+public class NavBarViewModel: INotifyPropertyChanged
 {
+    private string _selectedView = "All";
+    
+    public string SelectedView
+    {
+        get => _selectedView;
+        set
+        {
+            _selectedView = value;
+            OnPropertyChanged(nameof(SelectedView));
+        }
+    }
+    
     public ICommand OpenMenuCommand { get; }
     public ICommand AddTaskCommand { get; }
     public ICommand AllTasksCommand { get; }
@@ -40,17 +53,23 @@ public class NavBarViewModel
         if (Shell.Current.CurrentPage is Views.AllTasksPage)
             return;
         
+        // Update styling 
+        SelectedView = "All";
+        
         Debug.WriteLine($"---[NavBarViewModel.ViewAllTasks] Navigating to {nameof(Views.AllTasksPage)}");
-        await Shell.Current.GoToAsync($"//{nameof(Views.AllTasksPage)}", true);
+        await Shell.Current.GoToAsync($"//{nameof(Views.AllTasksPage)}", false);
     }
     
     private async void ViewTasksByDueDate()
     {
         if (Shell.Current.CurrentPage is Views.TasksByDueDatePage)
             return;
+
+        // Update styling 
+        SelectedView = "Due";
         
         Debug.WriteLine($"---[NavBarViewModel.ViewTasksByDueDate] Navigating to {nameof(Views.TasksByDueDatePage)}");
-        await Shell.Current.GoToAsync($"//{nameof(Views.TasksByDueDatePage)}", true);
+        await Shell.Current.GoToAsync($"//{nameof(Views.TasksByDueDatePage)}", false);
     }
     
     private async void ViewTasksByLabel()
@@ -58,7 +77,16 @@ public class NavBarViewModel
         if (Shell.Current.CurrentPage is Views.TasksByLabelPage)
             return;
         
+        // Update styling 
+        SelectedView = "Label";
+        
         Debug.WriteLine($"---[NavBarViewModel.ViewTasksByLabel] Navigating to {nameof(Views.TasksByLabelPage)}");
-        await Shell.Current.GoToAsync($"//{nameof(Views.TasksByLabelPage)}", true);
+        await Shell.Current.GoToAsync($"//{nameof(Views.TasksByLabelPage)}", false);
+    }
+    
+    public event PropertyChangedEventHandler PropertyChanged;
+    protected virtual void OnPropertyChanged(string propertyName)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }
