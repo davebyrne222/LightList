@@ -4,7 +4,7 @@ namespace LightList.Converters;
 
 public class NavBtnStyleConverter : IValueConverter
 {
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value == null || parameter == null)
             return Application.Current.Resources["FilterButtonStyle"];
@@ -14,7 +14,7 @@ public class NavBtnStyleConverter : IValueConverter
             : Application.Current.Resources["FilterButtonStyle"];
     }
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         return null;
     }

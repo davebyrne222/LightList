@@ -4,11 +4,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:converters="clr-namespace:LightList.Converters"
              x:Class="LightList.Views.Components.NavBar">
-    
+
     <ContentView.Resources>
         <converters:NavBtnStyleConverter x:Key="NavBtnStyleConverter" />
     </ContentView.Resources>
-    
+
     <Grid Padding="10" BackgroundColor="Transparent"
           RowDefinitions="Auto"
           ColumnDefinitions="Auto, 1*, Auto">
@@ -19,29 +19,32 @@
             Command="{Binding OpenMenuCommand}"
             HorizontalOptions="Start"
             Style="{StaticResource ActionBarButtonStyle}"
-            Rotation="90"/>
-            
+            Rotation="90" />
+
         <HorizontalStackLayout
-            Grid.Column="1"        
+            Grid.Column="1"
             HorizontalOptions="Center"
             VerticalOptions="Center"
             Spacing="10">
             <Button Text="All"
-                    Command="{Binding AllTasksCommand}"
-                    Style="{Binding SelectedView, Converter={StaticResource NavBtnStyleConverter}, ConverterParameter=All}"/>
+                    Command="{Binding NavigateCommand}"
+                    CommandParameter="All"
+                    Style="{Binding SelectedView, Converter={StaticResource NavBtnStyleConverter}, ConverterParameter=All}" />
             <Button Text="Due"
-                    Command="{Binding TasksByDueDateCommand}"
+                    Command="{Binding NavigateCommand}"
+                    CommandParameter="Due"
                     Style="{Binding SelectedView, Converter={StaticResource NavBtnStyleConverter}, ConverterParameter=Due}" />
             <Button Text="Label"
-                    Command="{Binding TasksByLabelCommand}"
+                    Command="{Binding NavigateCommand}"
+                    CommandParameter="Label"
                     Style="{Binding SelectedView, Converter={StaticResource NavBtnStyleConverter}, ConverterParameter=Label}" />
         </HorizontalStackLayout>
-            
-        <ImageButton 
-            Grid.Column="2" 
+
+        <ImageButton
+            Grid.Column="2"
             Source="{FontImageSource Glyph='&#xf489;', FontFamily='Ionicons', Color=Black}"
             Command="{Binding AddTaskCommand}"
             HorizontalOptions="End"
-            Style="{StaticResource ActionBarButtonStyle}"/>
+            Style="{StaticResource ActionBarButtonStyle}" />
     </Grid>
 </ContentView>

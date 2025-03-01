@@ -20,17 +20,13 @@ public class NavBarViewModel: INotifyPropertyChanged
     
     public ICommand OpenMenuCommand { get; }
     public ICommand AddTaskCommand { get; }
-    public ICommand AllTasksCommand { get; }
-    public ICommand TasksByDueDateCommand { get; }
-    public ICommand TasksByLabelCommand { get; }
+    public ICommand NavigateCommand { get; }
 
     public NavBarViewModel()
     {
         OpenMenuCommand = new Command(OpenMenu);
         AddTaskCommand = new Command(AddTask);
-        AllTasksCommand = new Command(ViewAllTasks);
-        TasksByDueDateCommand = new Command(ViewTasksByDueDate);
-        TasksByLabelCommand = new Command(ViewTasksByLabel);
+        NavigateCommand = new Command<string>(NavigateToPage);
     }
 
     private static void OpenMenu()
@@ -48,40 +44,24 @@ public class NavBarViewModel: INotifyPropertyChanged
         await Shell.Current.GoToAsync(nameof(Views.TaskPage));
     }
     
-    private async void ViewAllTasks()
+    private async void NavigateToPage(string pageName)
     {
-        if (Shell.Current.CurrentPage is Views.AllTasksPage)
-            return;
+        string? route = pageName switch
+        {
+            "All" => nameof(Views.AllTasksPage),
+            "Due" => nameof(Views.TasksByDueDatePage),
+            "Label" => nameof(Views.TasksByLabelPage),
+            _ => null
+        };
         
-        // Update styling 
-        SelectedView = "All";
-        
-        Debug.WriteLine($"---[NavBarViewModel.ViewAllTasks] Navigating to {nameof(Views.AllTasksPage)}");
-        await Shell.Current.GoToAsync($"//{nameof(Views.AllTasksPage)}", false);
-    }
-    
-    private async void ViewTasksByDueDate()
-    {
-        if (Shell.Current.CurrentPage is Views.TasksByDueDatePage)
+        if (route == null || Shell.Current.CurrentPage?.GetType().Name == route)
             return;
 
-        // Update styling 
-        SelectedView = "Due";
-        
-        Debug.WriteLine($"---[NavBarViewModel.ViewTasksByDueDate] Navigating to {nameof(Views.TasksByDueDatePage)}");
-        await Shell.Current.GoToAsync($"//{nameof(Views.TasksByDueDatePage)}", false);
-    }
-    
-    private async void ViewTasksByLabel()
-    {
-        if (Shell.Current.CurrentPage is Views.TasksByLabelPage)
-            return;
-        
-        // Update styling 
-        SelectedView = "Label";
-        
-        Debug.WriteLine($"---[NavBarViewModel.ViewTasksByLabel] Navigating to {nameof(Views.TasksByLabelPage)}");
-        await Shell.Current.GoToAsync($"//{nameof(Views.TasksByLabelPage)}", false);
+        // Update styling
+        SelectedView = pageName;
+
+        Debug.WriteLine($"---[NavBarViewModel.NavigateToPage] Navigating to {route}");
+        await Shell.Current.GoToAsync($"//{route}", false);
     }
     
     public event PropertyChangedEventHandler PropertyChanged;
