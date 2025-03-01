@@ -4,7 +4,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="LightList.Views.TaskPage"
              Title="Task"
-             Shell.NavBarIsVisible="False">
+             Shell.NavBarIsVisible="True">
 
     <VerticalStackLayout Spacing="10" Margin="5">
         <Editor x:Name="DescriptionEditor"
