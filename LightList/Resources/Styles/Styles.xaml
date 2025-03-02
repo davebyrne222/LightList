@@ -16,9 +16,9 @@
     <Style TargetType="Border">
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray500}}" />
         <Setter Property="StrokeShape" Value="Rectangle"/>
-        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeThickness" Value="0"/>
     </Style>
-
+    
     <Style TargetType="BoxView">
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray950}, Dark={StaticResource Gray200}}" />
     </Style>
@@ -395,11 +395,11 @@
 
     <Style TargetType="Page" ApplyToDerivedTypes="True">
         <Setter Property="Padding" Value="0"/>
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource OffBlack}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}" />
     </Style>
 
     <Style TargetType="Shell" ApplyToDerivedTypes="True">
-        <Setter Property="Shell.BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource OffBlack}}" />
+        <Setter Property="Shell.BackgroundColor" Value="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}" />
         <Setter Property="Shell.ForegroundColor" Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource SecondaryDarkText}}" />
         <Setter Property="Shell.TitleColor" Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource SecondaryDarkText}}" />
         <Setter Property="Shell.DisabledColor" Value="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}" />
@@ -455,5 +455,62 @@
         <Setter Property="TextColor" Value="White"/>
         <Setter Property="FontAttributes" Value="Bold"/>
     </Style>
-
+    
+    <Style x:Key="TaskItem" TargetType="Border">
+        <Setter Property="StrokeShape" Value="RoundRectangle 20" />
+        <Setter Property="BackgroundColor" Value="White" />
+        <Setter Property="Padding" Value="20" />
+    </Style>
+    
+    <Style x:Key="TaskItemLabelLbl" TargetType="Label">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="TextTransform" Value="Uppercase" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor" Value="{StaticResource OffBlack}" />
+    </Style>
+    
+    <Style x:Key="TaskItemSeparator" TargetType="BoxView">
+        <Setter Property="HeightRequest" Value="1"/>
+        <Setter Property="Color" Value="{StaticResource Gray100}" />
+    </Style>
+    
+    <Style x:Key="DueInIndicator" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource Gray200}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 20" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="Padding" Value="10, 1" />
+    </Style>
+    
+    <Style x:Key="DueInIndicatorLate" TargetType="Border" BasedOn="{StaticResource DueInIndicator}">
+        <Setter Property="Background" Value="transparent" />
+        <Setter Property="StrokeThickness" Value="2" />
+        <Setter Property="Stroke" Value="{StaticResource Late}" />
+    </Style>
+    
+    <Style x:Key="DueInIndicatorDue" TargetType="Border" BasedOn="{StaticResource DueInIndicator}">
+        <Setter Property="Background" Value="{StaticResource Due}" />
+    </Style>
+    
+    <Style x:Key="DueInIndicatorWarning" TargetType="Border" BasedOn="{StaticResource DueInIndicator}">
+        <Setter Property="Background" Value="{StaticResource Warning}" />
+    </Style>
+    
+    <Style x:Key="DueInIndicatorLbl" TargetType="Label">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="TextColor" Value="{StaticResource OffBlack}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+    
+    <Style x:Key="DueInIndicatorLblLate" TargetType="Label" BasedOn="{StaticResource DueInIndicatorLbl}">
+        <Setter Property="TextColor" Value="{StaticResource Late}" />
+    </Style>
+    
+    <Style x:Key="DueInIndicatorLblDue" TargetType="Label" BasedOn="{StaticResource DueInIndicatorLbl}">
+        <Setter Property="TextColor" Value="White" />
+    </Style>
+    
+    <Style x:Key="DueInIndicatorLblWarning" TargetType="Label" BasedOn="{StaticResource DueInIndicatorLbl}">
+        <Setter Property="TextColor" Value="White" />
+    </Style>
+    
 </ResourceDictionary>

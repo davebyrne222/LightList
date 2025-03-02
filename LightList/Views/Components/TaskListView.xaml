@@ -1,8 +1,14 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:LightList.Converters"
              x:Class="LightList.Views.Components.TaskListView"
              x:Name="Listview"
              >
+    
+    <ContentView.Resources>
+        <converters:TaskDueIndicatorConverter x:Key="TaskDueIndicatorConverter" />
+        <converters:TaskDueLblConverter x:Key="TaskDueLblConverter" />
+    </ContentView.Resources>
     
     <CollectionView x:Name="TasksCollection"
                     ItemsSource="{Binding Tasks, Source={x:Reference Listview}}"
@@ -11,43 +17,49 @@
                     SelectionChanged="OnTaskSelected">
     
         <CollectionView.ItemsLayout>
-            <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+            <LinearItemsLayout Orientation="Vertical" ItemSpacing="20" />
         </CollectionView.ItemsLayout>
     
         <CollectionView.ItemTemplate>
             <DataTemplate>
-                <Frame BorderColor="White"
-                       CornerRadius="20"
-                       BackgroundColor="White">
-                    <StackLayout Spacing="10">
-                        <FlexLayout Direction="Column">
+                <Border Style="{StaticResource TaskItem}">
+                    <Border.Shadow>
+                        <Shadow Brush="Gray"
+                                Offset="0,5"
+                                Radius="5"
+                                Opacity="0.2"/>
+                    </Border.Shadow>
+                    <StackLayout Spacing="20">
+                        <FlexLayout Direction="Column" Grow="1"
+                                    Margin="0, 0, 0, 0">
                             <Label Text="{Binding Text}" FontSize="22"
                                    LineBreakMode="TailTruncation"
                                    MaxLines="2"/>
                         </FlexLayout>
+                        <BoxView Style="{StaticResource TaskItemSeparator}"/>
                         <FlexLayout Direction="Row"
                                     AlignItems="Center"
-                                    AlignContent="Center"
-                                    JustifyContent="SpaceBetween"
-                                    Margin="0, 10, 0, 0">
+                                    JustifyContent="SpaceBetween">
                             <HorizontalStackLayout
                                 HorizontalOptions="Start"
-                                VerticalOptions="Center"
+                                VerticalOptions="End"
                                 Spacing="10">
-                                <Image BackgroundColor="Transparent" Rotation="270">
+                                <Image BackgroundColor="Transparent" Rotation="270" IsVisible="{Binding HasLabel}">
                                     <Image.Source>
                                         <FontImageSource Glyph="&#xf48d;"
-                                                         Color="LightGray"
+                                                         Color="{StaticResource Gray200}"
                                                          FontFamily="Ionicons"
                                                          Size="18"/>
                                     </Image.Source>
                                 </Image>
-                                <Label Text="{Binding Label}" FontSize="14" TextColor="Silver"/>
+                                <Label Text="{Binding Label}" Style="{StaticResource TaskItemLabelLbl}"/>
                             </HorizontalStackLayout>
-                            <Label Text="{Binding NoDaysRemainingLbl}" FontSize="14" TextColor="Silver"/>
+                            <Border Style="{Binding NoDaysRemaining, Converter={StaticResource TaskDueIndicatorConverter}}">
+                                <Label Text="{Binding NoDaysRemainingLbl}" Style="{Binding NoDaysRemaining, Converter={StaticResource TaskDueLblConverter}}" />
+                            </Border>
                         </FlexLayout>
                     </StackLayout>
-                </Frame>
+                </Border>
             </DataTemplate>
         </CollectionView.ItemTemplate>
     </CollectionView>
