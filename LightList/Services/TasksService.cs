@@ -1,5 +1,6 @@
 using LightList.Models;
 using LightList.Repositories;
+using LightList.Utils;
 
 namespace LightList.Services;
 
@@ -12,24 +13,27 @@ public class TasksService: ITasksService
         _localRepository = localRepository;
     }
 
-    public Models.Task GetTask(string id)
+    public async Task<Models.Task> GetTask(int taskId)
     {
-        return _localRepository.Get(id);
+        Logger.Log($"Getting task (id={taskId})");
+        return await _localRepository.Get(taskId);
     }
 
-    public IEnumerable<Models.Task> GetTasks()
-    {
-        return _localRepository.GetAll();
+    public async Task<List<Models.Task>> GetTasks()
+    { 
+        Logger.Log($"Getting all tasks");
+        return await _localRepository.GetAll();
     }
 
-    public void SaveTask(Models.Task task)
+    public async Task<int> SaveTask(Models.Task task)
     {
-        task.UpdatedOnDate = DateTime.Now;
-        _localRepository.Save(task);
+        Logger.Log($"Saving task (id={task.Id}, default id: {task.Id == default})");
+        return await _localRepository.Save(task);
     }
 
     public void DeleteTask(Models.Task task)
     {
+        Logger.Log($"Deleting task (id={task.Id})");
         _localRepository.Delete(task);
     }
 }

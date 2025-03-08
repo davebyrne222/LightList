@@ -1,10 +1,12 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using LightList.Messages;
 using LightList.Services;
+using LightList.Utils;
 using LightList.ViewModels;
 
 namespace LightList.Views.Components;
@@ -40,9 +42,9 @@ public partial class TaskListView : ContentView
         TaskViewModelFactory = taskViewModelFactory;
         TasksService = tasksService;
 
-        messenger.Register<TaskSavedMessage>(this, (recipient, message) =>
+        messenger.Register<TaskSavedMessage>(this, async (recipient, message) =>
         {
-            OnTaskSaved(message.Value);
+            await OnTaskSaved(message.Value);
         });
 
         messenger.Register<TaskDeletedMessage>(this, (recipient, message) =>
@@ -53,27 +55,28 @@ public partial class TaskListView : ContentView
     
     private static void OnTasksChanged(BindableObject bindable, object oldValue, object newValue)
     {
-        Debug.WriteLine($"----[TaskListView] OnTasksChanged: bindable={bindable.GetType()}");
+        Logger.Log($"bindable={bindable.GetType()} oldValue={oldValue} newValue={newValue}");
     }
     
     private async void OnTaskSelected(object sender, SelectionChangedEventArgs e)
     {
+        Logger.Log($"Selection count = {e.CurrentSelection.Count}");
+
         if (e.CurrentSelection.Count == 0)
             return;
 
         var selectedTask = e.CurrentSelection[0] as TaskViewModel; 
 
+        Logger.Log($"Selected task id = {selectedTask.Id}");
+
         if (selectedTask != null)
-        {
-            Debug.WriteLine($"----[TaskListViewModel] Selected Task: {selectedTask.Text}");
             await Shell.Current.GoToAsync($"{nameof(Views.TaskPage)}?load={selectedTask.Id}");
-        }
 
         // Deselect the item
         ((CollectionView)sender).SelectedItem = null;
     }
 
-    void OnTaskDeleted(string taskId)
+    void OnTaskDeleted(int taskId)
     {
         TaskViewModel? matchedTask = this.Tasks.FirstOrDefault(n => n.Id == taskId);
 
@@ -81,17 +84,21 @@ public partial class TaskListView : ContentView
             Tasks.Remove(matchedTask);
     }
 
-    void OnTaskSaved(string taskId)
+    async Task OnTaskSaved(int taskId)
     {
+        Logger.Log($"taskId = {taskId}");
         TaskViewModel? matchedTask = Tasks.FirstOrDefault(n => n.Id == taskId);
-
+        
         if (matchedTask != null)
         {
-            matchedTask.Reload();
+            await matchedTask.Reload();
             Tasks.Move(Tasks.IndexOf(matchedTask), 0);
         }
-            
-        else 
-            Tasks.Insert(0, TaskViewModelFactory.Create(TasksService.GetTask(taskId)));
+
+        else
+        {
+            var task = await TasksService.GetTask(taskId);
+            Tasks.Insert(0, TaskViewModelFactory.Create(task));
+        }
     }
 }

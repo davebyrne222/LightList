@@ -5,10 +5,11 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using LightList.Messages;
 using LightList.Services;
+using LightList.Utils;
 
 namespace LightList.ViewModels;
 
-public class TaskViewModel: ObservableObject, IQueryAttributable
+public partial class TaskViewModel: ObservableObject, IQueryAttributable
 {
     private Models.Task _task;
     public string Text
@@ -19,10 +20,12 @@ public class TaskViewModel: ObservableObject, IQueryAttributable
             if (_task.Text != value)
             {
                 _task.Text = value;
+                Logger.Log($"Text changed: {value}");
                 OnPropertyChanged();
             }
         }
     }
+    
     public DateTime DueDate
     {
         get => _task.DueDate;
@@ -31,12 +34,14 @@ public class TaskViewModel: ObservableObject, IQueryAttributable
             if (_task.DueDate != value)
             {
                 _task.DueDate = value;
+                Logger.Log($"DueDate changed: {value}");
                 OnPropertyChanged();
             }
         }
     }
-    public int NoDaysRemaining => _task.DueDate.Subtract(DateTime.Today).Days;
 
+    // [ObservableProperty] private DateTime _dueDate;
+    public int NoDaysRemaining => DueDate.Subtract(DateTime.Today).Days;
     public string NoDaysRemainingLbl
     {
         get
@@ -57,20 +62,21 @@ public class TaskViewModel: ObservableObject, IQueryAttributable
             if (_task.Label != value)
             {
                 _task.Label = value;
+                Logger.Log($"Label changed: {value}");
                 OnPropertyChanged();
             }
         }
     }
     public bool HasLabel => !String.IsNullOrEmpty(_task.Label);
-    public string Id => _task.Id;
+    public int Id => _task.Id;
     public ICommand SaveCommand { get; private set; }
     public ICommand DeleteCommand { get; private set; }
     private ITasksService TasksService { get; }
-    
     private readonly IMessenger _messenger;
     
     public TaskViewModel(ITasksService tasksService, IMessenger messenger, Models.Task task)
     {
+        Logger.Log("Initializing");
         TasksService = tasksService;
         _messenger = messenger;
         _task = task;
@@ -80,43 +86,57 @@ public class TaskViewModel: ObservableObject, IQueryAttributable
     
     private async Task SaveTaskAsync()
     {
-        TasksService.SaveTask(_task);
+        Logger.Log($"Saving task (id={_task.Id})");
+        await TasksService.SaveTask(_task);
+
+        Logger.Log($"Saved task (id={_task.Id})");
         _messenger.Send(new TaskSavedMessage(_task.Id));
         
-        Debug.WriteLine($"Task saved: {_task.Id}");
-
         await Shell.Current.GoToAsync($"..");
     }
 
     private async Task DeleteTaskAsync()
     {
+        Logger.Log($"Deleted task (id={_task.Id})");
         TasksService.DeleteTask(_task);
+        
+        Logger.Log($"Sending deleted message");
         _messenger.Send(new TaskDeletedMessage(_task.Id));
-        
-        Debug.WriteLine($"Task Deleted: {_task.Id}");
-        
+
+        Logger.Log($"Navigating to previous page");
         await Shell.Current.GoToAsync($"..");
     }
-    
-    void IQueryAttributable.ApplyQueryAttributes(IDictionary<string, object> query)
+
+    private async Task LoadTaskAsync(int id)
     {
+        Logger.Log($"Loading task (id={id})");
+        _task = await TasksService.GetTask(id);
+    }
+    
+    async void IQueryAttributable.ApplyQueryAttributes(IDictionary<string, object> query)
+    {
+        Logger.Log($"Applying query attributes");
         if (query.ContainsKey("load"))
         {
-            _task = TasksService.GetTask(query["load"].ToString());
+            await LoadTaskAsync(Convert.ToInt32(query["load"]));
             RefreshProperties();
         }
     }
     
-    public void Reload()
+    public async Task Reload()
     {
-        _task = TasksService.GetTask(_task.Id);
+        Logger.Log($"Reloading task (id={_task.Id})");
+        await LoadTaskAsync(_task.Id);
         RefreshProperties();
     }
 
     private void RefreshProperties()
     {
+        Logger.Log($"Refreshing properties");
         OnPropertyChanged(nameof(Text));
         OnPropertyChanged(nameof(DueDate));
+        OnPropertyChanged(nameof(NoDaysRemaining));
+        OnPropertyChanged(nameof(NoDaysRemainingLbl));
         OnPropertyChanged(nameof(Label));
     }
 }

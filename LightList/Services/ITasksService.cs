@@ -4,11 +4,11 @@ namespace LightList.Services;
 
 public interface ITasksService
 {
-    Models.Task GetTask(string filename);
+    Task<Models.Task> GetTask(int taskId);
     
-    IEnumerable<Models.Task> GetTasks();
+    Task<List<Models.Task>> GetTasks();
 
-    void SaveTask(Models.Task task);
+    Task<int> SaveTask(Models.Task task);
     
     void DeleteTask(Models.Task task);
 }

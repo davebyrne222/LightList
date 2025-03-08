@@ -5,7 +5,8 @@ using LightList.Services;
 using LightList.ViewModels;
 using LightList.Views;
 using LightList.Views.Components;
-using LightList.Converters;
+using LightList.Data;
+using LightList.Utils;
 
 namespace LightList;
 
@@ -18,6 +19,8 @@ public static class MauiProgram
     
     public static MauiApp CreateMauiApp()
     {
+        Logger.Log("Creating MauiApp & Registering Services");
+        
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
@@ -27,6 +30,9 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 fonts.AddFont("ionicons.ttf", "Ionicons");
             });
+        
+        // Register Database
+        builder.Services.AddSingleton<TasksDatabase>();
         
         // Register Repositories
         builder.Services.AddSingleton<ILocalRepository, LocalRepository>();
@@ -46,17 +52,17 @@ public static class MauiProgram
         builder.Services.AddSingleton<ITaskViewModelFactory, TaskViewModelFactory>();
         builder.Services.AddSingleton<BaseTasksViewModel>();
         builder.Services.AddSingleton<AllTasksViewModel>();
-        builder.Services.AddTransient<TasksByDueDateViewModel>();
-        builder.Services.AddTransient<TasksByLabelViewModel>();
+        builder.Services.AddSingleton<TasksByDueDateViewModel>();
+        builder.Services.AddSingleton<TasksByLabelViewModel>();
         
         // Register Views
         builder.Services.AddTransient<TaskPage>();
         builder.Services.AddSingleton<AllTasksPage>();
-        builder.Services.AddTransient<TasksByDueDatePage>();
-        builder.Services.AddTransient<TasksByLabelPage>();
+        builder.Services.AddSingleton<TasksByDueDatePage>();
+        builder.Services.AddSingleton<TasksByLabelPage>();
         
         // Register View Components
-        builder.Services.AddTransient<TaskListView>();
+        builder.Services.AddScoped<TaskListView>();
         builder.Services.AddSingleton<NavBar>();
         
 #if DEBUG
@@ -65,6 +71,10 @@ public static class MauiProgram
 
         var app = builder.Build();
         serviceProvider = app.Services;
+        
+        // Initialize database before returning the app
+        var dbService = app.Services.GetRequiredService<TasksDatabase>();
+        Task.Run(async () => await dbService.InitialiseAsync()).Wait();
         
         return app;
     }

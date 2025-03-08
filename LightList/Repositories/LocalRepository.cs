@@ -1,48 +1,40 @@
 using System.Text.Json;
+using LightList.Data;
+using LightList.Utils;
 
 namespace LightList.Repositories;
 
 public class LocalRepository: ILocalRepository
 {
-    private const string FileExtension = ".lighttask.json";
-    
-    public IEnumerable<Models.Task> GetAll()
-    {
-        string appDataPath = FileSystem.AppDataDirectory;
+    private readonly TasksDatabase _database;
 
-        return Directory
-            .EnumerateFiles(appDataPath, $"*{FileExtension}")
-            .Select(filename => Get(Path.GetFileName(filename)))
-            .OrderBy(task => task.DueDate);
+    public LocalRepository(TasksDatabase database)
+    {
+        _database = database;
     }
     
-    public Models.Task Get(string id)
+    public async Task<List<Models.Task>> GetAll()
     {
-        if (!id.Contains(FileExtension)) id += FileExtension;
-        
-        string filename = Path.Combine(FileSystem.AppDataDirectory, id);
-
-        if (!File.Exists(filename))
-            throw new FileNotFoundException("Unable to find file on local storage.", filename);
-        
-        string json = File.ReadAllText(filename);
-        return JsonSerializer.Deserialize<Models.Task>(json);
+        Logger.Log("Getting all tasks");
+        return await _database.GetItemsAsync();
+    }
+    
+    public async Task<Models.Task> Get(int id)
+    {
+        Logger.Log($"Getting task (id={id})");
+        return await _database.GetItemAsync(id);
     }
 
-    public void Save(Models.Task task)
+    public async Task<int> Save(Models.Task task)
     {
-        task.Id = string.IsNullOrEmpty(task.Id) ? Guid.NewGuid().ToString() : task.Id;
-
-        string filename = Path.Combine(FileSystem.AppDataDirectory, task.Id + FileExtension);
-        string json = JsonSerializer.Serialize(task, new JsonSerializerOptions { WriteIndented = true });
-
-        File.WriteAllText(filename, json);
+        Logger.Log($"Saving task (id={task.Id}, Default Id: {task.Id == default})");
+        task.UpdatedOnDate = DateTime.Now;
+        return await _database.SaveItemAsync(task);
     }
 
-    public void Delete(Models.Task task)
+    public async void Delete(Models.Task task)
     {
-        string filename = Path.Combine(FileSystem.AppDataDirectory, task.Id + FileExtension);
-        if (File.Exists(filename))
-            File.Delete(filename);
+        Logger.Log($"Deleting task (id={task.Id})");
+        await _database.DeleteItemAsync(task);
     }
 }

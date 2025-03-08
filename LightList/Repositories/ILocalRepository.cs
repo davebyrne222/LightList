@@ -4,11 +4,11 @@ namespace LightList.Repositories;
 
 public interface ILocalRepository
 {
-    IEnumerable<Models.Task> GetAll();
+    Task<List<Models.Task>> GetAll();
 
-    Models.Task Get(string filename);
+    Task<Models.Task> Get(int id);
 
-    void Save(Models.Task task);
+    Task<int> Save(Models.Task task);
     
     void Delete(Models.Task task);
 }

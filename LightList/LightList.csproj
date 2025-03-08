@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFrameworks>net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
-
+        
         <!-- Note for MacCatalyst:
         The default runtime is maccatalyst-x64, except in Release config, in which case the default is maccatalyst-x64;maccatalyst-arm64.
         When specifying both architectures, use the plural <RuntimeIdentifiers> instead of the singular <RuntimeIdentifier>.
@@ -56,6 +56,7 @@
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
         <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)"/>
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0"/>
+        <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
     </ItemGroup>
 
     <ItemGroup>

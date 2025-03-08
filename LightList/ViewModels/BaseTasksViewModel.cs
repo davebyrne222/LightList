@@ -6,6 +6,7 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using LightList.Messages;
 using LightList.Services;
+using LightList.Utils;
 using LightList.Views;
 using LightList.Views.Components;
 
@@ -15,7 +16,6 @@ public class BaseTasksViewModel: INotifyPropertyChanged
 {
     protected ITaskViewModelFactory TaskViewModelFactory { get; }
     protected ITasksService TasksService { get; }
-    
     private ObservableCollection<TaskViewModel> _tasks;
     public ObservableCollection<TaskViewModel> AllTasks
     {
@@ -29,17 +29,16 @@ public class BaseTasksViewModel: INotifyPropertyChanged
             }
         }
     }
-
     public BaseTasksViewModel(ITaskViewModelFactory taskViewModelFactory, ITasksService tasksService)
     {
         TaskViewModelFactory = taskViewModelFactory;
         TasksService = tasksService;
     }
-    
     public event PropertyChangedEventHandler PropertyChanged;
+    
     protected virtual void OnPropertyChanged(string propertyName)
     {
-        Debug.WriteLine($"----[AllTasksViewModel] PropertyChanged: {propertyName}]");
+        Logger.Log($"PropertyChanged: {propertyName}");
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }
