@@ -21,7 +21,7 @@
                     SelectionChanged="OnTaskSelected">
     
         <CollectionView.ItemsLayout>
-            <LinearItemsLayout Orientation="Vertical" ItemSpacing="20" />
+            <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
         </CollectionView.ItemsLayout>
     
         <CollectionView.ItemTemplate>
@@ -44,12 +44,6 @@
                         </SwipeItems>
                     </SwipeView.RightItems>
                     <Border Style="{StaticResource TaskItem}">
-                        <Border.Shadow>
-                            <Shadow Brush="Gray"
-                                    Offset="0,5"
-                                    Radius="5"
-                                    Opacity="0.2"/>
-                        </Border.Shadow>
                         <StackLayout Spacing="20">
                             <FlexLayout Direction="Column" Grow="1"
                                         Margin="0, 0, 0, 0">
@@ -97,7 +91,6 @@
                         </StackLayout>
                     </Border>
                 </SwipeView>
-
             </DataTemplate>
         </CollectionView.ItemTemplate>
     </CollectionView>

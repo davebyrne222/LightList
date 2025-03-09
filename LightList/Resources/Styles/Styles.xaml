@@ -460,6 +460,13 @@
         <Setter Property="StrokeShape" Value="RoundRectangle 20" />
         <Setter Property="BackgroundColor" Value="White" />
         <Setter Property="Padding" Value="20" />
+        <Setter Property="Margin" Value="0, 0, 0, 10" />
+        <Setter Property="Shadow">
+            <Shadow Brush="Gray"
+                    Offset="0, 5"
+                    Radius="5"
+                    Opacity="0.2"/>
+        </Setter>
     </Style>
     
     <Style x:Key="TaskItemLabelLbl" TargetType="Label">
