@@ -11,7 +11,6 @@ public class TaskDueTextConverter: IValueConverter
             return Application.Current.Resources["TaskLabelDone"];
 
         return Application.Current.Resources["BaseLabel"];
-        
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

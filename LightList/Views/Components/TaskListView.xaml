@@ -36,7 +36,7 @@
                         <SwipeItems Mode="Execute">
                             <SwipeItem Text="Complete"
                                        IconImageSource="{FontImageSource Glyph='&#xf375;', FontFamily='Ionicons'}"
-                                       BackgroundColor="LightGreen"
+                                       BackgroundColor="{StaticResource Complete}"
                                        Command="{Binding CompleteCommand}" />
                         </SwipeItems>
                     </SwipeView.RightItems>

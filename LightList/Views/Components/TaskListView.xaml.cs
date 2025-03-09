@@ -98,12 +98,14 @@ public partial class TaskListView : ContentView
         if (matchedTask != null)
         {
             await matchedTask.Reload();
+            // TODO: Add in sorted order
             Tasks.Move(Tasks.IndexOf(matchedTask), 0);
         }
 
         else
         {
             var task = await _tasksService.GetTask(taskId);
+            // TODO: Add in sorted order
             Tasks.Insert(0, _taskViewModelFactory.Create(task));
         }
     }
