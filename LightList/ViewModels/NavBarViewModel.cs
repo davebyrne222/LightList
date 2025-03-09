@@ -17,7 +17,6 @@ public class NavBarViewModel: INotifyPropertyChanged
             OnPropertyChanged(nameof(SelectedView));
         }
     }
-    
     public ICommand OpenMenuCommand { get; }
     public ICommand AddTaskCommand { get; }
     public ICommand NavigateCommand { get; }
@@ -65,7 +64,7 @@ public class NavBarViewModel: INotifyPropertyChanged
     }
     
     public event PropertyChangedEventHandler PropertyChanged;
-    protected virtual void OnPropertyChanged(string propertyName)
+    private void OnPropertyChanged(string propertyName)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }

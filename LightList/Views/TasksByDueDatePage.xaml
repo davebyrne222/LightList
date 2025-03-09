@@ -1,7 +1,9 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="LightList.Views.TasksByDueDatePage"
-             xmlns:components="clr-namespace:LightList.Views.Components">
+             x:DataType="viewModels:TasksByDueDateViewModel"
+             xmlns:components="clr-namespace:LightList.Views.Components"
+             xmlns:viewModels="clr-namespace:LightList.ViewModels">
     
     <Grid RowDefinitions="Auto, 60, *">
         
