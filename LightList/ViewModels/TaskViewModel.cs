@@ -11,7 +11,11 @@ namespace LightList.ViewModels;
 
 public partial class TaskViewModel: ObservableObject, IQueryAttributable
 {
+    private readonly ITasksService _tasksService;
+    private readonly IMessenger _messenger;
+    
     private Models.Task _task;
+    public int Id => _task.Id;
     public string Text
     {
         get => _task.Text;
@@ -25,7 +29,6 @@ public partial class TaskViewModel: ObservableObject, IQueryAttributable
             }
         }
     }
-    
     public DateTime DueDate
     {
         get => _task.DueDate;
@@ -39,13 +42,14 @@ public partial class TaskViewModel: ObservableObject, IQueryAttributable
             }
         }
     }
-
-    // [ObservableProperty] private DateTime _dueDate;
     public int NoDaysRemaining => DueDate.Subtract(DateTime.Today).Days;
     public string NoDaysRemainingLbl
     {
         get
         {
+            if (Complete)
+                return "Done";
+            
             switch(NoDaysRemaining) {
                 case < 0: return "Overdue";
                 case 0: return "Today";
@@ -68,49 +72,33 @@ public partial class TaskViewModel: ObservableObject, IQueryAttributable
         }
     }
     public bool HasLabel => !String.IsNullOrEmpty(_task.Label);
-    public int Id => _task.Id;
+    // [ObservableProperty] private bool _complete;
+    public bool Complete
+    {
+        get => _task.Complete;
+        set
+        {
+            if (_task.Complete != value)
+            {
+                _task.Complete = value;
+                Logger.Log($"Complete changed: {value}");
+                OnPropertyChanged();
+            }
+        }
+    }
     public ICommand SaveCommand { get; private set; }
+    public ICommand CompleteCommand { get; private set; }
     public ICommand DeleteCommand { get; private set; }
-    private ITasksService TasksService { get; }
-    private readonly IMessenger _messenger;
     
     public TaskViewModel(ITasksService tasksService, IMessenger messenger, Models.Task task)
     {
         Logger.Log("Initializing");
-        TasksService = tasksService;
+        _tasksService = tasksService;
         _messenger = messenger;
         _task = task;
         SaveCommand = new AsyncRelayCommand(SaveTaskAsync);
+        CompleteCommand = new AsyncRelayCommand(CompleteTaskAsync);
         DeleteCommand = new AsyncRelayCommand(DeleteTaskAsync);
-    }
-    
-    private async Task SaveTaskAsync()
-    {
-        Logger.Log($"Saving task (id={_task.Id})");
-        await TasksService.SaveTask(_task);
-
-        Logger.Log($"Saved task (id={_task.Id})");
-        _messenger.Send(new TaskSavedMessage(_task.Id));
-        
-        await Shell.Current.GoToAsync($"..");
-    }
-
-    private async Task DeleteTaskAsync()
-    {
-        Logger.Log($"Deleted task (id={_task.Id})");
-        TasksService.DeleteTask(_task);
-        
-        Logger.Log($"Sending deleted message");
-        _messenger.Send(new TaskDeletedMessage(_task.Id));
-
-        Logger.Log($"Navigating to previous page");
-        await Shell.Current.GoToAsync($"..");
-    }
-
-    private async Task LoadTaskAsync(int id)
-    {
-        Logger.Log($"Loading task (id={id})");
-        _task = await TasksService.GetTask(id);
     }
     
     async void IQueryAttributable.ApplyQueryAttributes(IDictionary<string, object> query)
@@ -121,6 +109,47 @@ public partial class TaskViewModel: ObservableObject, IQueryAttributable
             await LoadTaskAsync(Convert.ToInt32(query["load"]));
             RefreshProperties();
         }
+    }
+    
+    private async Task LoadTaskAsync(int id)
+    {
+        Logger.Log($"Loading task (id={id})");
+        _task = await _tasksService.GetTask(id);
+    }
+    
+    private async Task SaveTaskAsync()
+    {
+        Logger.Log($"Saving task (id={_task.Id})");
+        await _tasksService.SaveTask(_task);
+
+        Logger.Log($"Saved task (id={_task.Id})");
+        _messenger.Send(new TaskSavedMessage(_task.Id));
+        
+        await Shell.Current.GoToAsync($"..");
+    }
+    
+    private async Task CompleteTaskAsync()
+    {
+        Logger.Log($"Completing task (id={_task.Id})");
+        Complete = true;
+        await _tasksService.SaveTask(_task);
+
+        Logger.Log($"Saved task (id={_task.Id})");
+        _messenger.Send(new TaskCompletedMessage(_task.Id));
+        
+        await Shell.Current.GoToAsync($"..");
+    }
+
+    private async Task DeleteTaskAsync()
+    {
+        Logger.Log($"Deleted task (id={_task.Id})");
+        _tasksService.DeleteTask(_task);
+        
+        Logger.Log($"Sending deleted message");
+        _messenger.Send(new TaskDeletedMessage(_task.Id));
+
+        Logger.Log($"Navigating to previous page");
+        await Shell.Current.GoToAsync($"..");
     }
     
     public async Task Reload()

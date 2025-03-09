@@ -13,8 +13,8 @@ namespace LightList.Views.Components;
 
 public partial class TaskListView : ContentView
 {
-    private ITaskViewModelFactory TaskViewModelFactory { get; }
-    private ITasksService TasksService { get; }
+    private readonly ITaskViewModelFactory _taskViewModelFactory;
+    private readonly ITasksService _tasksService;
 
     public static readonly BindableProperty TasksProperty =
         BindableProperty.Create(
@@ -39,13 +39,18 @@ public partial class TaskListView : ContentView
     public TaskListView(ITaskViewModelFactory taskViewModelFactory, ITasksService tasksService, IMessenger messenger)
     {
         InitializeComponent();
-        TaskViewModelFactory = taskViewModelFactory;
-        TasksService = tasksService;
+        _taskViewModelFactory = taskViewModelFactory;
+        _tasksService = tasksService;
 
         messenger.Register<TaskSavedMessage>(this, async (recipient, message) =>
         {
             await OnTaskSaved(message.Value);
         });
+        
+        // messenger.Register<TaskCompletedMessage>(this, (recipient, message) =>
+        // {
+        //     OnTaskDeleted(message.Value);
+        // });
 
         messenger.Register<TaskDeletedMessage>(this, (recipient, message) =>
         {
@@ -78,6 +83,7 @@ public partial class TaskListView : ContentView
 
     void OnTaskDeleted(int taskId)
     {
+        Logger.Log($"taskId = {taskId}");
         TaskViewModel? matchedTask = this.Tasks.FirstOrDefault(n => n.Id == taskId);
 
         if (matchedTask != null)
@@ -97,8 +103,8 @@ public partial class TaskListView : ContentView
 
         else
         {
-            var task = await TasksService.GetTask(taskId);
-            Tasks.Insert(0, TaskViewModelFactory.Create(task));
+            var task = await _tasksService.GetTask(taskId);
+            Tasks.Insert(0, _taskViewModelFactory.Create(task));
         }
     }
 }

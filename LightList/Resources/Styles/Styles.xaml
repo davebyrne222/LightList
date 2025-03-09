@@ -161,7 +161,7 @@
         </Setter>
     </Style>
 
-    <Style TargetType="Label">
+    <Style TargetType="Label" x:Key="BaseLabel">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
         <Setter Property="BackgroundColor" Value="Transparent" />
         <Setter Property="FontFamily" Value="OpenSansRegular" />
@@ -495,6 +495,10 @@
         <Setter Property="Background" Value="{StaticResource Warning}" />
     </Style>
     
+    <Style x:Key="DueInIndicatorDone" TargetType="Border" BasedOn="{StaticResource DueInIndicator}">
+        <Setter Property="Background" Value="{StaticResource Complete}" />
+    </Style>
+    
     <Style x:Key="DueInIndicatorLbl" TargetType="Label">
         <Setter Property="FontSize" Value="14" />
         <Setter Property="TextColor" Value="{StaticResource OffBlack}" />
@@ -511,6 +515,15 @@
     
     <Style x:Key="DueInIndicatorLblWarning" TargetType="Label" BasedOn="{StaticResource DueInIndicatorLbl}">
         <Setter Property="TextColor" Value="White" />
+    </Style>
+    
+    <Style x:Key="DueInIndicatorLblDone" TargetType="Label" BasedOn="{StaticResource DueInIndicatorLbl}">
+        <Setter Property="TextColor" Value="White" />
+    </Style>
+    
+    <Style x:Key="TaskLabelDone" TargetType="Label">
+        <Setter Property="TextDecorations" Value="Strikethrough"/>
+        <Setter Property="TextColor" Value="{StaticResource Gray400}"/>
     </Style>
     
 </ResourceDictionary>

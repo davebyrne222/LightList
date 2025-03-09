@@ -2,12 +2,18 @@ using System.Globalization;
 
 namespace LightList.Converters;
 
-public class TaskDueLblConverter: IValueConverter
+public class TaskDueLblConverter: IMultiValueConverter
 {
-    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    public object Convert(object[] values, Type targetType, object? parameter, CultureInfo culture)
     {
+
+        if (values.Length != 2 || values[0] == null || values[1] == null)
+            return Application.Current.Resources["DueInIndicatorLbl"];
+
+        if ((bool)values[0] == true)
+            return Application.Current.Resources["DueInIndicatorLblDone"];
         
-        switch(value) {
+        switch(values[1]) {
             case < 0: return Application.Current.Resources["DueInIndicatorLblLate"];
             case 0: return Application.Current.Resources["DueInIndicatorLblDue"];
             case 1: return Application.Current.Resources["DueInIndicatorLblWarning"];
@@ -15,8 +21,8 @@ public class TaskDueLblConverter: IValueConverter
         }
     }
 
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    public object[] ConvertBack(object? value, Type[] targetType, object? parameter, CultureInfo culture)
     {
-        return null;
+        throw new NotImplementedException();
     }
 }

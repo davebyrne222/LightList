@@ -17,6 +17,7 @@
     <Color x:Key="Late">#680500</Color>
     <Color x:Key="Due">#B3261E</Color>
     <Color x:Key="Warning">#FF9500</Color>
+    <Color x:Key="Complete">#00AC6B</Color>
 
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>

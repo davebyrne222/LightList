@@ -24,7 +24,10 @@ public class TasksDatabase
     public async Task<List<Models.Task>> GetItemsAsync()
     {
         Logger.Log("Retrieving all tasks");
-        return await _database.Table<Models.Task>().OrderBy(t => t.DueDate).ToListAsync();
+        return await _database.Table<Models.Task>()
+            .OrderBy(t => t.Complete)
+            .OrderBy(t => t.DueDate)
+            .ToListAsync();
     }
 
     public async Task<Models.Task> GetItemAsync(int id)
