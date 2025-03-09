@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using LightList.Utils;
 using SQLite;
 
@@ -6,25 +5,24 @@ namespace LightList.Data;
 
 public class TasksDatabase
 {
-    private readonly SQLiteAsyncConnection? _database;
-
+    private SQLiteAsyncConnection? _database;
+    private SQLiteAsyncConnection Database => _database ??= new SQLiteAsyncConnection(Constants.DatabasePath, Constants.Flags);
+    
     public async Task InitialiseAsync()
     {
         Logger.Log("Creating tables");
-        var result = await _database!.CreateTableAsync<Models.Task>();
+        var result = await Database!.CreateTableAsync<Models.Task>();
         Logger.Log($"Tables: {result}");
     }
 
-    public TasksDatabase()
-    {
-        Logger.Log("Initialing database connection");
-        _database = new SQLiteAsyncConnection(Constants.DatabasePath, Constants.Flags);
-    }
+    public TasksDatabase() { }
 
     public async Task<List<Models.Task>> GetItemsAsync()
     {
         Logger.Log("Retrieving all tasks");
-        return await _database.Table<Models.Task>()
+        
+        return await Database.Table<Models.Task>()
+            .OrderBy(t => t.CompleteOnDate)
             .OrderBy(t => t.Complete)
             .OrderBy(t => t.DueDate)
             .ToListAsync();
@@ -33,20 +31,20 @@ public class TasksDatabase
     public async Task<Models.Task> GetItemAsync(int id)
     {
         Logger.Log($"Retrieving task (id={id})");
-        return await _database.Table<Models.Task>().Where(i => i.Id == id).FirstOrDefaultAsync();
+        return await Database.Table<Models.Task>().Where(i => i.Id == id).FirstOrDefaultAsync();
     }
-
+    
     public async Task<int> SaveItemAsync(Models.Task item)
     {
         Logger.Log($"Saving task (id={item.Id})");
         
         if (item.Id != 0)
         {
-            await _database.UpdateAsync(item);
+            await Database.UpdateAsync(item);
         }
         else
         {
-            await _database.InsertAsync(item);
+            await Database.InsertAsync(item);
         }
         
         return item.Id;
@@ -55,6 +53,6 @@ public class TasksDatabase
     public async Task<int> DeleteItemAsync(Models.Task item)
     {
         Logger.Log($"Deleting task (id={item.Id})");
-        return await _database.DeleteAsync(item);
+        return await Database.DeleteAsync(item);
     }
 }

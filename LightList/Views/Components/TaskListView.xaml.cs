@@ -45,10 +45,10 @@ public partial class TaskListView : ContentView
             await OnTaskSaved(message.Value);
         });
         
-        // messenger.Register<TaskCompletedMessage>(this, (recipient, message) =>
-        // {
-        //     OnTaskDeleted(message.Value);
-        // });
+        messenger.Register<TaskCompletedMessage>(this, (recipient, message) =>
+        {
+            OnTaskCompleted(message.Value);
+        });
 
         messenger.Register<TaskDeletedMessage>(this, (recipient, message) =>
         {
@@ -59,6 +59,20 @@ public partial class TaskListView : ContentView
     private static void OnTasksChanged(BindableObject bindable, object oldValue, object newValue)
     {
         Logger.Log($"\nbindable={bindable.GetType()}\noldValue={oldValue}\nnewValue={newValue}");
+    }
+    
+    private int GetInsertionIndex(DateTime dueDate)
+    {
+        TaskViewModel? insertBeforeTask = Tasks.FirstOrDefault(t => t.DueDate > dueDate && t.Complete == false);
+        
+        Logger.Log($"insert before: {insertBeforeTask?.Id}");
+        
+        if (insertBeforeTask == null)
+            insertBeforeTask = Tasks.FirstOrDefault(t => t.Complete);
+        
+        Logger.Log($"insert before: {insertBeforeTask?.Id}");
+        
+        return insertBeforeTask == null ? Tasks.Count -1 : Tasks.IndexOf(insertBeforeTask);
     }
     
     private async void OnTaskSelected(object sender, SelectionChangedEventArgs e)
@@ -78,22 +92,7 @@ public partial class TaskListView : ContentView
         // Deselect the item
         ((CollectionView)sender).SelectedItem = null;
     }
-
-    private void OnTaskDeleted(int taskId)
-    {
-        Logger.Log($"taskId = {taskId}");
-        TaskViewModel? matchedTask = this.Tasks.FirstOrDefault(n => n.Id == taskId);
-
-        if (matchedTask != null)
-            Tasks.Remove(matchedTask);
-    }
-
-    private int GetInsertionIndex(DateTime dueDate)
-    {
-        TaskViewModel? insertBeforeTask = Tasks.FirstOrDefault(t => t.DueDate > dueDate);
-        return insertBeforeTask == null ? Tasks.Count -1 : Tasks.IndexOf(insertBeforeTask);
-    }
-
+    
     private async Task OnTaskSaved(int taskId)
     {
         Logger.Log($"taskId = {taskId}");
@@ -112,5 +111,27 @@ public partial class TaskListView : ContentView
             Tasks.Insert(GetInsertionIndex(task.DueDate), _taskViewModelFactory.Create(task));
             Logger.Log($"Added task {task.Id} in tasks list");
         }
+    }
+    
+    private async Task OnTaskCompleted(int taskId)
+    {
+        Logger.Log($"taskId = {taskId}");
+        TaskViewModel? matchedTask = Tasks.FirstOrDefault(n => n.Id == taskId);
+        
+        if (matchedTask != null)
+        {
+            await matchedTask.Reload();
+            Tasks.Move(Tasks.IndexOf(matchedTask), Tasks.Count - 1);
+            Logger.Log($"Updated taskId {matchedTask.Id} in tasks list");
+        }
+    }
+
+    private void OnTaskDeleted(int taskId)
+    {
+        Logger.Log($"taskId = {taskId}");
+        TaskViewModel? matchedTask = this.Tasks.FirstOrDefault(n => n.Id == taskId);
+
+        if (matchedTask != null)
+            Tasks.Remove(matchedTask);
     }
 }
