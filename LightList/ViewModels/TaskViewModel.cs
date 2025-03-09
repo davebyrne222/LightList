@@ -53,7 +53,7 @@ public partial class TaskViewModel: ObservableObject, IQueryAttributable
             switch(NoDaysRemaining) {
                 case < 0: return "Overdue";
                 case 0: return "Today";
-                case 1: return $"{NoDaysRemaining} Day";
+                case 1: return "Tomorrow";
                 default: return $"{NoDaysRemaining} Days";
             } 
         }
@@ -63,12 +63,17 @@ public partial class TaskViewModel: ObservableObject, IQueryAttributable
         get => _task.Label;
         set
         {
-            if (_task.Label != value)
+            if (String.IsNullOrWhiteSpace(value))
+            {
+                _task.Label = "-";
+            }
+            else if (_task.Label != value)
             {
                 _task.Label = value;
-                Logger.Log($"Label changed: {value}");
-                OnPropertyChanged();
             }
+            
+            Logger.Log($"Label changed: {value}");
+            OnPropertyChanged();
         }
     }
     public bool HasLabel => !String.IsNullOrEmpty(_task.Label);

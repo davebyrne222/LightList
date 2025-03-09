@@ -60,7 +60,7 @@
                                     HorizontalOptions="Start"
                                     VerticalOptions="End"
                                     Spacing="10">
-                                    <Image BackgroundColor="Transparent" Rotation="270" IsVisible="{Binding HasLabel}">
+                                    <Image BackgroundColor="Transparent" Rotation="270">
                                         <Image.Source>
                                             <FontImageSource Glyph="&#xf48d;"
                                                              Color="{StaticResource Gray200}"

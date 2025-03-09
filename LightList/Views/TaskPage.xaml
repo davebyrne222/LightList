@@ -18,7 +18,7 @@
                     Date="{Binding DueDate}" />
 
         <Editor x:Name="LabelEditor"
-                Placeholder="Enter your note"
+                Placeholder="Enter your label"
                 Text="{Binding Label}"
                 HeightRequest="100" />
 
