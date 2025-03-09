@@ -88,6 +88,12 @@ public partial class TaskListView : ContentView
             Tasks.Remove(matchedTask);
     }
 
+    private int GetInsertionIndex(DateTime dueDate)
+    {
+        TaskViewModel? insertBeforeTask = Tasks.FirstOrDefault(t => t.DueDate > dueDate);
+        return insertBeforeTask == null ? Tasks.Count -1 : Tasks.IndexOf(insertBeforeTask);
+    }
+
     private async Task OnTaskSaved(int taskId)
     {
         Logger.Log($"taskId = {taskId}");
@@ -96,16 +102,14 @@ public partial class TaskListView : ContentView
         if (matchedTask != null)
         {
             await matchedTask.Reload();
-            // TODO: Add in sorted order
-            Tasks.Move(Tasks.IndexOf(matchedTask), 0);
+            Tasks.Move(Tasks.IndexOf(matchedTask), GetInsertionIndex(matchedTask.DueDate));
             Logger.Log($"Updated taskId {matchedTask.Id} in tasks list");
         }
 
         else
         {
             var task = await _tasksService.GetTask(taskId);
-            // TODO: Add in sorted order
-            Tasks.Insert(0, _taskViewModelFactory.Create(task));
+            Tasks.Insert(GetInsertionIndex(task.DueDate), _taskViewModelFactory.Create(task));
             Logger.Log($"Added task {task.Id} in tasks list");
         }
     }
