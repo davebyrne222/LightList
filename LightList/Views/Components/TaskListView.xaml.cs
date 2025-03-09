@@ -65,14 +65,16 @@ public partial class TaskListView : ContentView
     {
         TaskViewModel? insertBeforeTask = Tasks.FirstOrDefault(t => t.DueDate > dueDate && t.Complete == false);
         
-        Logger.Log($"insert before: {insertBeforeTask?.Id}");
+        Logger.Log($"insert before task id (DueDate is greater): {insertBeforeTask?.Id.ToString() ?? "Not Found"}");
         
         if (insertBeforeTask == null)
             insertBeforeTask = Tasks.FirstOrDefault(t => t.Complete);
         
-        Logger.Log($"insert before: {insertBeforeTask?.Id}");
+        Logger.Log($"insert before task id (Completed tasks): {insertBeforeTask?.Id.ToString() ?? "Not Found"}");
+        if (insertBeforeTask == null)
+            Logger.Log($"Inserting at {Tasks.Count}");
         
-        return insertBeforeTask == null ? Tasks.Count -1 : Tasks.IndexOf(insertBeforeTask);
+        return insertBeforeTask == null ? Tasks.Count : Tasks.IndexOf(insertBeforeTask);
     }
     
     private async void OnTaskSelected(object sender, SelectionChangedEventArgs e)

@@ -21,17 +21,23 @@
         <ApplicationTitle>LightList</ApplicationTitle>
 
         <!-- App Identifier -->
-        <ApplicationId>com.companyname.lightlist</ApplicationId>
+        <ApplicationId>com.davidbyrne222.lightlist</ApplicationId>
 
         <!-- Versions -->
-        <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-        <ApplicationVersion>1</ApplicationVersion>
+        <ApplicationDisplayVersion>1</ApplicationDisplayVersion>
+        <ApplicationVersion>0.0.1</ApplicationVersion>
 
         <!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
         <WindowsPackageType>None</WindowsPackageType>
 
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
+        <Company>davidbyrne222</Company>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <CodesignKey>Apple Development: david.byrne222@gmail.com (V8C7QANGA5)</CodesignKey>
+      <CodesignProvision>iOS Team Provisioning Profile: com.davidbyrne222.lightlist</CodesignProvision>
     </PropertyGroup>
 
     <ItemGroup>
