@@ -1,0 +1,97 @@
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:LightList.Converters"
+             xmlns:components="clr-namespace:LightList.Views.Components"
+             xmlns:viewModels="clr-namespace:LightList.ViewModels"
+             x:Class="LightList.Views.Components.TaskListView"
+             x:DataType="components:TaskListView"
+             x:Name="Listview"
+             >
+    
+    <ContentView.Resources>
+        <converters:TaskDueIndicatorConverter x:Key="TaskDueIndicatorConverter" />
+        <converters:TaskDueLblConverter x:Key="TaskDueLblConverter" />
+        <converters:TaskDueTextConverter x:Key="TaskDueTextConverter" />
+    </ContentView.Resources>
+    
+    <CollectionView x:Name="TasksCollection"
+                    ItemsSource="{Binding Tasks, Source={x:Reference Listview}}"
+                    Margin="20"
+                    SelectionMode="Single"
+                    SelectionChanged="OnTaskSelected">
+    
+        <CollectionView.ItemsLayout>
+            <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+        </CollectionView.ItemsLayout>
+    
+        <CollectionView.ItemTemplate>
+            <DataTemplate x:DataType="viewModels:TaskViewModel">
+                <SwipeView>
+                    <SwipeView.LeftItems>
+                        <SwipeItems>
+                            <SwipeItem Text="Delete"
+                                       IconImageSource="{FontImageSource Glyph='&#xf4c4;', FontFamily='Ionicons'}"
+                                       BackgroundColor="LightPink"
+                                       Command="{Binding DeleteCommand}" />
+                        </SwipeItems>
+                    </SwipeView.LeftItems>
+                    <SwipeView.RightItems>
+                        <SwipeItems Mode="Execute">
+                            <SwipeItem Text="Complete"
+                                       IconImageSource="{FontImageSource Glyph='&#xf375;', FontFamily='Ionicons'}"
+                                       BackgroundColor="{StaticResource Complete}"
+                                       Command="{Binding CompleteCommand}" />
+                        </SwipeItems>
+                    </SwipeView.RightItems>
+                    <Border Style="{StaticResource TaskItem}">
+                        <StackLayout Spacing="20">
+                            <FlexLayout Direction="Column" Grow="1"
+                                        Margin="0, 0, 0, 0">
+                                <Label Text="{Binding Text}" FontSize="22"
+                                       Style="{Binding Complete, Converter={StaticResource TaskDueTextConverter}}"
+                                       LineBreakMode="TailTruncation"
+                                       MaxLines="2"/>
+                            </FlexLayout>
+                            <BoxView Style="{StaticResource TaskItemSeparator}"/>
+                            <FlexLayout Direction="Row"
+                                        AlignItems="Center"
+                                        JustifyContent="SpaceBetween">
+                                <HorizontalStackLayout
+                                    HorizontalOptions="Start"
+                                    VerticalOptions="End"
+                                    Spacing="10">
+                                    <Image BackgroundColor="Transparent" Rotation="270">
+                                        <Image.Source>
+                                            <FontImageSource Glyph="&#xf48d;"
+                                                             Color="{StaticResource Gray200}"
+                                                             FontFamily="Ionicons"
+                                                             Size="18"/>
+                                        </Image.Source>
+                                    </Image>
+                                    <Label Text="{Binding Label}" 
+                                           Style="{StaticResource TaskItemLabelLbl}"/>
+                                </HorizontalStackLayout>
+                                <Border>
+                                    <Border.Style>
+                                        <MultiBinding Converter="{StaticResource TaskDueIndicatorConverter}">
+                                            <Binding Path="Complete" />
+                                            <Binding Path="NoDaysRemaining" />
+                                        </MultiBinding>
+                                    </Border.Style>
+                                    <Label Text="{Binding NoDaysRemainingLbl}">
+                                        <Label.Style>
+                                            <MultiBinding Converter="{StaticResource TaskDueLblConverter}">
+                                                <Binding Path="Complete" />
+                                                <Binding Path="NoDaysRemaining" />
+                                            </MultiBinding>
+                                        </Label.Style>
+                                    </Label>
+                                </Border>
+                            </FlexLayout>
+                        </StackLayout>
+                    </Border>
+                </SwipeView>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+    </CollectionView>
+</ContentView>

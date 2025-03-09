@@ -1,0 +1,25 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LightList.Views.AllTasksPage"
+             x:DataType="viewModels:AllTasksViewModel"
+             xmlns:components="clr-namespace:LightList.Views.Components"
+             xmlns:viewModels="clr-namespace:LightList.ViewModels">
+    
+    <Grid RowDefinitions="Auto, 60, *">
+        
+        <components:NavBar/>
+        
+        <FlexLayout Grid.Row="1"
+                    Direction="Row"
+                    AlignItems="Center"
+                    JustifyContent="Start"
+                    Grow="1">
+            <Label FontSize="22" Margin="10">All Tasks</Label>
+        </FlexLayout>
+        
+        <components:TaskListView
+            Grid.Row="2"
+            Tasks="{Binding AllTasks}"/>
+        
+    </Grid>
+</ContentPage>

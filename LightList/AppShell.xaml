@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="LightList.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:LightList.Views"
+    Shell.NavBarIsVisible="False"
+    Shell.NavBarHasShadow="True">
+
+    <ShellContent Route="AllTasksPage" ContentTemplate="{DataTemplate views:AllTasksPage}" />
+    <ShellContent Route="TasksByDueDatePage" ContentTemplate="{DataTemplate views:TasksByDueDatePage}" />
+    <ShellContent Route="TasksByLabelPage" ContentTemplate="{DataTemplate views:TasksByLabelPage}" />
+    <ShellContent Route="TaskPage" ContentTemplate="{DataTemplate views:TaskPage}" />    
+    
+    <Shell.FlyoutContent>
+        <Grid Padding="20" RowDefinitions="*, *, *, *, *">
+                
+            <Label Grid.Row="0" Text="Sign In" FontSize="24" FontAttributes="Bold" HorizontalOptions="Center"/>
+
+            <!-- Username Input -->
+            <Entry Grid.Row="1" Placeholder="Email" Text="{Binding Email}" Keyboard="Email"/>
+
+            <!-- Password Input -->
+            <Entry Grid.Row="2" Placeholder="Password" Text="{Binding Password}" IsPassword="True"/>
+
+            <!-- Login Button -->
+            <Button Grid.Row="3"
+                    Text="Sign In"
+                    Command="{Binding SignInCommand}"
+                    BackgroundColor="Blue" TextColor="White"/>
+
+            <!-- Sign-up Link -->
+            <Button Grid.Row="4"
+                    Text="Create Account"
+                    Command="{Binding SignUpCommand}"
+                    BackgroundColor="Transparent" TextColor="Gray"/>
+        </Grid>
+    </Shell.FlyoutContent>
+    
+</Shell>

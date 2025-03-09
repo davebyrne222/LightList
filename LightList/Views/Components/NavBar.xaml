@@ -1,0 +1,49 @@
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:LightList.Converters"
+             xmlns:viewModels="clr-namespace:LightList.ViewModels"
+             x:Class="LightList.Views.Components.NavBar"
+             x:DataType="viewModels:NavBarViewModel">
+
+    <ContentView.Resources>
+        <converters:NavBtnStyleConverter x:Key="NavBtnStyleConverter" />
+    </ContentView.Resources>
+
+    <Grid Padding="20" BackgroundColor="Transparent"
+          RowDefinitions="60"
+          ColumnDefinitions="Auto, 1*, Auto">
+
+        <ImageButton
+            Grid.Column="0"
+            Source="{FontImageSource Glyph='&#xf46a;', FontFamily='Ionicons', Color=Black}"
+            Command="{Binding OpenMenuCommand}"
+            HorizontalOptions="Start"
+            Style="{StaticResource ActionBarButtonStyle}"
+            Rotation="90" />
+
+        <HorizontalStackLayout
+            Grid.Column="1"
+            HorizontalOptions="Center"
+            Spacing="10">
+            <Button Text="All"
+                    Command="{Binding NavigateCommand}"
+                    CommandParameter="All"
+                    Style="{Binding SelectedView, Converter={StaticResource NavBtnStyleConverter}, ConverterParameter=All}" />
+            <Button Text="Due"
+                    Command="{Binding NavigateCommand}"
+                    CommandParameter="Due"
+                    Style="{Binding SelectedView, Converter={StaticResource NavBtnStyleConverter}, ConverterParameter=Due}" />
+            <Button Text="Label"
+                    Command="{Binding NavigateCommand}"
+                    CommandParameter="Label"
+                    Style="{Binding SelectedView, Converter={StaticResource NavBtnStyleConverter}, ConverterParameter=Label}" />
+        </HorizontalStackLayout>
+
+        <ImageButton
+            Grid.Column="2"
+            Source="{FontImageSource Glyph='&#xf489;', FontFamily='Ionicons', Color=Black}"
+            Command="{Binding AddTaskCommand}"
+            HorizontalOptions="End"
+            Style="{StaticResource ActionBarButtonStyle}" />
+    </Grid>
+</ContentView>

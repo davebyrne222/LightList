@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:LightList.ViewModels"
+             x:Class="LightList.Views.TaskPage"
+             x:DataType="viewModels:TaskViewModel"
+             Title="Task"
+             Shell.NavBarIsVisible="True">
+
+    <VerticalStackLayout Spacing="10" Margin="5">
+        <Editor x:Name="DescriptionEditor"
+                Placeholder="Enter your note"
+                Text="{Binding Text}"
+                HeightRequest="100" />
+
+        <DatePicker x:Name="DueDatePicker"
+                    Date="{Binding DueDate}" />
+
+        <Editor x:Name="LabelEditor"
+                Placeholder="Enter your label"
+                Text="{Binding Label}"
+                HeightRequest="100" />
+
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="4">
+            <Button Text="Save"
+                    Command="{Binding SaveCommand}" />
+
+            <Button Grid.Column="1"
+                    Text="Delete"
+                    Command="{Binding DeleteCommand}" />
+
+        </Grid>
+    </VerticalStackLayout>
+</ContentPage>
