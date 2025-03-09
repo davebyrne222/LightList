@@ -93,24 +93,34 @@ public partial class TaskListView : ContentView
         ((CollectionView)sender).SelectedItem = null;
     }
     
+    private void ScrollToTask(TaskViewModel task)
+    {
+        if (TasksCollection != null)
+        {
+            TasksCollection.ScrollTo(task, null, ScrollToPosition.Center, true);
+        }
+    }
+    
     private async Task OnTaskSaved(int taskId)
     {
         Logger.Log($"taskId = {taskId}");
-        TaskViewModel? matchedTask = Tasks.FirstOrDefault(n => n.Id == taskId);
+        TaskViewModel? task = Tasks.FirstOrDefault(n => n.Id == taskId);
         
-        if (matchedTask != null)
+        if (task != null)
         {
-            await matchedTask.Reload();
-            Tasks.Move(Tasks.IndexOf(matchedTask), GetInsertionIndex(matchedTask.DueDate));
-            Logger.Log($"Updated taskId {matchedTask.Id} in tasks list");
+            await task.Reload();
+            Tasks.Move(Tasks.IndexOf(task), GetInsertionIndex(task.DueDate));
+            Logger.Log($"Updated taskId {task.Id} in tasks list");
         }
 
         else
         {
-            var task = await _tasksService.GetTask(taskId);
-            Tasks.Insert(GetInsertionIndex(task.DueDate), _taskViewModelFactory.Create(task));
+            task = _taskViewModelFactory.Create(await _tasksService.GetTask(taskId));
+            Tasks.Insert(GetInsertionIndex(task.DueDate), task);
             Logger.Log($"Added task {task.Id} in tasks list");
         }
+        
+        ScrollToTask(task);
     }
     
     private async Task OnTaskCompleted(int taskId)
