@@ -5,6 +5,7 @@
              xmlns:viewModels="clr-namespace:LightList.ViewModels"
              x:Class="LightList.Views.Components.TaskListView"
              x:DataType="components:TaskListView"
+             x:Name="Listview"
              >
     
     <ContentView.Resources>
@@ -14,7 +15,7 @@
     </ContentView.Resources>
     
     <CollectionView x:Name="TasksCollection"
-                    ItemsSource="{Binding Tasks}"
+                    ItemsSource="{Binding Tasks, Source={x:Reference Listview}}"
                     Margin="20"
                     SelectionMode="Single"
                     SelectionChanged="OnTaskSelected">
@@ -73,7 +74,8 @@
                                                              Size="18"/>
                                         </Image.Source>
                                     </Image>
-                                    <Label Text="{Binding Label}" Style="{StaticResource TaskItemLabelLbl}"/>
+                                    <Label Text="{Binding Label}" 
+                                           Style="{StaticResource TaskItemLabelLbl}"/>
                                 </HorizontalStackLayout>
                                 <Border>
                                     <Border.Style>

@@ -1,14 +1,7 @@
-using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Windows.Input;
-using CommunityToolkit.Mvvm.Messaging;
-using LightList.Messages;
 using LightList.Services;
 using LightList.Utils;
-using LightList.Views;
-using LightList.Views.Components;
 
 namespace LightList.ViewModels;
 
@@ -16,7 +9,7 @@ public class BaseTasksViewModel: INotifyPropertyChanged
 {
     protected ITaskViewModelFactory TaskViewModelFactory { get; }
     protected ITasksService TasksService { get; }
-    private ObservableCollection<TaskViewModel> _tasks;
+    private ObservableCollection<TaskViewModel> _tasks = new();
     public ObservableCollection<TaskViewModel> AllTasks
     {
         get => _tasks;
@@ -29,14 +22,15 @@ public class BaseTasksViewModel: INotifyPropertyChanged
             }
         }
     }
+    public event PropertyChangedEventHandler? PropertyChanged = delegate { };
+
     public BaseTasksViewModel(ITaskViewModelFactory taskViewModelFactory, ITasksService tasksService)
     {
         TaskViewModelFactory = taskViewModelFactory;
         TasksService = tasksService;
     }
-    public event PropertyChangedEventHandler PropertyChanged;
     
-    protected virtual void OnPropertyChanged(string propertyName)
+    private void OnPropertyChanged(string propertyName)
     {
         Logger.Log($"PropertyChanged: {propertyName}");
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

@@ -122,7 +122,7 @@ public partial class TaskViewModel: ObservableObject, IQueryAttributable
         Logger.Log($"Saving task (id={_task.Id})");
         await _tasksService.SaveTask(_task);
 
-        Logger.Log($"Saved task (id={_task.Id})");
+        Logger.Log($"Saved task. Sending Message (id={_task.Id})");
         _messenger.Send(new TaskSavedMessage(_task.Id));
         
         await Shell.Current.GoToAsync($"..");
