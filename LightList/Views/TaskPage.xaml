@@ -8,7 +8,7 @@
              Title="Task"
              Shell.NavBarIsVisible="True">
 
-    <VerticalStackLayout Spacing="10" Margin="5">
+    <VerticalStackLayout Spacing="10" Margin="20" VerticalOptions="Center">
         <Editor x:Name="DescriptionEditor"
                 Placeholder="Enter your note"
                 Text="{Binding Text}"
@@ -17,10 +17,10 @@
         <DatePicker x:Name="DueDatePicker"
                     Date="{Binding DueDate}" />
 
-        <Editor x:Name="LabelEditor"
-                Placeholder="Enter your label"
-                Text="{Binding Label}"
-                HeightRequest="100" />
+        <Entry x:Name="LabelEditor"
+               Placeholder="Enter your label"
+               Text="{Binding Label}"
+               HeightRequest="50" />
 
         <Grid ColumnDefinitions="*,*" ColumnSpacing="4">
             <Button Text="Save"

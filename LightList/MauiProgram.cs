@@ -12,10 +12,10 @@ namespace LightList;
 
 public static class MauiProgram
 {
-    static IServiceProvider serviceProvider;
+    private static IServiceProvider? _serviceProvider;
 
     public static TService GetService<TService>()
-        => serviceProvider.GetService<TService>();
+        => _serviceProvider.GetService<TService>();
     
     public static MauiApp CreateMauiApp()
     {
@@ -39,12 +39,14 @@ public static class MauiProgram
 
         // Register Services
         builder.Services.AddSingleton<ITasksService, TasksService>();
+        builder.Services.AddSingleton<IAuthService, AuthService>();
         
-        // Messenger
+        // Register Messenger
         builder.Services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
         
         // Register Models
         builder.Services.AddTransient<Models.Task>();
+        builder.Services.AddTransient<Models.AuthTokens>();
         
         // Register ViewModels
         builder.Services.AddSingleton<NavBarViewModel>();
@@ -56,6 +58,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<TasksByLabelViewModel>();
         
         // Register Views
+        builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<TaskPage>();
         builder.Services.AddSingleton<AllTasksPage>();
         builder.Services.AddSingleton<TasksByDueDatePage>();
@@ -70,7 +73,7 @@ public static class MauiProgram
 #endif
 
         var app = builder.Build();
-        serviceProvider = app.Services;
+        _serviceProvider = app.Services;
         
         // Initialize database before returning the app
         var dbService = app.Services.GetRequiredService<TasksDatabase>();

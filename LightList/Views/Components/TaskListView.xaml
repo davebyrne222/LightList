@@ -71,7 +71,7 @@
                                     <Label Text="{Binding Label}" 
                                            Style="{StaticResource TaskItemLabelLbl}"/>
                                 </HorizontalStackLayout>
-                                <Border>
+                                <Border VerticalOptions="Center">
                                     <Border.Style>
                                         <MultiBinding Converter="{StaticResource TaskDueIndicatorConverter}">
                                             <Binding Path="Complete" />
