@@ -459,7 +459,7 @@
     <Style x:Key="TaskItem" TargetType="Border">
         <Setter Property="StrokeShape" Value="RoundRectangle 20" />
         <Setter Property="BackgroundColor" Value="White" />
-        <Setter Property="Padding" Value="20" />
+        <Setter Property="Padding" Value="20, 10" />
         <Setter Property="Margin" Value="0, 0, 0, 10" />
         <Setter Property="Shadow">
             <Shadow Brush="{StaticResource PrimaryBrush}"
@@ -510,7 +510,10 @@
         <Setter Property="FontSize" Value="14" />
         <Setter Property="TextColor" Value="{StaticResource OffBlack}" />
         <Setter Property="FontAttributes" Value="Bold" />
-        <!-- <Setter Property="LineHeight" Value="1.5" /> -->
+        <Setter Property="MinimumHeightRequest" Value="20" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0, 1" />
+        <Setter Property="VerticalTextAlignment" Value="Center" />
     </Style>
     
     <Style x:Key="DueInIndicatorLblLate" TargetType="Label" BasedOn="{StaticResource DueInIndicatorLbl}">
