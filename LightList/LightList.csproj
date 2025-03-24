@@ -9,13 +9,15 @@
         The Mac App Store will NOT accept apps with ONLY maccatalyst-arm64 indicated;
         either BOTH runtimes must be indicated or ONLY macatalyst-x64. -->
         <!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
-
+        
         <OutputType>Exe</OutputType>
         <RootNamespace>LightList</RootNamespace>
         <UseMaui>true</UseMaui>
         <SingleProject>true</SingleProject>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        
+        <Company>davidbyrne222</Company>
 
         <!-- Display name -->
         <ApplicationTitle>LightList</ApplicationTitle>
@@ -29,18 +31,20 @@
 
         <!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
         <WindowsPackageType>None</WindowsPackageType>
-
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
-        <Company>davidbyrne222</Company>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
-      <CodesignKey>Apple Development: david.byrne222@gmail.com (V8C7QANGA5)</CodesignKey>
-      <CodesignProvision>iOS Team Provisioning Profile: com.davidbyrne222.lightlist</CodesignProvision>
     </PropertyGroup>
 
     <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
+        <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
+        <CodesignKey>Apple Development: david.byrne222@gmail.com (V8C7QANGA5)</CodesignKey>
+        <CodesignProvision>iOS Team Provisioning Profile: com.davidbyrne222.lightlist</CodesignProvision>
+        <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">
+        <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
+        <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers>
+        <CodesignKey>Apple Development: david.byrne222@gmail.com (V8C7QANGA5)</CodesignKey>
+        <CodesignProvision>Mac Team Provisioning Profile: com.davidbyrne222.lightlist</CodesignProvision>
         <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     </PropertyGroup>
 
