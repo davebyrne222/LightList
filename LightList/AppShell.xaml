@@ -18,7 +18,7 @@
         <VerticalStackLayout Spacing="10" Margin="20" VerticalOptions="Fill" HorizontalOptions="Fill">
             <Label FontSize="22" LineHeight="1.5">Sign In</Label>
             <Label FontSize="14" LineHeight="1.5" LineBreakMode="WordWrap">By signing in, your tasks will be available across your devices. This is entirely optional</Label>
-            <Button Text="Sign In"
+            <Button Text="Sign Up / In"
                     Clicked="OnLoginClicked"
                     BackgroundColor="{StaticResource Primary}" TextColor="White"/>
             <Label Text="" x:Name="LoggedInStatusLbl"></Label>

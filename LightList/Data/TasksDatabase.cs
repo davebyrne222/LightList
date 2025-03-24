@@ -6,7 +6,12 @@ namespace LightList.Data;
 public class TasksDatabase
 {
     private SQLiteAsyncConnection? _database;
-    private SQLiteAsyncConnection Database => _database ??= new SQLiteAsyncConnection(Constants.DatabasePath, Constants.DbFlags);
+    private SQLiteAsyncConnection Database => _database ??= 
+        new SQLiteAsyncConnection(
+            Constants.DatabasePath, 
+            Constants.DbFlags,
+            true
+         );
     public async Task InitialiseAsync()
     {
         Logger.Log("Creating tables");

@@ -5,6 +5,7 @@ using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
 using Amazon.Runtime;
 using LightList.Models;
+using LightList.Repositories;
 using LightList.Utils;
 
 namespace LightList.Services;
@@ -12,10 +13,12 @@ namespace LightList.Services;
 public class AuthService: IAuthService
 {
     private AmazonCognitoIdentityProviderClient? _provider;
+    private readonly ISecureStorageRepository _secureStorage;
 
-    public AuthService()
+    public AuthService(ISecureStorageRepository repository)
     {
         Logger.Log("Initializing");
+        _secureStorage = repository;
     }
 
     private AmazonCognitoIdentityProviderClient Provider => _provider ??=
@@ -73,32 +76,41 @@ public class AuthService: IAuthService
         {
             try
             {
-                // TODO: move to repo & handle null ref
-                var tokens = JsonSerializer.Deserialize<AuthTokens>(responseContent);
-                Logger.Log($"Decoded tokens successfully: {tokens?.AccessToken}");
-                SecureStorage.SetAsync("access_token", tokens.AccessToken);
-                SecureStorage.SetAsync("id_token", tokens.IdToken);
-                SecureStorage.SetAsync("refresh_token", tokens.RefreshToken);
-                return true;
+                AuthTokens? tokens = JsonSerializer.Deserialize<AuthTokens>(responseContent);
+
+                Logger.Log($"Decoded tokens successfully: {tokens != null}");
+
+                if (tokens != null)
+                {
+                    await _secureStorage.SaveAuthTokensAsync(tokens);
+                    return true;
+                }
             }
             catch (Exception ex)
             {
                 Logger.Log($"Error storing access tokens: {ex.Message}");
             }
         }
-
+        
         return false;
+    }
+
+    internal async Task<AuthTokens?> GetAuthTokensAsync()
+    {
+        Logger.Log("Getting auth tokens");
+        return await _secureStorage.GetAuthTokensAsync();
     }
     
     public void SignOutAsync()
     {
-        // TODO: Manage properly with cognito & delete all tokens
-        SecureStorage.Default.Remove("id_token");
+        // TODO: Manage properly with cognito
+        Logger.Log("Signing out");
+        _secureStorage.DeleteAuthTokens();
     }
 
     public async Task<bool> IsUserLoggedIn()
     {
-        // TODO: do proper check if user logged in
+        // TODO: do properly - check if user logged in
         var token = await SecureStorage.Default.GetAsync("id_token");
         return !string.IsNullOrEmpty(token);
     }

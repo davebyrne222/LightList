@@ -36,6 +36,7 @@ public static class MauiProgram
         
         // Register Repositories
         builder.Services.AddSingleton<ILocalRepository, LocalRepository>();
+        builder.Services.AddSingleton<ISecureStorageRepository, SecureStorageRepository>();
 
         // Register Services
         builder.Services.AddSingleton<ITasksService, TasksService>();

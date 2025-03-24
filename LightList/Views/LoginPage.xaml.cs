@@ -28,8 +28,7 @@ public partial class LoginPage : ContentPage
 
     private async Task ManageLogin()
     {
-        LoginStatusLbl.Text = "Welcome, we will try to log in now...";
-        
+     
         bool loggedIn = await LoginAsync();
 
         if (loggedIn)

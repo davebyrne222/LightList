@@ -9,7 +9,7 @@
             <ContentPage.Content>
                 <VerticalStackLayout Spacing="10" Margin="20" VerticalOptions="Center">
                     
-                    <Label Text="" x:Name="LoginStatusLbl"></Label>
+                    <Label Text="Welcome! Lets log in" x:Name="LoginStatusLbl"></Label>
                     
                     <Button x:Name="SignInBtn"
                             Text="Sign In"

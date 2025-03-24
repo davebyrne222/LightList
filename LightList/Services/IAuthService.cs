@@ -1,3 +1,5 @@
+using LightList.Models;
+
 namespace LightList.Services;
 
 public interface IAuthService
