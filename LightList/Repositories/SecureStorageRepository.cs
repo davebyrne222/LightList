@@ -21,7 +21,7 @@ public class SecureStorageRepository: ISecureStorageRepository
     {
         Logger.Log("Retrieving auth tokens");
         string? tokensString = await SecureStorage.GetAsync("AuthTokens");
-        Logger.Log($"Auth tokens found: {string.IsNullOrEmpty(tokensString)}");
+        Logger.Log($"Auth tokens found: {!string.IsNullOrEmpty(tokensString)}");
         return string.IsNullOrEmpty(tokensString) ? null : JsonSerializer.Deserialize<AuthTokens>(tokensString);
     }
 

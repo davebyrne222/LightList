@@ -1,5 +1,6 @@
 using System.Net;
 using System.Security.Authentication;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json;
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
@@ -101,17 +102,38 @@ public class AuthService: IAuthService
         return await _secureStorage.GetAuthTokensAsync();
     }
     
-    public void SignOutAsync()
+    public async Task<bool> SignOutAsync()
     {
         // TODO: Manage properly with cognito
         Logger.Log("Signing out");
         _secureStorage.DeleteAuthTokens();
+        return true;
     }
 
     public async Task<bool> IsUserLoggedIn()
     {
-        // TODO: do properly - check if user logged in
-        var token = await SecureStorage.Default.GetAsync("id_token");
-        return !string.IsNullOrEmpty(token);
+        AuthTokens? authTokens = await GetAuthTokensAsync();
+
+        if (authTokens == null)
+        {
+            Logger.Log("No auth tokens found");
+            return false;
+        }
+        
+        JwtSecurityTokenHandler handler = new();
+        var jwtToken = handler.ReadJwtToken(authTokens.AccessToken);
+        var expiry = jwtToken.Claims.FirstOrDefault(c => c.Type == "exp")?.Value;
+
+        if (string.IsNullOrEmpty(expiry))
+        {
+            Logger.Log("No expiry claim found");
+            return false;
+        }
+
+        DateTime expDateTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(expiry)).UtcDateTime;
+        
+        Logger.Log($"Token expiry: {expDateTime}");
+        
+        return DateTime.UtcNow < expDateTime;
     }
 }

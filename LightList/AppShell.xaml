@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <Shell
-    x:Class="LightList.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:LightList.Views"
+    xmlns:lightList="clr-namespace:LightList"
+    x:Class="LightList.AppShell"
+    x:DataType="lightList:AppShell"
     Shell.NavBarIsVisible="False"
     Shell.NavBarHasShadow="True"
     Shell.TabBarIsVisible="False">
@@ -16,14 +18,49 @@
     <ShellContent Route="LoginPage" ContentTemplate="{DataTemplate views:LoginPage}" />
 
     <Shell.FlyoutContent>
-        <VerticalStackLayout Spacing="10" Margin="20" VerticalOptions="Fill" HorizontalOptions="Fill">
-            <Label FontSize="22" LineHeight="1.5">Sign In</Label>
-            <Label FontSize="14" LineHeight="1.5" LineBreakMode="WordWrap">By signing in, your tasks will be available across your devices. This is entirely optional</Label>
-            <Button Text="Sign Up / In"
-                    Clicked="OnLoginClicked"
-                    BackgroundColor="{DynamicResource Primary}" TextColor="White"/>
-            <Label Text="" x:Name="LoggedInStatusLbl"></Label>
-        </VerticalStackLayout>
+        <!-- <VerticalStackLayout Spacing="10" Margin="20" VerticalOptions="Fill" HorizontalOptions="Fill"> -->
+        <!--     <Label FontSize="22" LineHeight="1.5">Sign In</Label> -->
+        <!--     <Label FontSize="14" LineHeight="1.5" LineBreakMode="WordWrap">By signing in, your tasks will be available across your devices. This is entirely optional</Label> -->
+        <!--     <Button Text="Sign Up / In" -->
+        <!--             Clicked="OnLoginClicked" -->
+        <!--             BackgroundColor="{DynamicResource Primary}" TextColor="White"/> -->
+        <!--     <Label Text="{Binding IsLoggedIn, StringFormat='Logged in: {0}'}"></Label> -->
+        <!-- </VerticalStackLayout> -->
+        <Grid Margin="20" VerticalOptions="Fill" HorizontalOptions="Fill">
+            <!-- Define a grid with two rows: 
+             - First row for content (Auto-sized)
+             - Second row takes up remaining space to push the last Label down -->
+            <Grid.RowDefinitions>
+                <RowDefinition Height="300" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Upper content remains in natural order -->
+            <Label Grid.Row="0"
+                   Text="LightList"
+                   FontSize="26"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Center"/>
+            
+            <VerticalStackLayout Spacing="10" Grid.Row="1">
+                <Button Text="Sign Up / In"
+                        Clicked="OnLoginClicked"
+                        BackgroundColor="{DynamicResource Primary}" TextColor="White"
+                        IsVisible="{Binding IsLoggedOut}"/>
+                
+                <Button Text="Sign Out"
+                        Clicked="OnLogoutClicked"
+                        BackgroundColor="{DynamicResource Primary}" TextColor="White"
+                        IsVisible="{Binding IsLoggedIn}"/>
+            </VerticalStackLayout>
+
+            <Label Grid.Row="2"
+                   Text="{Binding IsLoggedIn, StringFormat='Logged in: {0}'}"
+                   VerticalOptions="End"
+                   HorizontalOptions="Start"/>
+
+        </Grid>
     </Shell.FlyoutContent>
 
 </Shell>
