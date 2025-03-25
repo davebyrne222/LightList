@@ -18,25 +18,15 @@
     <ShellContent Route="LoginPage" ContentTemplate="{DataTemplate views:LoginPage}" />
 
     <Shell.FlyoutContent>
-        <!-- <VerticalStackLayout Spacing="10" Margin="20" VerticalOptions="Fill" HorizontalOptions="Fill"> -->
-        <!--     <Label FontSize="22" LineHeight="1.5">Sign In</Label> -->
-        <!--     <Label FontSize="14" LineHeight="1.5" LineBreakMode="WordWrap">By signing in, your tasks will be available across your devices. This is entirely optional</Label> -->
-        <!--     <Button Text="Sign Up / In" -->
-        <!--             Clicked="OnLoginClicked" -->
-        <!--             BackgroundColor="{DynamicResource Primary}" TextColor="White"/> -->
-        <!--     <Label Text="{Binding IsLoggedIn, StringFormat='Logged in: {0}'}"></Label> -->
-        <!-- </VerticalStackLayout> -->
+
         <Grid Margin="20" VerticalOptions="Fill" HorizontalOptions="Fill">
-            <!-- Define a grid with two rows: 
-             - First row for content (Auto-sized)
-             - Second row takes up remaining space to push the last Label down -->
+
             <Grid.RowDefinitions>
                 <RowDefinition Height="300" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <!-- Upper content remains in natural order -->
             <Label Grid.Row="0"
                    Text="LightList"
                    FontSize="26"

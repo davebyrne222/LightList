@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using LightList.Services;
 using LightList.Utils;
 using LightList.Views;
@@ -81,8 +80,7 @@ public partial class AppShell : Shell
     private async void ShowToast(string message, ToastDuration duration = ToastDuration.Short)
     {
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-        double fontSize = 14;
-        var toast = Toast.Make(message, duration, fontSize);
+        var toast = Toast.Make(message, duration, 14);
         await toast.Show(cancellationTokenSource.Token);
     }
     

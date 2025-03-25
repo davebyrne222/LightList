@@ -22,7 +22,6 @@ public class Constants
     public static readonly string CognitoAuthUrl = $"{CognitoRootUrl}/oauth2/authorize" +
                                                    $"?client_id={CognitoAppClientId}" +
                                                    $"&response_type=code" +
-                                                   $"&scope=email+openid+phone" +
                                                    $"&redirect_uri={AuthRedirectUrl}";
     public static readonly string CognitoTokenExchangeUrl = $"{CognitoRootUrl}/oauth2/token";
 }

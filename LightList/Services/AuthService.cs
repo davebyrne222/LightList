@@ -5,6 +5,7 @@ using System.Text.Json;
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
 using Amazon.Runtime;
+using CommunityToolkit.Maui.Core.Views;
 using LightList.Models;
 using LightList.Repositories;
 using LightList.Utils;
@@ -104,9 +105,35 @@ public class AuthService: IAuthService
     
     public async Task<bool> SignOutAsync()
     {
-        // TODO: Manage properly with cognito
-        Logger.Log("Signing out");
+
+        // Sign out from cognito
+        Logger.Log($"Signing out: requesting cognito sign out");
+
+        AuthTokens? tokens = await GetAuthTokensAsync();
+        
+        if (tokens == null)
+        {
+            return false;
+        }
+
+        GlobalSignOutRequest request = new GlobalSignOutRequest
+        {
+            AccessToken = tokens?.AccessToken
+        };
+
+        try
+        {
+            await Provider.GlobalSignOutAsync(request);
+        }
+        catch (Exception ex)
+        {
+            Logger.Log($"Error signing out from cognito: {ex.GetType().FullName} - {ex.Message}");
+            return false;   
+        }
+        
+        // Delete stored tokens
         _secureStorage.DeleteAuthTokens();
+
         return true;
     }
 
