@@ -69,6 +69,9 @@ public static class MauiProgram
         builder.Services.AddScoped<TaskListView>();
         builder.Services.AddSingleton<NavBar>();
         
+        // Misc
+        builder.Services.AddSingleton<AppShell>();
+        
 #if DEBUG
         builder.Logging.AddDebug();
 #endif

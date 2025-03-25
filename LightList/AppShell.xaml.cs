@@ -6,11 +6,14 @@ namespace LightList;
 
 public partial class AppShell : Shell
 {
-    public AppShell()
+    private IAuthService _authService;
+    public AppShell(IAuthService authService)
     {
         Logger.Log("Initializing");
         InitializeComponent();
+        _authService = authService;
         RegisterRoutes();
+        Logger.Log("Initialized");
     }
 
     private void RegisterRoutes()

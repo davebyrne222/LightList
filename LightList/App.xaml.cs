@@ -2,9 +2,11 @@
 
 public partial class App : Application
 {
-    public App()
+    private AppShell _shell;
+    public App(AppShell shell)
     {
         InitializeComponent();
+        _shell = shell;
     }
 
     protected override Window CreateWindow(IActivationState? activationState)
@@ -13,6 +15,6 @@ public partial class App : Application
         if (Current != null)
             Current.UserAppTheme = AppTheme.Light;
 
-        return new Window(new AppShell());
+        return new Window(_shell);
     }
 }
