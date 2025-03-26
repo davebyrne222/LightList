@@ -48,5 +48,7 @@
 	<array>
 		<string>$(AppIdentifierPrefix)$(CFBundleIdentifier)</string>
 	</array>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en-IE</string>
 </dict>
 </plist>
