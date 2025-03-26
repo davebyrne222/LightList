@@ -87,10 +87,10 @@
             </VisualStateGroupList>
         </Setter>
     </Style>
-
+    
     <Style TargetType="Editor">
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
-        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}" />
         <Setter Property="FontFamily" Value="OpenSansRegular"/>
         <Setter Property="FontSize" Value="14" />
         <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray500}}" />
@@ -111,8 +111,8 @@
     </Style>
 
     <Style TargetType="Entry">
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
-        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}" />
         <Setter Property="FontFamily" Value="OpenSansRegular"/>
         <Setter Property="FontSize" Value="14" />
         <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray500}}" />
@@ -459,10 +459,10 @@
     <Style x:Key="TaskItem" TargetType="Border">
         <Setter Property="StrokeShape" Value="RoundRectangle 20" />
         <Setter Property="BackgroundColor" Value="White" />
-        <Setter Property="Padding" Value="20" />
+        <Setter Property="Padding" Value="20, 10" />
         <Setter Property="Margin" Value="0, 0, 0, 10" />
         <Setter Property="Shadow">
-            <Shadow Brush="Gray"
+            <Shadow Brush="{StaticResource PrimaryBrush}"
                     Offset="0, 5"
                     Radius="5"
                     Opacity="0.2"/>
@@ -510,6 +510,10 @@
         <Setter Property="FontSize" Value="14" />
         <Setter Property="TextColor" Value="{StaticResource OffBlack}" />
         <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="MinimumHeightRequest" Value="20" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0, 1" />
+        <Setter Property="VerticalTextAlignment" Value="Center" />
     </Style>
     
     <Style x:Key="DueInIndicatorLblLate" TargetType="Label" BasedOn="{StaticResource DueInIndicatorLbl}">

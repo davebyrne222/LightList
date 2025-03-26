@@ -9,7 +9,7 @@ public class Task
     public int Id { get; set; }
     [NotNull]
     public string Text { get; set; } = string.Empty;
-    public string Label { get; set; } = "-";
+    public string? Label { get; set; }
     public DateTime CreateOnDate { get; private set; } = DateTime.Now;
     public DateTime UpdatedOnDate { get; set; } = DateTime.Now;
     public DateTime DueDate { get; set; } = DateTime.Now;

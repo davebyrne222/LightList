@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using LightList.Repositories;
 using LightList.Services;
@@ -12,18 +13,39 @@ namespace LightList;
 
 public static class MauiProgram
 {
-    static IServiceProvider serviceProvider;
+    private static IServiceProvider? _serviceProvider;
 
     public static TService GetService<TService>()
-        => serviceProvider.GetService<TService>();
+        => _serviceProvider.GetService<TService>();
     
     public static MauiApp CreateMauiApp()
     {
         Logger.Log("Creating MauiApp & Registering Services");
+
+        MauiApp app = CreateBuilder();
         
+        _serviceProvider = app.Services;
+
+        try
+        {
+            // _ = StartUpAsync(); // <-- async startup. App will be ready before database
+            Task.Run(async () => await StartUpAsync()).Wait();
+        }
+        catch (Exception ex)
+        {
+            Logger.Log($"Error starting up: {ex.GetType().FullName} - {ex.Message}");
+            throw;
+        }
+        
+        return app;
+    }
+
+    private static MauiApp CreateBuilder()
+    {
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
+            .UseMauiCommunityToolkit()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -36,15 +58,18 @@ public static class MauiProgram
         
         // Register Repositories
         builder.Services.AddSingleton<ILocalRepository, LocalRepository>();
+        builder.Services.AddSingleton<ISecureStorageRepository, SecureStorageRepository>();
 
         // Register Services
         builder.Services.AddSingleton<ITasksService, TasksService>();
+        builder.Services.AddSingleton<IAuthService, AuthService>();
         
-        // Messenger
+        // Register Messenger
         builder.Services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
         
         // Register Models
         builder.Services.AddTransient<Models.Task>();
+        builder.Services.AddTransient<Models.AuthTokens>();
         
         // Register ViewModels
         builder.Services.AddSingleton<NavBarViewModel>();
@@ -56,6 +81,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<TasksByLabelViewModel>();
         
         // Register Views
+        builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<TaskPage>();
         builder.Services.AddSingleton<AllTasksPage>();
         builder.Services.AddSingleton<TasksByDueDatePage>();
@@ -65,17 +91,45 @@ public static class MauiProgram
         builder.Services.AddScoped<TaskListView>();
         builder.Services.AddSingleton<NavBar>();
         
+        // Misc
+        builder.Services.AddSingleton<AppShell>();
+        
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
+        return builder.Build();
+    }
+    
+    private static async Task StartUpAsync()
+    {
+        Logger.Log("Starting StartUp routine");
 
-        var app = builder.Build();
-        serviceProvider = app.Services;
+        try
+        {
+            await InitializeDatabaseAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.Log($"StartUp routine failed: {ex.GetType().FullName} {ex.Message}");
+            throw;
+        }
+    }
+    
+    private static async Task InitializeDatabaseAsync()
+    {
+        Logger.Log("Initializing Database");
         
-        // Initialize database before returning the app
-        var dbService = app.Services.GetRequiredService<TasksDatabase>();
-        Task.Run(async () => await dbService.InitialiseAsync()).Wait();
+        try
+        {
+            var dbService = GetService<TasksDatabase>();
+            await dbService.InitialiseAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.Log($"Error initialising database: {ex.GetType().FullName} - {ex.Message}");
+            throw;
+        }
         
-        return app;
+        Logger.Log("Database initialized");
     }
 }

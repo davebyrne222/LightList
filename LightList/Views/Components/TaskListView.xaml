@@ -16,7 +16,7 @@
     
     <CollectionView x:Name="TasksCollection"
                     ItemsSource="{Binding Tasks, Source={x:Reference Listview}}"
-                    Margin="20"
+                    Margin="20, 10"
                     SelectionMode="Single"
                     SelectionChanged="OnTaskSelected">
     
@@ -44,7 +44,7 @@
                         </SwipeItems>
                     </SwipeView.RightItems>
                     <Border Style="{StaticResource TaskItem}">
-                        <StackLayout Spacing="20">
+                        <StackLayout Spacing="10">
                             <FlexLayout Direction="Column" Grow="1"
                                         Margin="0, 0, 0, 0">
                                 <Label Text="{Binding Text}" FontSize="22"
@@ -54,11 +54,11 @@
                             </FlexLayout>
                             <BoxView Style="{StaticResource TaskItemSeparator}"/>
                             <FlexLayout Direction="Row"
-                                        AlignItems="Center"
-                                        JustifyContent="SpaceBetween">
+                                        JustifyContent="SpaceBetween"
+                                        VerticalOptions="Center">
                                 <HorizontalStackLayout
                                     HorizontalOptions="Start"
-                                    VerticalOptions="End"
+                                    VerticalOptions="Center"
                                     Spacing="10">
                                     <Image BackgroundColor="Transparent" Rotation="270">
                                         <Image.Source>
