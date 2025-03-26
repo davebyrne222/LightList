@@ -28,7 +28,8 @@ public static class MauiProgram
 
         try
         {
-            _ = StartUpAsync();
+            // _ = StartUpAsync(); // <-- async startup. App will be ready before database
+            Task.Run(async () => await StartUpAsync()).Wait();
         }
         catch (Exception ex)
         {
