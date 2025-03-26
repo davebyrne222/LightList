@@ -44,11 +44,6 @@ public partial class AppShell : Shell
         RegisterRoutes();
         _ = GetLoginStatus();
         
-        // Todo: Change to messages
-        // Temporary: check user logged in status when flyout opens
-        //  Allows displaying of login or logout button
-        PropertyChanged += OnPropertyChangedHandler;
-        
         Logger.Log("Initialized");
     }
     
@@ -88,24 +83,10 @@ public partial class AppShell : Shell
     
     #region Event Handlers
     
-    private async void OnPropertyChangedHandler(object? sender, PropertyChangedEventArgs e)
-    {
-        Logger.Log($"Property changed: {e.PropertyName}");
-        
-        if (e.PropertyName == nameof(FlyoutIsPresented))
-        {
-            Logger.Log($"FlyoutIsPresented changed to: {FlyoutIsPresented}");
-            
-            if (FlyoutIsPresented)
-                await GetLoginStatus();
-        }
-    }
-    
     private async void OnLoginClicked(object sender, EventArgs e)
     {
         Logger.Log("Navigating to the login page");
-        // CloseFlyout();
-        // await Current.GoToAsync("LoginPage");
+
         IsLoggedIn = await _authService.SignInAsync();
 
         if (IsLoggedIn)
@@ -115,7 +96,7 @@ public partial class AppShell : Shell
         }
         else
         {
-            ShowToast("There was a problem signing in. Please try again.");
+            ShowToast("There was a problem signing in. Please try again.", ToastDuration.Long);
         }
     }
 
@@ -130,7 +111,7 @@ public partial class AppShell : Shell
         }
         else
         {
-            ShowToast("There was a problem signing out. Please try again.");
+            ShowToast("There was a problem signing out. Please try again.", ToastDuration.Long);
         }
     }
     

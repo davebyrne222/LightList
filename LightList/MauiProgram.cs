@@ -21,7 +21,26 @@ public static class MauiProgram
     public static MauiApp CreateMauiApp()
     {
         Logger.Log("Creating MauiApp & Registering Services");
+
+        MauiApp app = CreateBuilder();
         
+        _serviceProvider = app.Services;
+
+        try
+        {
+            _ = StartUpAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.Log($"Error starting up: {ex.GetType().FullName} - {ex.Message}");
+            throw;
+        }
+        
+        return app;
+    }
+
+    private static MauiApp CreateBuilder()
+    {
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
@@ -77,14 +96,39 @@ public static class MauiProgram
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
+        return builder.Build();
+    }
+    
+    private static async Task StartUpAsync()
+    {
+        Logger.Log("Starting StartUp routine");
 
-        var app = builder.Build();
-        _serviceProvider = app.Services;
+        try
+        {
+            await InitializeDatabaseAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.Log($"StartUp routine failed: {ex.GetType().FullName} {ex.Message}");
+            throw;
+        }
+    }
+    
+    private static async Task InitializeDatabaseAsync()
+    {
+        Logger.Log("Initializing Database");
         
-        // Initialize database before returning the app
-        var dbService = app.Services.GetRequiredService<TasksDatabase>();
-        Task.Run(async () => await dbService.InitialiseAsync()).Wait();
+        try
+        {
+            var dbService = GetService<TasksDatabase>();
+            await dbService.InitialiseAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.Log($"Error initialising database: {ex.GetType().FullName} - {ex.Message}");
+            throw;
+        }
         
-        return app;
+        Logger.Log("Database initialized");
     }
 }
