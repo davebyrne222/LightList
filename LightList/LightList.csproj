@@ -16,6 +16,7 @@
         <SingleProject>true</SingleProject>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <NeutralLanguage>en-IE</NeutralLanguage>
         
         <Company>davidbyrne222</Company>
 
