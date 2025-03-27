@@ -59,19 +59,13 @@ public partial class TaskViewModel: ObservableObject, IQueryAttributable
     }
     public string Label
     {
-        get => _task.Label;
+        get => _task.Label ?? string.Empty;
         set
         {
-            if (String.IsNullOrWhiteSpace(value))
-            {
-                _task.Label = "-";
-            }
-            else if (_task.Label != value)
+            if (_task.Label != value)
             {
                 _task.Label = value;
             }
-            
-            Logger.Log($"Label changed: {value}");
             OnPropertyChanged();
         }
     }

@@ -9,6 +9,7 @@
              >
     
     <ContentView.Resources>
+        <converters:TaskLabelHyphenConverter x:Key="EmptyToHyphenConverter"/>
         <converters:TaskDueIndicatorConverter x:Key="TaskDueIndicatorConverter" />
         <converters:TaskDueLblConverter x:Key="TaskDueLblConverter" />
         <converters:TaskDueTextConverter x:Key="TaskDueTextConverter" />
@@ -68,7 +69,7 @@
                                                              Size="18"/>
                                         </Image.Source>
                                     </Image>
-                                    <Label Text="{Binding Label}" 
+                                    <Label Text="{Binding Label, Converter={StaticResource EmptyToHyphenConverter}}" 
                                            Style="{StaticResource TaskItemLabelLbl}"/>
                                 </HorizontalStackLayout>
                                 <Border>
