@@ -24,7 +24,6 @@ public partial class TaskViewModel: ObservableObject, IQueryAttributable
             if (_task.Text != value)
             {
                 _task.Text = value;
-                Logger.Log($"Text changed: {value}");
                 OnPropertyChanged();
             }
         }
