@@ -13,7 +13,6 @@ public partial class TaskViewModel: ObservableObject, IQueryAttributable
 {
     private readonly ITasksService _tasksService;
     private readonly IMessenger _messenger;
-    
     private Models.Task _task;
     public int Id => _task.Id;
     public string Text
@@ -36,7 +35,6 @@ public partial class TaskViewModel: ObservableObject, IQueryAttributable
             if (_task.DueDate != value)
             {
                 _task.DueDate = value;
-                Logger.Log($"DueDate changed: {value}");
                 OnPropertyChanged();
             }
         }

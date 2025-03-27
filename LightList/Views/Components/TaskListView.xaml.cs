@@ -67,7 +67,7 @@ public partial class TaskListView : ContentView
     // TODO: remove? Seems redundant
     private static void OnTasksChanged(BindableObject bindable, object oldValue, object newValue)
     {
-        Logger.Log($"\nbindable={bindable.GetType()}\noldValue={oldValue}\nnewValue={newValue}");
+        Logger.Log($"Bindable changed: {bindable.GetType()}");
     }
     
     private async void OnTaskSelected(object sender, SelectionChangedEventArgs e)

@@ -45,28 +45,40 @@ public partial class App : Application
 #if IOS
         Microsoft.Maui.Handlers.DatePickerHandler.Mapper.ModifyMapping(nameof(IDatePicker), (handler, view, action) =>
         {
-            var datePicker = new UIDatePicker
+            if (view is IDatePicker mauiDatePicker)
             {
-                Mode = UIDatePickerMode.DateAndTime,
-                PreferredDatePickerStyle = UIDatePickerStyle.Inline,
-                TranslatesAutoresizingMaskIntoConstraints = false
-            };
+                var datePicker = new UIDatePicker
+                {
+                    Mode = UIDatePickerMode.DateAndTime,
+                    PreferredDatePickerStyle = UIDatePickerStyle.Inline,
+                    TranslatesAutoresizingMaskIntoConstraints = false,
+                    Date = mauiDatePicker.Date.ToNSDate()
+                };
+                
+                Logger.Log($"Initial Date: {mauiDatePicker.Date.ToNSDate()}");
+                
+                // Handle date selection
+                datePicker.ValueChanged += (s, e) =>
+                {
+                    mauiDatePicker.Date = datePicker.Date.ToDateTime();
+                };
 
-            var containerView = new UIView();
-            
-            containerView.AddSubview(datePicker);
+                var containerView = new UIView();
 
-            // Set the frame or constraints for proper sizing
-            containerView.Frame = new CoreGraphics.CGRect(0, 0, handler.PlatformView.Frame.Width, 500);
+                containerView.AddSubview(datePicker);
 
-            // Set constraints for better layout
-            datePicker.TopAnchor.ConstraintEqualTo(containerView.TopAnchor).Active = true;
-            datePicker.LeadingAnchor.ConstraintEqualTo(containerView.LeadingAnchor).Active = true;
-            datePicker.TrailingAnchor.ConstraintEqualTo(containerView.TrailingAnchor).Active = true;
-            datePicker.BottomAnchor.ConstraintEqualTo(containerView.BottomAnchor).Active = true;
+                // Set the frame or constraints for proper sizing
+                containerView.Frame = new CoreGraphics.CGRect(0, 0, handler.PlatformView.Frame.Width, 500);
 
-            // Assign the custom input view
-            handler.PlatformView.InputView = containerView; 
+                // Set constraints for better layout
+                datePicker.TopAnchor.ConstraintEqualTo(containerView.TopAnchor).Active = true;
+                datePicker.LeadingAnchor.ConstraintEqualTo(containerView.LeadingAnchor).Active = true;
+                datePicker.TrailingAnchor.ConstraintEqualTo(containerView.TrailingAnchor).Active = true;
+                datePicker.BottomAnchor.ConstraintEqualTo(containerView.BottomAnchor).Active = true;
+
+                // Assign the custom input view
+                handler.PlatformView.InputView = containerView;
+            }
         });
 #endif
     }

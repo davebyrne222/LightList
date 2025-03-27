@@ -13,6 +13,6 @@ public static class Logger
     )
     {
         var className = Path.GetFileNameWithoutExtension(filePath);
-        Console.WriteLine($"[{className}.{methodName}] {message}");
+        Console.WriteLine($"[{(className + "." + methodName), -50}] - {message}");
     }
 }
