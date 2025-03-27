@@ -50,5 +50,9 @@
 	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en-IE</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+	</array>
 </dict>
 </plist>
