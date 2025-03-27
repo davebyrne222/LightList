@@ -1,4 +1,5 @@
 using System.Globalization;
+using CoreGraphics;
 using Foundation;
 using LightList.Data;
 using LightList.Services;
@@ -33,19 +34,41 @@ public partial class App : Application
         return new Window(_shell);
     }
 
+    /**
+     * Create a custom UIView to contain DatePicker and allow selection of time as well as date
+     *
+     * Problem: Maui uses an accessory view to display the picker and this view is too small
+     * causing the time portion of the datepicker to be obscured.
+     */
     private void CustomiseDatepicker()
     {
-        Microsoft.Maui.Handlers.DatePickerHandler.Mapper.PrependToMapping(nameof(IDatePicker), (handler, view) =>
+#if IOS
+        Microsoft.Maui.Handlers.DatePickerHandler.Mapper.ModifyMapping(nameof(IDatePicker), (handler, view, action) =>
         {
-#if IOS || MACCATALYST
-            if (handler.PlatformView.InputView is UIDatePicker picker)
+            var datePicker = new UIDatePicker
             {
-                picker.PreferredDatePickerStyle = UIDatePickerStyle.Inline;
-                picker.Mode = UIDatePickerMode.DateAndTime; // TODO: doesn't work. Why?
-                picker.Frame = new CoreGraphics.CGRect(0, 0, UIScreen.MainScreen.Bounds.Width, UIScreen.MainScreen.Bounds.Height);
-            }
-#endif
+                Mode = UIDatePickerMode.DateAndTime,
+                PreferredDatePickerStyle = UIDatePickerStyle.Inline,
+                TranslatesAutoresizingMaskIntoConstraints = false
+            };
+
+            var containerView = new UIView();
+            
+            containerView.AddSubview(datePicker);
+
+            // Set the frame or constraints for proper sizing
+            containerView.Frame = new CoreGraphics.CGRect(0, 0, handler.PlatformView.Frame.Width, 500);
+
+            // Set constraints for better layout
+            datePicker.TopAnchor.ConstraintEqualTo(containerView.TopAnchor).Active = true;
+            datePicker.LeadingAnchor.ConstraintEqualTo(containerView.LeadingAnchor).Active = true;
+            datePicker.TrailingAnchor.ConstraintEqualTo(containerView.TrailingAnchor).Active = true;
+            datePicker.BottomAnchor.ConstraintEqualTo(containerView.BottomAnchor).Active = true;
+
+            // Assign the custom input view
+            handler.PlatformView.InputView = containerView; 
         });
+#endif
     }
     
 }
