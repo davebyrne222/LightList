@@ -9,9 +9,10 @@ namespace LightList.Views.Components;
 
 public partial class TaskListView : ContentView
 {
+    #region Fields
+    
     private readonly ITaskViewModelFactory _taskViewModelFactory;
     private readonly ITasksService _tasksService;
-
     public static readonly BindableProperty TasksProperty =
         BindableProperty.Create(
             nameof(Tasks), 
@@ -20,12 +21,15 @@ public partial class TaskListView : ContentView
             defaultValue: new ObservableCollection<TaskViewModel>(),
             defaultBindingMode: BindingMode.TwoWay,
             propertyChanged: OnTasksChanged);
-
     public ObservableCollection<TaskViewModel> Tasks
     {
         get => (ObservableCollection<TaskViewModel>)GetValue(TasksProperty);
         set => SetValue(TasksProperty, value);
     }
+    
+    #endregion
+    
+    #region Ctor
     
     public TaskListView() : this(
         MauiProgram.GetService<ITaskViewModelFactory>(),
@@ -45,9 +49,9 @@ public partial class TaskListView : ContentView
             await OnTaskSaved(message.Value);
         });
         
-        messenger.Register<TaskCompletedMessage>(this, (recipient, message) =>
+        messenger.Register<TaskCompletedMessage>(this, async (recipient, message) =>
         {
-            OnTaskCompleted(message.Value);
+            await OnTaskCompleted(message.Value);
         });
 
         messenger.Register<TaskDeletedMessage>(this, (recipient, message) =>
@@ -56,25 +60,14 @@ public partial class TaskListView : ContentView
         });
     }
     
+    #endregion
+    
+    #region Event Handlers
+    
+    // TODO: remove? Seems redundant
     private static void OnTasksChanged(BindableObject bindable, object oldValue, object newValue)
     {
         Logger.Log($"\nbindable={bindable.GetType()}\noldValue={oldValue}\nnewValue={newValue}");
-    }
-    
-    private int GetInsertionIndex(DateTime dueDate)
-    {
-        TaskViewModel? insertBeforeTask = Tasks.FirstOrDefault(t => t.DueDate > dueDate && t.Complete == false);
-        
-        Logger.Log($"insert before task id (DueDate is greater): {insertBeforeTask?.Id.ToString() ?? "Not Found"}");
-        
-        if (insertBeforeTask == null)
-            insertBeforeTask = Tasks.FirstOrDefault(t => t.Complete);
-        
-        Logger.Log($"insert before task id (Completed tasks): {insertBeforeTask?.Id.ToString() ?? "Not Found"}");
-        if (insertBeforeTask == null)
-            Logger.Log($"Inserting at {Tasks.Count}");
-        
-        return insertBeforeTask == null ? Tasks.Count : Tasks.IndexOf(insertBeforeTask);
     }
     
     private async void OnTaskSelected(object sender, SelectionChangedEventArgs e)
@@ -95,31 +88,32 @@ public partial class TaskListView : ContentView
         ((CollectionView)sender).SelectedItem = null;
     }
     
-    private void ScrollToTask(TaskViewModel task)
-    {
-        if (TasksCollection != null)
-        {
-            TasksCollection.ScrollTo(task, null, ScrollToPosition.Center, true);
-        }
-    }
-    
+    /// <summary>
+    /// Event handler for when a task is added or updated.
+    ///
+    /// If new, create new TaskViewModel object and add to Tasks ObservableCollection.
+    /// If updated, reload task and update position in Tasks ObservableCollection
+    /// </summary>
+    /// <param name="taskId">Id of task that was created or updated</param>
     private async Task OnTaskSaved(int taskId)
     {
-        Logger.Log($"taskId = {taskId}");
+        Logger.Log($"taskId {taskId} saved. Updating task list");
         TaskViewModel? task = Tasks.FirstOrDefault(n => n.Id == taskId);
-        
-        if (task != null)
-        {
-            await task.Reload();
-            Tasks.Move(Tasks.IndexOf(task), GetInsertionIndex(task.DueDate));
-            Logger.Log($"Updated taskId {task.Id} in tasks list");
-        }
 
-        else
+        // Task is new
+        if (task == null)
         {
             task = _taskViewModelFactory.Create(await _tasksService.GetTask(taskId));
             Tasks.Insert(GetInsertionIndex(task.DueDate), task);
-            Logger.Log($"Added task {task.Id} in tasks list");
+            Logger.Log($"New task added (id={task.Id}) to index {Tasks.IndexOf(task)}");
+        }
+        // Task was updated
+        else
+        {
+            await task.Reload();
+            int idx = GetInsertionIndex(task.DueDate) - 1;
+            Tasks.Move(Tasks.IndexOf(task), idx < 0 ? 0 : idx);
+            Logger.Log($"Updated taskId {task.Id} in tasks list to index {Tasks.IndexOf(task)}");
         }
         
         ScrollToTask(task);
@@ -146,4 +140,57 @@ public partial class TaskListView : ContentView
         if (matchedTask != null)
             Tasks.Remove(matchedTask);
     }
+    
+    #endregion
+
+    #region Utils
+    
+    /// <summary>
+    /// Determine the index in the Tasks ObservableCollection that a new or updated task should be inserted/moved to
+    ///
+    /// Insertion preference:
+    /// 1. before incomplete task with later due date
+    /// 2. before complete tasks
+    /// 3. end of Tasks ObservableCollection
+    /// </summary>
+    /// <param name="dueDate">Due date of new/updated task</param>
+    /// <returns></returns>
+    private int GetInsertionIndex(DateTime dueDate)
+    {
+        Logger.Log($"Inserting task");
+        
+        // Insert before incomplete task with the next due date but
+        TaskViewModel? insertBeforeTask = Tasks.FirstOrDefault(t => t.DueDate > dueDate && t.Complete == false);
+        
+        // If no incomplete tasks with later due date, add before completed tasks
+        if (insertBeforeTask == null)
+        {
+            Logger.Log("No incomplete task with greater due date found. Searching for complete tasks");
+            insertBeforeTask = Tasks.FirstOrDefault(t => t.Complete);
+        }
+        
+        // if no complete tasks, insert at end
+        if (insertBeforeTask == null)
+            Logger.Log($"No complete tasks found. Inserting at end (idx={Tasks.Count})");
+        else
+            Logger.Log($"Inserting before task id {insertBeforeTask.Id} with index {Tasks.IndexOf(insertBeforeTask)}");
+        
+        return insertBeforeTask == null ? Tasks.Count : Tasks.IndexOf(insertBeforeTask);
+    }
+    
+    /// <summary>
+    /// Ensures new or updated task is visible in the view
+    /// </summary>
+    /// <param name="task">Task to be scrolled into view</param>
+    private void ScrollToTask(TaskViewModel task)
+    {
+        Logger.Log($"Scrolling taskId {task.Id} into view");
+        
+        if (TasksCollection != null)
+        {
+            TasksCollection.ScrollTo(task, null, ScrollToPosition.Center, true);
+        }
+    }
+    
+    #endregion
 }
