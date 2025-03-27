@@ -8,21 +8,30 @@
              Title="Task"
              Shell.NavBarIsVisible="True">
 
-    <VerticalStackLayout Spacing="10" Margin="20" VerticalOptions="Center">
-        <Editor x:Name="DescriptionEditor"
-                Placeholder="Enter your note"
-                Text="{Binding Text}"
-                HeightRequest="100" />
-
-        <DatePicker x:Name="DueDatePicker"
-                    Date="{Binding DueDate}" />
-
-        <Entry x:Name="LabelEditor"
-               Placeholder="Enter your label"
-               Text="{Binding Label}"
-               HeightRequest="50" />
-
-        <Grid ColumnDefinitions="*,*" ColumnSpacing="4">
+    <VerticalStackLayout Spacing="30" Margin="20" VerticalOptions="Center">
+        <VerticalStackLayout HorizontalOptions="Fill" Spacing="5">
+            <Label Text="Summary" FontSize="16" TextColor="{StaticResource OffBlack}"/>
+            <Editor Placeholder="Enter your task"
+                    Text="{Binding Text}"
+                    HeightRequest="100" />
+        </VerticalStackLayout>
+        
+        <VerticalStackLayout HorizontalOptions="Fill" Spacing="5">
+            <Label Text="Due Date" FontSize="16" TextColor="{StaticResource OffBlack}"/>
+            <Grid ColumnDefinitions="2*,1*" ColumnSpacing="5">
+                <DatePicker Date="{Binding DueDate}" />
+                <TimePicker Grid.Column="1"/>
+            </Grid>
+        </VerticalStackLayout>
+        
+        <VerticalStackLayout HorizontalOptions="Fill" Spacing="5">
+            <Label Text="Tag" FontSize="16" TextColor="{StaticResource OffBlack}"/>
+            <Entry Placeholder="Enter your label"
+                   Text="{Binding Label}"
+                   HeightRequest="50" />
+        </VerticalStackLayout>
+        
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="5">
             <Button Text="Save"
                     Command="{Binding SaveCommand}" />
 
