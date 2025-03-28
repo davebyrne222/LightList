@@ -119,6 +119,7 @@
         <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray500}}" />
         <Setter Property="MinimumHeightRequest" Value="44"/>
         <Setter Property="MinimumWidthRequest" Value="44"/>
+        <Setter Property="ClearButtonVisibility" Value="WhileEditing" />
         <Setter Property="VisualStateManager.VisualStateGroups">
             <VisualStateGroupList>
                 <VisualStateGroup x:Name="CommonStates">
@@ -458,16 +459,12 @@
     </Style>
     
     <Style x:Key="TaskItem" TargetType="Border">
-        <Setter Property="StrokeShape" Value="RoundRectangle 20" />
         <Setter Property="BackgroundColor" Value="White" />
         <Setter Property="Padding" Value="20, 10" />
-        <Setter Property="Margin" Value="0, 0, 0, 10" />
-        <Setter Property="Shadow">
-            <Shadow Brush="{StaticResource PrimaryBrush}"
-                    Offset="0, 5"
-                    Radius="5"
-                    Opacity="0.2"/>
-        </Setter>
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Stroke" Value="{StaticResource Gray100}"></Setter>
+        <Setter Property="StrokeShape" Value="RoundRectangle 20" />
+        <Setter Property="StrokeThickness" Value="1" />
     </Style>
     
     <Style x:Key="TaskItemLabelLbl" TargetType="Label">
@@ -536,6 +533,14 @@
     <Style x:Key="TaskLabelDone" TargetType="Label">
         <Setter Property="TextDecorations" Value="Strikethrough"/>
         <Setter Property="TextColor" Value="{StaticResource Gray400}"/>
+    </Style>
+    
+    FontSize="16" TextColor="{StaticResource OffBlack}
+    
+    <Style TargetType="Label" Class="MenuItemLabel">
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"/>
     </Style>
     
 </ResourceDictionary>

@@ -32,7 +32,7 @@
                         <SwipeItems>
                             <SwipeItem Text="Delete"
                                        IconImageSource="{FontImageSource Glyph='&#xf4c4;', FontFamily='Ionicons'}"
-                                       BackgroundColor="LightPink"
+                                       BackgroundColor="{StaticResource Red}"
                                        Command="{Binding DeleteCommand}" />
                         </SwipeItems>
                     </SwipeView.LeftItems>
@@ -45,9 +45,9 @@
                         </SwipeItems>
                     </SwipeView.RightItems>
                     <Border Style="{StaticResource TaskItem}">
-                        <StackLayout Spacing="10">
+                        <StackLayout Spacing="20">
                             <FlexLayout Direction="Column" Grow="1"
-                                        Margin="0, 0, 0, 0">
+                                        Margin="0">
                                 <Label Text="{Binding Text}" FontSize="22"
                                        Style="{Binding Complete, Converter={StaticResource TaskDueTextConverter}}"
                                        LineBreakMode="TailTruncation"

@@ -10,14 +10,14 @@
 
     <VerticalStackLayout Spacing="30" Margin="20" VerticalOptions="Center">
         <VerticalStackLayout HorizontalOptions="Fill" Spacing="5">
-            <Label Text="Summary" FontSize="16" TextColor="{StaticResource OffBlack}"/>
+            <Label Text="Summary" StyleClass="MenuItemLabel"/>
             <Editor Placeholder="Enter your task"
                     Text="{Binding Text}"
                     HeightRequest="100" />
         </VerticalStackLayout>
         
         <VerticalStackLayout HorizontalOptions="Fill" Spacing="5">
-            <Label Text="Due Date" FontSize="16" TextColor="{StaticResource OffBlack}"/>
+            <Label Text="Due Date" StyleClass="MenuItemLabel"/>
             <Grid ColumnDefinitions="2*,1*" ColumnSpacing="5">
                 <DatePicker Date="{Binding DueDate}" />
                 <TimePicker Grid.Column="1"/>
@@ -25,7 +25,7 @@
         </VerticalStackLayout>
         
         <VerticalStackLayout HorizontalOptions="Fill" Spacing="5">
-            <Label Text="Tag" FontSize="16" TextColor="{StaticResource OffBlack}"/>
+            <Label Text="Tag" StyleClass="MenuItemLabel"/>
             <Entry Placeholder="Enter your label"
                    Text="{Binding Label}"
                    HeightRequest="50" />
@@ -38,7 +38,6 @@
             <Button Grid.Column="1"
                     Text="Delete"
                     Command="{Binding DeleteCommand}" />
-
         </Grid>
     </VerticalStackLayout>
 </ContentPage>
