@@ -63,7 +63,7 @@ public class NavBarViewModel: INotifyPropertyChanged
         await Shell.Current.GoToAsync($"//{route}", false);
     }
     
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
     private void OnPropertyChanged(string propertyName)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

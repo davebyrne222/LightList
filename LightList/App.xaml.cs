@@ -19,6 +19,7 @@ public partial class App : Application
         _shell = shell;
 #if IOS
         CustomiseDatepicker();
+        CustomiseEditor();
 #endif
         Logger.Log("App initialized");
     }
@@ -49,6 +50,19 @@ public partial class App : Application
             if (handler?.PlatformView?.InputView is UIDatePicker picker)
             {
                 picker.PreferredDatePickerStyle = UIDatePickerStyle.Inline;
+            }
+        });
+    }
+    
+    private void CustomiseEditor()
+    {
+        Microsoft.Maui.Handlers.EditorHandler.Mapper.AppendToMapping("Border", (handler, view) =>
+        {
+            if (handler.PlatformView is UITextView uiTextView)
+            {
+                uiTextView.Layer.BorderColor = CGColor.CreateSrgb(204f/255f, 204f/255f, 204f/255f, 1);
+                uiTextView.Layer.BorderWidth = 0.5f;
+                uiTextView.Layer.CornerRadius = 5;
             }
         });
     }

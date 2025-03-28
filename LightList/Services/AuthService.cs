@@ -44,7 +44,7 @@ public class AuthService: IAuthService
             if (authResult.Properties["code"] != null)
                 return await ExchangeCodeForTokensAsync(authResult.Properties["code"]);
         }
-        catch (TaskCanceledException ex)
+        catch (TaskCanceledException)
         {
             // User has cancelled login process; do nothing
         }

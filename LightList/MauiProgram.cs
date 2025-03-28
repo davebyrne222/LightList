@@ -13,9 +13,9 @@ namespace LightList;
 
 public static class MauiProgram
 {
-    private static IServiceProvider? _serviceProvider;
+    private static IServiceProvider _serviceProvider = null!;
 
-    public static TService GetService<TService>()
+    public static TService? GetService<TService>()
         => _serviceProvider.GetService<TService>();
     
     public static MauiApp CreateMauiApp()
@@ -121,8 +121,8 @@ public static class MauiProgram
         
         try
         {
-            var dbService = GetService<TasksDatabase>();
-            await dbService.InitialiseAsync();
+            TasksDatabase? dbService = GetService<TasksDatabase>();
+            await dbService?.InitialiseAsync();
         }
         catch (Exception ex)
         {
