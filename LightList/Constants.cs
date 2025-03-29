@@ -2,17 +2,14 @@ namespace LightList;
 
 public class Constants
 {
-    private const string databaseFilename = "LightList.db3";
+    private const string DatabaseFilename = "LightList.db3";
     public static string DatabasePath =>
-        Path.Combine(FileSystem.AppDataDirectory, databaseFilename);
+        Path.Combine(FileSystem.AppDataDirectory, DatabaseFilename);
     
     public const SQLite.SQLiteOpenFlags DbFlags =
-        // open the database in read/write mode
-        SQLite.SQLiteOpenFlags.ReadWrite |
-        // create the database if it doesn't exist
-        SQLite.SQLiteOpenFlags.Create |
-        // enable multi-threaded database access
-        SQLite.SQLiteOpenFlags.SharedCache;
+        SQLite.SQLiteOpenFlags.ReadWrite |  // open the database in read/write mode
+        SQLite.SQLiteOpenFlags.Create |     // create the database if it doesn't exist
+        SQLite.SQLiteOpenFlags.SharedCache; // enable multi-threaded database access
     
     public static readonly Amazon.RegionEndpoint AwsRegion = Amazon.RegionEndpoint.EUWest1;
     public const string CognitoPoolId = "eu-west-1oawcmeine";
