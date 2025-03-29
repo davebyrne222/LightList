@@ -23,6 +23,7 @@ public class NavBarViewModel: INotifyPropertyChanged
 
     public NavBarViewModel()
     {
+        // TODO: replace with AsyncRelayCommand (community toolkit)
         OpenMenuCommand = new Command(OpenMenu);
         AddTaskCommand = new Command(AddTask);
         NavigateCommand = new Command<string>(NavigateToPage);

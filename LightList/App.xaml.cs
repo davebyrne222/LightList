@@ -58,12 +58,31 @@ public partial class App : Application
     {
         Microsoft.Maui.Handlers.EditorHandler.Mapper.AppendToMapping("Border", (handler, view) =>
         {
-            if (handler.PlatformView is UITextView uiTextView)
+            if (handler.PlatformView is not UITextView uiTextView)
+                return;
+
+            // Default fallback color (Gray100: #CCCCCC)
+            (float red, float green, float blue, float alpha) borderColor = (204f / 255f, 204f / 255f, 204f / 255f, 1f);
+
+            // Attempt to get the color from resources
+            if (Application.Current?.Resources.TryGetValue("BorderBrush", out var colorValue) == true 
+                && colorValue is SolidColorBrush borderBrush)
             {
-                uiTextView.Layer.BorderColor = CGColor.CreateSrgb(204f/255f, 204f/255f, 204f/255f, 1);
-                uiTextView.Layer.BorderWidth = 0.5f;
-                uiTextView.Layer.CornerRadius = 5;
+                borderColor = (
+                    borderBrush.Color.Red,
+                    borderBrush.Color.Green,
+                    borderBrush.Color.Blue,
+                    borderBrush.Color.Alpha);
             }
+
+            // Apply border properties
+            uiTextView.Layer.BorderColor = CGColor.CreateSrgb(
+                borderColor.red, 
+                borderColor.green, 
+                borderColor.blue, 
+                borderColor.alpha);
+            uiTextView.Layer.BorderWidth = 0.5f;
+            uiTextView.Layer.CornerRadius = 5;
         });
     }
 }
