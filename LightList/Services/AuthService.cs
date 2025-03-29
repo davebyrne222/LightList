@@ -88,9 +88,7 @@ public class AuthService: IAuthService
 
         return true;
     }
-
-    #endregion
-
+    
     public async Task<bool> IsUserLoggedIn()
     {
         Logger.Log("Checking if user is logged in");
@@ -118,6 +116,8 @@ public class AuthService: IAuthService
         return await RefreshAccessTokenAsync(authTokens.RefreshToken);
     }
 
+    #endregion
+    
     #region Utils
 
     private async Task<bool> ExchangeCodeForTokensAsync(string authCode)
