@@ -28,20 +28,20 @@ public partial class AppShell : Shell
     }
     public bool IsLoggedOut => !IsLoggedIn;
     
-    private readonly ISyncService _syncService;
+    private readonly ITasksService _tasksService;
     
     #endregion
     
     #region Init
 
-    public AppShell(IAuthService authService, ISyncService syncService)
+    public AppShell(IAuthService authService, ITasksService tasksService)
     {
         Logger.Log("Initializing");
 
         InitializeComponent();
         
         _authService = authService;
-        _syncService = syncService;
+        _tasksService = tasksService;
         BindingContext = this;
 
         RegisterRoutes();
@@ -96,7 +96,7 @@ public partial class AppShell : Shell
         {
             ShowToast("Signed In Successfully. Synchronizing.");
             SyncTasks();
-            // await CloseFlyout();
+            // await CloseFlyout(); 
         }
         else
         {
@@ -124,7 +124,7 @@ public partial class AppShell : Shell
         Logger.Log("Syncing tasks");
         try
         {
-            await _syncService.SyncRemoteDataAsync();
+            await _tasksService.SyncNowAsync();
             Logger.Log("Finished syncing");
         }
         catch (Exception ex)

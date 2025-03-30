@@ -8,19 +8,27 @@ namespace LightList.Services;
 
 public class SyncService : ISyncService
 {
+    private readonly IAuthService _authService;
     private readonly ISecureStorageRepository _secureStorage;
     private readonly IRemoteRepository _remoteRepository;
     
-    public SyncService(ISecureStorageRepository secureStorage, IRemoteRepository repository)
+    public SyncService(IAuthService authService, ISecureStorageRepository secureStorage, IRemoteRepository repository)
     {
+        _authService = authService;
         _secureStorage = secureStorage;
         _remoteRepository = repository;
     }
     
     #region Public Methods
 
-    public async Task SyncRemoteDataAsync()
+    public async Task PullChangesAsync()
     {
+        if (!await _authService.IsUserLoggedIn()) 
+        {
+            Console.WriteLine("Sync skipped: User is not signed in.");
+            return;
+        }
+        
         Logger.Log("Syncing Remote Data");
         
         try

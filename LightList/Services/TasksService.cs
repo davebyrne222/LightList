@@ -1,16 +1,19 @@
 using LightList.Models;
 using LightList.Repositories;
 using LightList.Utils;
+using Task = System.Threading.Tasks.Task;
 
 namespace LightList.Services;
 
 public class TasksService: ITasksService
 {
     private readonly ILocalRepository _localRepository;
+    private readonly ISyncService _syncService;
 
-    public TasksService(ILocalRepository localRepository)
+    public TasksService(ILocalRepository localRepository, ISyncService syncService)
     {
         _localRepository = localRepository;
+        _syncService = syncService;
     }
 
     public async Task<Models.Task> GetTask(int taskId)
@@ -35,5 +38,11 @@ public class TasksService: ITasksService
     {
         Logger.Log($"Deleting task (id={task.Id})");
         _localRepository.Delete(task);
+    }
+    
+    public async Task SyncNowAsync()
+    {
+        // await _syncService.PushChangesAsync();
+        await _syncService.PullChangesAsync();
     }
 }
