@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+﻿using System.Text.Json;
+using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using LightList.Repositories;
@@ -59,10 +60,12 @@ public static class MauiProgram
         // Register Repositories
         builder.Services.AddSingleton<ILocalRepository, LocalRepository>();
         builder.Services.AddSingleton<ISecureStorageRepository, SecureStorageRepository>();
+        builder.Services.AddSingleton<IRemoteRepository, RemoteRepository>();
 
         // Register Services
         builder.Services.AddSingleton<ITasksService, TasksService>();
         builder.Services.AddSingleton<IAuthService, AuthService>();
+        builder.Services.AddSingleton<ISyncService, SyncService>();
         
         // Register Messenger
         builder.Services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
@@ -70,6 +73,9 @@ public static class MauiProgram
         // Register Models
         builder.Services.AddTransient<Models.Task>();
         builder.Services.AddTransient<Models.AuthTokens>();
+        builder.Services.AddTransient<Models.AppSyncUserTasks>();
+        builder.Services.AddTransient<Models.AppSyncUserTask>();
+        builder.Services.AddTransient<Models.AppSyncGetTasksResponse>();
         
         // Register ViewModels
         builder.Services.AddSingleton<NavBarViewModel>();
@@ -107,6 +113,7 @@ public static class MauiProgram
         try
         {
             await InitializeDatabaseAsync();
+            
         }
         catch (Exception ex)
         {

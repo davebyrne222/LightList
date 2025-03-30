@@ -21,4 +21,5 @@ public class Constants
                                                    $"&response_type=code" +
                                                    $"&redirect_uri={AuthRedirectUrl}";
     public static readonly string CognitoTokenExchangeUrl = $"{CognitoRootUrl}/oauth2/token";
+    public static readonly string AppSyncEndpoint = $"https://bphzh2xzsrhklp5hobkkvlgq3i.appsync-api.eu-west-1.amazonaws.com/graphql";
 }

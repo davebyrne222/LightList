@@ -80,7 +80,6 @@ public class AuthService: IAuthService
         catch (Exception ex)
         {
             Logger.Log($"Error signing out from cognito: {ex.GetType().FullName} - {ex.Message}");
-            return false;   
         }
         
         // Delete stored tokens
