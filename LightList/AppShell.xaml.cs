@@ -122,8 +122,16 @@ public partial class AppShell : Shell
     private async void SyncTasks()
     {
         Logger.Log("Syncing tasks");
-        await _syncService.SyncRemoteDataAsync();
-        Logger.Log("Finished syncing");
+        try
+        {
+            await _syncService.SyncRemoteDataAsync();
+            Logger.Log("Finished syncing");
+        }
+        catch (Exception ex)
+        {
+            Logger.Log($"Syncing tasks failed: {ex}");
+            ShowToast("There was a problem synchronising tasks. Please try again.", ToastDuration.Long);
+        }
     }
     
     #endregion

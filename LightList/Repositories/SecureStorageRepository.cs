@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json;
 using LightList.Models;
 using LightList.Utils;
@@ -27,7 +28,18 @@ public class SecureStorageRepository: ISecureStorageRepository
         
         Logger.Log($"Auth tokens found: {!string.IsNullOrEmpty(tokensString)}");
         
-        return string.IsNullOrEmpty(tokensString) ? null : JsonSerializer.Deserialize<AuthTokens>(tokensString);
+        if (string.IsNullOrEmpty(tokensString))
+            return null;
+        
+        AuthTokens? tokens = JsonSerializer.Deserialize<AuthTokens>(tokensString);
+        
+        if (tokens == null)
+            return null;
+        
+        Logger.Log("Extracting user id");
+        tokens.UserId = GetCognitoUserId(tokens.IdToken);
+        
+        return tokens;
     }
     
     public void DeleteAuthTokens()
@@ -39,7 +51,7 @@ public class SecureStorageRepository: ISecureStorageRepository
     #endregion
     
     #region Utils
-    private bool IsValidTokenString(string json)
+    private static bool IsValidTokenString(string json)
     {
         try
         {
@@ -50,6 +62,14 @@ public class SecureStorageRepository: ISecureStorageRepository
         {
             return false;
         }
+    }
+    
+    private static string GetCognitoUserId(string jwtToken)
+    {
+        Logger.Log("Extracting cognito user id");
+        var handler = new JwtSecurityTokenHandler();
+        var token = handler.ReadJwtToken(jwtToken);
+        return token.Claims.First(claim => claim.Type == "sub").Value;
     }
     #endregion
 }

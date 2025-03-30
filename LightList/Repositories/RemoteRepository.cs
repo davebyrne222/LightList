@@ -10,28 +10,39 @@ public class RemoteRepository : IRemoteRepository
 {
     private static readonly HttpClient Client = new();
 
-    public async Task<List<Models.Task?>> ExecuteQuery(string idToken, string query)
+    public async Task<List<Models.Task?>> GetUserTasks(AuthTokens accessToken)
     {
-        Logger.Log($"Executing query: {query}");
+        string query = $$"""query { getUserTasks(UserId: "{{accessToken.UserId}}") { ItemId, Data, UpdatedAt } }""";
+        string result = await ExecuteQuery(accessToken.AccessToken, query);
+        return DeserializeUserTasks(result);
+    }
+
+    private async Task<string> ExecuteQuery(string accessToken, string query)
+    {
+        Logger.Log($"Executing query");
         
         var request = new HttpRequestMessage(HttpMethod.Post, Constants.AppSyncEndpoint)
         {
-            Content = new StringContent(JsonSerializer.Serialize(new { query }), Encoding.UTF8, "application/json")
+            Content = new StringContent(JsonSerializer.Serialize(new { query }), Encoding.UTF8, "application/json"),
         };
-
-        request.Headers.Add("Authorization", idToken);
+        request.Headers.Add("Authorization", accessToken);
         
         var response = await Client.SendAsync(request);
-        
+
         if (!response.IsSuccessStatusCode)
-            throw new HttpRequestException($"Query failed: {response.StatusCode} - {response.ReasonPhrase}");
+        {
+            string msg = $"Query failed: {response.StatusCode} - {response.ReasonPhrase}";
+            Logger.Log(msg);
+            throw new HttpRequestException(msg);
+        }
         
         Logger.Log($"Query successful");
         
-        return DeserializeResponse(await response.Content.ReadAsStringAsync());
+        return await response.Content.ReadAsStringAsync();
     }
     
-    private static List<Models.Task?> DeserializeResponse(string response)
+    #region Utils
+    private static List<Models.Task?> DeserializeUserTasks(string response)
     {
         Logger.Log($"Deserializing response");
         try
@@ -62,4 +73,5 @@ public class RemoteRepository : IRemoteRepository
             task.UpdatedOnDate = response.UpdatedAt;
         return task;
     }
+    #endregion
 }

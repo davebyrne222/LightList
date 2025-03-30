@@ -12,4 +12,6 @@ public class AuthTokens
 
     [JsonPropertyName("refresh_token")]
     public required string RefreshToken { get; set; }
+    
+    public string UserId { get; set; } = string.Empty;
 }

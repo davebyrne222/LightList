@@ -25,35 +25,24 @@ public class SyncService : ISyncService
         
         try
         {
-            string query =
-                @"query { getUserTasks(UserId: ""a215d474-2001-7094-3233-f4c7dc35771f"") { ItemId, Data, UpdatedAt } }";
+            AuthTokens? accessToken = await _secureStorage.GetAuthTokensAsync();
             
-            Logger.Log($"Remote query: {query}");
-
-            string accessToken = await GetUserAccessToken();
-            List<Models.Task?> tasks = await _remoteRepository.ExecuteQuery(accessToken, query);
+            if (accessToken == null)
+                throw new UnauthorizedAccessException("Failed to get access token");
+            
+            List<Models.Task?> tasks = await _remoteRepository.GetUserTasks(accessToken);
             
             Logger.Log($"Retrieved: {tasks.Count} tasks");
             //TODO: update local database
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error synchronising: {ex.GetType().FullName} - {ex.Message}");
+            Logger.Log($"Error synchronising: {ex.GetType().FullName}: {ex.Message}");
             throw;
         }
         
         Logger.Log("Database synchronized");
     }
     
-    #endregion
-    
-    #region Utils
-
-    private async Task<string> GetUserAccessToken()
-    {
-        var result = await _secureStorage.GetAuthTokensAsync();
-        return result.IdToken;
-    }
-
     #endregion
 }
