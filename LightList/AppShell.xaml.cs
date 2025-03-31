@@ -95,7 +95,7 @@ public partial class AppShell : Shell
         if (IsLoggedIn)
         {
             ShowToast("Signed In Successfully. Synchronizing.");
-            SyncTasks();
+            await SyncTasks();
             // await CloseFlyout(); 
         }
         else
@@ -118,8 +118,15 @@ public partial class AppShell : Shell
             ShowToast("There was a problem signing out. Please try again.", ToastDuration.Long);
         }
     }
+    
+    private async void OnSyncClicked(object sender, EventArgs e)
+    {
+        ShowToast("Syncing...");
+        await SyncTasks();
+        ShowToast("Syncing complete");
+    }
 
-    private async void SyncTasks()
+    private async Task SyncTasks()
     {
         Logger.Log("Syncing tasks");
         try

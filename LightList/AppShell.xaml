@@ -43,6 +43,13 @@
                         Clicked="OnLogoutClicked"
                         BackgroundColor="{DynamicResource Primary}" TextColor="White"
                         IsVisible="{Binding IsLoggedIn}"/>
+                
+                <!-- TODO: temp for testing. remove-->
+                <Button Text="Sync"
+                        Clicked="OnSyncClicked"
+                        BackgroundColor="{DynamicResource Primary}" TextColor="White"
+                        IsVisible="{Binding IsLoggedIn}"/>
+                
             </VerticalStackLayout>
 
             <Label Grid.Row="2"

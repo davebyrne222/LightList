@@ -12,66 +12,138 @@ public class RemoteRepository : IRemoteRepository
 
     public async Task<List<Models.Task?>> GetUserTasks(AuthTokens accessToken)
     {
-        string query = $$"""query { getUserTasks(UserId: "{{accessToken.UserId}}") { ItemId, Data, UpdatedAt } }""";
+        var query = 
+            $$"""
+              query { getUserTasks(
+                UserId: "{{accessToken.UserId}}"
+              ) {
+                ItemId,
+                Data,
+                UpdatedAt
+              } }
+              """;
+        
         string result = await ExecuteQuery(accessToken.AccessToken, query);
         return DeserializeUserTasks(result);
     }
 
+    public async Task PushUserTasks(AuthTokens accessToken, List<Models.Task> tasks)
+    {
+        foreach (var task in tasks)
+        {
+            var escapedData = JsonSerializer.Serialize(task)
+                .Replace("\\", "\\\\")
+                .Replace("\"", "\\\"");
+                
+            var query = 
+                $$"""
+                  mutation { saveUserTask(
+                    UserId: "{{accessToken.UserId}}",
+                    ItemId: "{{task.Id}}",
+                    Data: "{{escapedData}}",
+                    UpdatedAt: "{{task.UpdatedOnDate:yyyy-MM-ddThh:mm:ss.sssZ}}"
+                  ) {
+                    UserId,
+                    ItemId,
+                    Data,
+                    UpdatedAt
+                  } }
+                  """; 
+            await ExecuteQuery(accessToken.AccessToken, query); 
+            Logger.Log($"Change pushed successfully");
+        } 
+    }
+    
+    #region Utils
+
     private async Task<string> ExecuteQuery(string accessToken, string query)
     {
-        Logger.Log($"Executing query");
-        
+        Logger.Log("Executing query");
+
         var request = new HttpRequestMessage(HttpMethod.Post, Constants.AppSyncEndpoint)
         {
-            Content = new StringContent(JsonSerializer.Serialize(new { query }), Encoding.UTF8, "application/json"),
+            Content = new StringContent(JsonSerializer.Serialize(new { query }), Encoding.UTF8, "application/json")
         };
+        
         request.Headers.Add("Authorization", accessToken);
         
         var response = await Client.SendAsync(request);
 
         if (!response.IsSuccessStatusCode)
         {
-            string msg = $"Query failed: {response.StatusCode} - {response.ReasonPhrase}";
+            var msg = $"Query failed: {response.StatusCode} - {response.ReasonPhrase}";
             Logger.Log(msg);
             throw new HttpRequestException(msg);
         }
         
-        Logger.Log($"Query successful");
-        
-        return await response.Content.ReadAsStringAsync();
+        Logger.Log($"Query succeeded");
+
+        return CheckAppSyncResponse(await response.Content.ReadAsStringAsync());
     }
     
-    #region Utils
-    private static List<Models.Task?> DeserializeUserTasks(string response)
+    private static string CheckAppSyncResponse(string contentString)
     {
-        Logger.Log($"Deserializing response");
+        Logger.Log("Checking app sync response for errors");
+
+        AppSyncGenericResponse? contentJson;
         try
         {
-            var result = JsonSerializer.Deserialize<AppSyncGetTasksResponse>(response);
-            
-            if (result is null)
+            contentJson = JsonSerializer.Deserialize<AppSyncGenericResponse>(contentString);
+        }
+        catch (JsonException ex)
+        {
+            Logger.Log($"De-serialisation failed: {ex.Message}");
+            throw;
+        }
+
+        if (contentJson != null && contentJson.Errors != null)
+        {
+            string errors = String.Empty;
+            foreach (var error in contentJson.Errors)
+            {
+                Logger.Log($"AppSync error: {error.Message}");
+                errors += error.Message + Environment.NewLine;
+            }
+            throw new ArgumentException(errors);
+        }
+        return contentString;
+    }
+
+    private static List<Models.Task?> DeserializeUserTasks(string response)
+    {
+        Logger.Log("Deserializing response");
+        
+        if (string.IsNullOrEmpty(response))
+            throw new ArgumentNullException(nameof(response));
+        
+        try
+        {
+            var result = JsonSerializer.Deserialize<AppSyncGetUserTasks>(response);
+
+            if (result == null)
                 throw new NullReferenceException("Deserializing failed: Response is null");
-            
-            Logger.Log($"Successfully deserialize response. Converting to model");
+
+            Logger.Log($"Successfully deserialized response: {result.Data.UserTasks.Count} user tasks retrieved");
 
             return result.Data.UserTasks.Select(
                 ConvertToTaskModel
-                ).ToList();
-
+            ).ToList();
         }
         catch (Exception ex)
         {
             Logger.Log($"Deserialization failed: {ex.Message}");
-            throw; 
+            throw;
         }
     }
 
     private static Models.Task? ConvertToTaskModel(AppSyncUserTask response)
     {
-        Models.Task? task = JsonSerializer.Deserialize<Models.Task>(response.Data);
+        Logger.Log("Converting task response to model");
+        var task = JsonSerializer.Deserialize<Models.Task>(response.Data);
         if (task is not null)
             task.UpdatedOnDate = response.UpdatedAt;
         return task;
     }
+
     #endregion
 }

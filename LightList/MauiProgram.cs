@@ -75,7 +75,9 @@ public static class MauiProgram
         builder.Services.AddTransient<Models.AuthTokens>();
         builder.Services.AddTransient<Models.AppSyncUserTasks>();
         builder.Services.AddTransient<Models.AppSyncUserTask>();
-        builder.Services.AddTransient<Models.AppSyncGetTasksResponse>();
+        builder.Services.AddTransient<Models.AppSyncGenericResponse>();
+        builder.Services.AddTransient<Models.AppSyncErrorObject>();
+        
         
         // Register ViewModels
         builder.Services.AddSingleton<NavBarViewModel>();
