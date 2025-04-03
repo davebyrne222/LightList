@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json;
 using LightList.Models;
 using LightList.Repositories;
@@ -25,40 +26,25 @@ public class SyncService : ISyncService
 
     public async Task PushChangesAsync()
     {
-        if (!await _authService.IsUserLoggedIn()) 
-        {
-            Console.WriteLine("Sync skipped: User is not signed in.");
-            return;
-        }
-        
-        Logger.Log("Pushing Data");
-        
-        try
-        {
-            AuthTokens? accessToken = await _secureStorage.GetAuthTokensAsync();
-            
-            if (accessToken == null)
-                throw new UnauthorizedAccessException("Failed to get access token");
-
-            // TODO: get only non-synched tasks
-            List<Models.Task> tasks = await _localRepository.GetAll();
-            
-            await _remoteRepository.PushUserTasks(accessToken, tasks);
-            
-            Logger.Log($"Pushed {tasks.Count} tasks");
-        }
-        catch (Exception ex)
-        {
-            Logger.Log($"Error synchronising: {ex.GetType().FullName}: {ex.Message}");
-            throw;
-        }
-        
-        Logger.Log("Remote database synchronized");
+        Logger.Log("Pushing changes");
+        await HandleQuery(PushUpdatedTasksAsync);
+        Logger.Log("Changes pushed");
     }
 
     public async Task PullChangesAsync()
     {
-        Logger.Log("Pulling Remote Data");
+        Logger.Log("Pulling changes");
+        await HandleQuery(GetUpdatedTasksAsync);
+        Logger.Log("Changes pulled");
+    }
+    
+    #endregion
+
+    #region Utils
+
+    private async Task HandleQuery(Func<AuthTokens, Task> action)
+    {
+        Logger.Log($"Executing {nameof(action.GetType)}");
 
         if (!await _authService.IsUserLoggedIn()) 
         {
@@ -68,20 +54,12 @@ public class SyncService : ISyncService
         
         try
         {
-            AuthTokens? accessToken = await _secureStorage.GetAuthTokensAsync();
+            AuthTokens? accessTokens = await _secureStorage.GetAuthTokensAsync();
             
-            if (accessToken == null)
+            if (accessTokens == null)
                 throw new UnauthorizedAccessException("Failed to get access token");
             
-            // TODO: get only non-synched tasks
-            List<Models.Task?> tasks = await _remoteRepository.GetUserTasks(accessToken);
-            
-            Logger.Log($"Retrieved: {tasks.Count} tasks");
-
-            foreach (var task in tasks)
-            {
-                if (task != null) await _localRepository.Save(task);
-            }
+            await action(accessTokens);
             
         }
         catch (Exception ex)
@@ -89,8 +67,29 @@ public class SyncService : ISyncService
             Logger.Log($"Error synchronising: {ex.GetType().FullName}: {ex.Message}");
             throw;
         }
-        
-        Logger.Log("Database synchronized");
+    }
+
+    private async Task GetUpdatedTasksAsync(AuthTokens accessToken)
+    {
+        // TODO: get only non-synched tasks
+        List<Models.Task?> tasks = await _remoteRepository.GetUserTasks(accessToken);
+            
+        Logger.Log($"Retrieved: {tasks.Count} tasks");
+
+        foreach (var task in tasks)
+        {
+            if (task != null) await _localRepository.Save(task);
+        }
+    }
+
+    private async Task PushUpdatedTasksAsync(AuthTokens accessToken)
+    {
+        // TODO: get only non-synched tasks
+        List<Models.Task> tasks = await _localRepository.GetAll();
+            
+        await _remoteRepository.PushUserTasks(accessToken, tasks);
+            
+        Logger.Log($"Pushed {tasks.Count} tasks");
     }
     
     #endregion
