@@ -4,6 +4,8 @@ using LightList.Utils;
 using LightList.Views;
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
+using CommunityToolkit.Mvvm.Messaging;
+using LightList.Messages;
 
 namespace LightList;
 
@@ -29,12 +31,13 @@ public partial class AppShell : Shell
     public bool IsLoggedOut => !IsLoggedIn;
     
     private readonly ITasksService _tasksService;
+    private readonly IMessenger _messenger;
     
     #endregion
     
     #region Init
 
-    public AppShell(IAuthService authService, ITasksService tasksService)
+    public AppShell(IAuthService authService, ITasksService tasksService, IMessenger messenger)
     {
         Logger.Log("Initializing");
 
@@ -42,6 +45,7 @@ public partial class AppShell : Shell
         
         _authService = authService;
         _tasksService = tasksService;
+        _messenger = messenger;
         BindingContext = this;
 
         RegisterRoutes();
@@ -133,6 +137,7 @@ public partial class AppShell : Shell
         {
             await _tasksService.SyncNowAsync();
             Logger.Log("Finished syncing");
+            _messenger.Send(new TasksSyncedMessage(true));
         }
         catch (Exception ex)
         {

@@ -10,12 +10,17 @@ public class RemoteRepository : IRemoteRepository
 {
     private static readonly HttpClient Client = new();
 
-    public async Task<List<Models.Task?>> GetUserTasks(AuthTokens accessToken)
+    public async Task<List<Models.Task?>> GetUserTasks(AuthTokens accessToken, DateTime? lastSyncDate)
     {
+        Logger.Log($"Retrieving remote tasks (lastSyncDate: {(lastSyncDate.HasValue ? lastSyncDate : "NA")})");
+        
+        string syncDate = lastSyncDate.HasValue ? AwsDatetimeConverter(lastSyncDate.Value) : "";
+        
         var query = 
             $$"""
               query { getUserTasks(
                 UserId: "{{accessToken.UserId}}"
+                {{(lastSyncDate.HasValue ? $", UpdatedOnOrAfter: \"{syncDate}\"" : "")}}
               ) {
                 ItemId,
                 Data,
@@ -27,38 +32,39 @@ public class RemoteRepository : IRemoteRepository
         return DeserializeUserTasks(result);
     }
 
-    public async Task PushUserTasks(AuthTokens accessToken, List<Models.Task> tasks)
+    public async Task PushUserTask(AuthTokens accessToken, Models.Task task)
     {
-        foreach (var task in tasks)
-        {
-            var escapedData = JsonSerializer.Serialize(task)
-                .Replace("\\", "\\\\")
-                .Replace("\"", "\\\"");
-                
-            var query = 
-                $$"""
-                  mutation { saveUserTask(
-                    UserId: "{{accessToken.UserId}}",
-                    ItemId: "{{task.Id}}",
-                    Data: "{{escapedData}}",
-                    UpdatedAt: "{{task.UpdatedOnDate:yyyy-MM-ddThh:mm:ss.sssZ}}"
-                  ) {
-                    UserId,
-                    ItemId,
-                    Data,
-                    UpdatedAt
-                  } }
-                  """; 
-            await ExecuteQuery(accessToken.AccessToken, query); 
-            Logger.Log($"Change pushed successfully");
-        } 
+        Logger.Log($"Pushing task to remote (task: {task.Id})");
+        
+        var escapedData = JsonSerializer.Serialize(task)
+            .Replace("\\", "\\\\")
+            .Replace("\"", "\\\"");
+            
+        var query = 
+            $$"""
+              mutation { saveUserTask(
+                UserId: "{{accessToken.UserId}}",
+                ItemId: "{{task.Uid}}",
+                Data: "{{escapedData}}",
+                UpdatedAt: "{{AwsDatetimeConverter(DateTime.UtcNow)}}"
+              ) {
+                UserId,
+                ItemId,
+                Data,
+                UpdatedAt
+              } }
+              """; 
+        
+        await ExecuteQuery(accessToken.AccessToken, query);
+        
+        Logger.Log($"Change pushed successfully");
     }
     
     #region Utils
 
     private async Task<string> ExecuteQuery(string accessToken, string query)
     {
-        Logger.Log("Executing query");
+        Logger.Log($"Executing query: \n{query}");
 
         var request = new HttpRequestMessage(HttpMethod.Post, Constants.AppSyncEndpoint)
         {
@@ -106,6 +112,8 @@ public class RemoteRepository : IRemoteRepository
             }
             throw new ArgumentException(errors);
         }
+        Logger.Log("No errors found");
+        
         return contentString;
     }
 
@@ -123,7 +131,10 @@ public class RemoteRepository : IRemoteRepository
             if (result == null)
                 throw new NullReferenceException("Deserializing failed: Response is null");
 
-            Logger.Log($"Successfully deserialized response: {result.Data.UserTasks.Count} user tasks retrieved");
+            Logger.Log($"Successfully deserialized response: {result.Data.UserTasks?.Count ?? 0} user tasks retrieved");
+
+            if (result.Data.UserTasks == null)
+                return [];
 
             return result.Data.UserTasks.Select(
                 ConvertToTaskModel
@@ -145,5 +156,9 @@ public class RemoteRepository : IRemoteRepository
         return task;
     }
 
+    private static string AwsDatetimeConverter(DateTime dateTime)
+    {
+        return dateTime.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+    }
     #endregion
 }

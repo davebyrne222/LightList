@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json;
 using LightList.Models;
@@ -9,7 +10,7 @@ namespace LightList.Repositories;
 public class SecureStorageRepository: ISecureStorageRepository
 {
     
-    #region Public methods
+    #region Public methods - Auth
     public async Task SaveAuthTokensAsync(string tokensString)
     {
         Logger.Log("Saving auth tokens");
@@ -48,6 +49,27 @@ public class SecureStorageRepository: ISecureStorageRepository
         SecureStorage.Remove("AuthTokens");
     }
     
+    #endregion
+    
+    #region Public methods - Sync
+    public async Task SaveLastSyncDateAsync(DateTime lastSyncDate)
+    {
+        Logger.Log($"Saving last sync date: {lastSyncDate}");
+        await SecureStorage.SetAsync("LastSyncDate", lastSyncDate.ToString(CultureInfo.CurrentCulture));
+    }
+
+    public async Task<DateTime?> GetLastSyncDateAsync()
+    {
+        Logger.Log("Retrieving last sync date");
+        string? dateString = await SecureStorage.GetAsync("LastSyncDate");
+        return DateTime.TryParse(dateString, out DateTime result) ? result : (DateTime?)null;
+    }
+
+    public void DeleteLastSyncDate()
+    {
+        Logger.Log("Deleting last sync date");
+        SecureStorage.Remove("LastSyncDate");
+    }
     #endregion
     
     #region Utils

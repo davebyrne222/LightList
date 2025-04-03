@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json;
+using Amazon.AppSync.Model;
 using LightList.Models;
 using LightList.Repositories;
 using LightList.Utils;
@@ -14,7 +15,11 @@ public class SyncService : ISyncService
     private readonly ILocalRepository _localRepository;
     private readonly IRemoteRepository _remoteRepository;
     
-    public SyncService(IAuthService authService, ISecureStorageRepository secureStorage, ILocalRepository localRepo, IRemoteRepository remoteRepo)
+    public SyncService(
+        IAuthService authService,
+        ISecureStorageRepository secureStorage,
+        ILocalRepository localRepo,
+        IRemoteRepository remoteRepo)
     {
         _authService = authService;
         _secureStorage = secureStorage;
@@ -44,11 +49,11 @@ public class SyncService : ISyncService
 
     private async Task HandleQuery(Func<AuthTokens, Task> action)
     {
-        Logger.Log($"Executing {nameof(action.GetType)}");
+        Logger.Log($"Executing {action}");
 
         if (!await _authService.IsUserLoggedIn()) 
         {
-            Console.WriteLine("Sync skipped: User is not signed in.");
+            Logger.Log("Sync skipped: User is not signed in.");
             return;
         }
         
@@ -71,24 +76,44 @@ public class SyncService : ISyncService
 
     private async Task GetUpdatedTasksAsync(AuthTokens accessToken)
     {
-        // TODO: get only non-synched tasks
-        List<Models.Task?> tasks = await _remoteRepository.GetUserTasks(accessToken);
-            
-        Logger.Log($"Retrieved: {tasks.Count} tasks");
+        Logger.Log("Retrieving updated tasks");
+
+        List<Models.Task?> tasks = await _remoteRepository.GetUserTasks(
+            accessToken,
+            await _secureStorage.GetLastSyncDateAsync());
+        
+        // Update last sync time in secure storage
+        await _secureStorage.SaveLastSyncDateAsync(DateTime.UtcNow);
+        
+        Logger.Log($"Retrieved {tasks.Count} tasks");
 
         foreach (var task in tasks)
         {
             if (task != null) await _localRepository.Save(task);
         }
+        
+        Logger.Log($"Tasks saved to local database");
     }
 
     private async Task PushUpdatedTasksAsync(AuthTokens accessToken)
     {
-        // TODO: get only non-synched tasks
-        List<Models.Task> tasks = await _localRepository.GetAll();
+        Logger.Log("Pushing updated tasks");
+
+        // Retrieve all tasks that have not been synced
+        List<Models.Task> tasks = await _localRepository.GetAll(true);
+        
+        Logger.Log($"Retrieved {tasks.Count} un-synced tasks. Pushing to remote");
+        
+        // Sync each task
+        foreach (var task in tasks)
+        {
+            await _remoteRepository.PushUserTask(accessToken, task);
             
-        await _remoteRepository.PushUserTasks(accessToken, tasks);
+            task.IsPushedToRemote = true;
             
+            await _localRepository.Save(task);
+        }
+
         Logger.Log($"Pushed {tasks.Count} tasks");
     }
     

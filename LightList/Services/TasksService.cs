@@ -31,8 +31,9 @@ public class TasksService: ITasksService
     public async Task<int> SaveTask(Models.Task task)
     {
         Logger.Log($"Saving task (id={task.Id}, default id: {task.Id == default})");
-        await _syncService.PushChangesAsync(); // TODO: change for method to push single item
-        return await _localRepository.Save(task);
+        int taskId = await _localRepository.Save(task);
+        await _syncService.PushChangesAsync();
+        return taskId;
     }
 
     public void DeleteTask(Models.Task task)

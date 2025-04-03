@@ -27,7 +27,7 @@ public class AppSyncGetUserTasks
 public class AppSyncUserTasks
 {
     [JsonPropertyName("getUserTasks")]
-    public List<AppSyncUserTask> UserTasks { get; set; } = new();
+    public List<AppSyncUserTask>? UserTasks { get; set; } = new();
 }
 
 public class AppSyncUserTask

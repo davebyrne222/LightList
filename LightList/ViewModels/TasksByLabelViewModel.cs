@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.Messaging;
 using LightList.Services;
 using LightList.Utils;
 
@@ -6,7 +7,7 @@ namespace LightList.ViewModels;
 
 public class TasksByLabelViewModel: BaseTasksViewModel
 { 
-    public TasksByLabelViewModel(ITaskViewModelFactory taskViewModelFactory, ITasksService tasksService) : base(taskViewModelFactory, tasksService)
+    public TasksByLabelViewModel(ITaskViewModelFactory taskViewModelFactory, ITasksService tasksService, IMessenger messenger) : base(taskViewModelFactory, tasksService, messenger)
     {
         _ = InitializeTasks();
     }

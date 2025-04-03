@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 using LightList.Services;
 using LightList.Utils;
 
@@ -9,6 +10,7 @@ public class BaseTasksViewModel: INotifyPropertyChanged
 {
     protected ITaskViewModelFactory TaskViewModelFactory { get; }
     protected ITasksService TasksService { get; }
+    protected IMessenger Messenger { get; }
     private ObservableCollection<TaskViewModel> _tasks = new();
     public ObservableCollection<TaskViewModel> AllTasks
     {
@@ -24,10 +26,11 @@ public class BaseTasksViewModel: INotifyPropertyChanged
     }
     public event PropertyChangedEventHandler? PropertyChanged = delegate { };
 
-    public BaseTasksViewModel(ITaskViewModelFactory taskViewModelFactory, ITasksService tasksService)
+    public BaseTasksViewModel(ITaskViewModelFactory taskViewModelFactory, ITasksService tasksService, IMessenger messenger)
     {
         TaskViewModelFactory = taskViewModelFactory;
         TasksService = tasksService;
+        Messenger = messenger;
     }
     
     private void OnPropertyChanged(string propertyName)
