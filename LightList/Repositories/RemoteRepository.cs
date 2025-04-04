@@ -64,7 +64,7 @@ public class RemoteRepository : IRemoteRepository
 
     private async Task<string> ExecuteQuery(string accessToken, string query)
     {
-        Logger.Log($"Executing query: \n{query}");
+        Logger.Log($"Executing query");
 
         var request = new HttpRequestMessage(HttpMethod.Post, Constants.AppSyncEndpoint)
         {
@@ -160,5 +160,6 @@ public class RemoteRepository : IRemoteRepository
     {
         return dateTime.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
     }
+    
     #endregion
 }

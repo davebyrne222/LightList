@@ -1,4 +1,112 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg width="456" height="456" viewBox="0 0 456 456" version="1.1" xmlns="http://www.w3.org/2000/svg">
-    <rect x="0" y="0" width="456" height="456" fill="#512BD4" />
+<svg
+   width="456"
+   height="456"
+   viewBox="0 0 456 456"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="appicon.svg"
+   inkscape:version="1.3 (0e150ed, 2023-07-21)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.4758772"
+     inkscape:cx="205.64042"
+     inkscape:cy="183.61961"
+     inkscape:window-width="1392"
+     inkscape:window-height="1027"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg1"
+     showgrid="false">
+    <inkscape:grid
+       id="grid1"
+       units="px"
+       originx="0"
+       originy="0"
+       spacingx="1"
+       spacingy="1"
+       empcolor="#0099e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="5"
+       dotted="true"
+       gridanglex="30"
+       gridanglez="30"
+       visible="false" />
+  </sodipodi:namedview>
+  <rect
+     x="0"
+     y="0"
+     width="456"
+     height="456"
+     fill="#512BD4"
+     id="rect1"
+     style="fill:#1d192b;fill-opacity:1"
+     sodipodi:insensitive="true" />
+  <g
+     style="clip-rule:evenodd;opacity:1;fill:#ac71ff;fill-opacity:1;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2"
+     id="g2"
+     transform="matrix(1.640625,0,0,1.640625,355.7284,125.89316)">
+    <path
+       d="M 12,2 A 10,10 0 1 0 22,12 10,10 0 0 0 12,2 Z m 5.676,8.237 -6,5.5 a 1,1 0 0 1 -1.383,-0.03 l -3,-3 a 1,1 0 1 1 1.414,-1.414 l 2.323,2.323 5.294,-4.853 a 1.0000725,1.0000725 0 1 1 1.352,1.474 z"
+       id="path1-99"
+       style="fill:#ac71ff;fill-opacity:1" />
+  </g>
+  <rect
+     style="clip-rule:evenodd;opacity:1;fill:#ac71ff;fill-opacity:1;fill-rule:evenodd;stroke-width:1.99664;stroke-linejoin:round;stroke-miterlimit:2"
+     id="rect1-97"
+     width="278.90625"
+     height="32.8125"
+     x="64.177849"
+     y="129.17441"
+     ry="7.6813707" />
+  <g
+     style="clip-rule:evenodd;opacity:0.8;fill:#ac71ff;fill-opacity:1;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2"
+     id="g2-7"
+     transform="matrix(1.640625,0,0,1.640625,347.52527,193.70566)">
+    <path
+       d="M 12,2 A 10,10 0 1 0 22,12 10,10 0 0 0 12,2 Z m 5.676,8.237 -6,5.5 a 1,1 0 0 1 -1.383,-0.03 l -3,-3 a 1,1 0 1 1 1.414,-1.414 l 2.323,2.323 5.294,-4.853 a 1.0000725,1.0000725 0 1 1 1.352,1.474 z"
+       id="path1-99-1"
+       style="fill:#ac71ff;fill-opacity:1" />
+  </g>
+  <rect
+     style="clip-rule:evenodd;opacity:0.8;fill:#ac71ff;fill-opacity:1;fill-rule:evenodd;stroke-width:1.93702;stroke-linejoin:round;stroke-miterlimit:2"
+     id="rect1-9"
+     width="262.5"
+     height="32.8125"
+     x="72.380974"
+     y="196.98691"
+     ry="7.6813707" />
+  <g
+     style="clip-rule:evenodd;opacity:0.6;fill:#ac71ff;fill-opacity:1;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2"
+     id="g2-7-0"
+     transform="matrix(1.640625,0,0,1.640625,339.32215,261.51816)">
+    <path
+       d="M 12,2 A 10,10 0 1 0 22,12 10,10 0 0 0 12,2 Z m 5.676,8.237 -6,5.5 a 1,1 0 0 1 -1.383,-0.03 l -3,-3 a 1,1 0 1 1 1.414,-1.414 l 2.323,2.323 5.294,-4.853 a 1.0000725,1.0000725 0 1 1 1.352,1.474 z"
+       id="path1-99-1-2"
+       style="fill:#ac71ff;fill-opacity:1" />
+  </g>
+  <rect
+     style="clip-rule:evenodd;opacity:0.6;fill:#ac71ff;fill-opacity:1;fill-rule:evenodd;stroke-width:1.87553;stroke-linejoin:round;stroke-miterlimit:2"
+     id="rect1-9-7"
+     width="246.09375"
+     height="32.8125"
+     x="80.584099"
+     y="264.79941"
+     ry="7.6813707" />
 </svg>
