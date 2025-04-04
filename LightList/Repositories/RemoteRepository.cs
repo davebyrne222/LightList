@@ -13,12 +13,12 @@ public class RemoteRepository : IRemoteRepository
     public async Task<List<Models.Task?>> GetUserTasks(AuthTokens accessToken, DateTime? lastSyncDate)
     {
         Logger.Log($"Retrieving remote tasks (lastSyncDate: {(lastSyncDate.HasValue ? lastSyncDate : "NA")})");
-        
-        string syncDate = lastSyncDate.HasValue ? AwsDatetimeConverter(lastSyncDate.Value) : "";
-        
-        var query = 
+
+        var syncDate = lastSyncDate.HasValue ? AwsDatetimeConverter(lastSyncDate.Value) : "";
+
+        var query =
             $$"""
-              query { getUserTasks(
+              query { getUserTasks(     
                 UserId: "{{accessToken.UserId}}"
                 {{(lastSyncDate.HasValue ? $", UpdatedOnOrAfter: \"{syncDate}\"" : "")}}
               ) {
@@ -27,24 +27,24 @@ public class RemoteRepository : IRemoteRepository
                 UpdatedAt
               } }
               """;
-        
-        string result = await ExecuteQuery(accessToken.AccessToken, query);
+
+        var result = await ExecuteQuery(accessToken.AccessToken, query);
         return DeserializeUserTasks(result);
     }
 
     public async Task PushUserTask(AuthTokens accessToken, Models.Task task)
     {
         Logger.Log($"Pushing task to remote (task: {task.Id})");
-        
+
         var escapedData = JsonSerializer.Serialize(task)
             .Replace("\\", "\\\\")
             .Replace("\"", "\\\"");
-            
-        var query = 
+
+        var query =
             $$"""
               mutation { saveUserTask(
                 UserId: "{{accessToken.UserId}}",
-                ItemId: "{{task.Uid}}",
+                ItemId: "{{task.Id}}",
                 Data: "{{escapedData}}",
                 UpdatedAt: "{{AwsDatetimeConverter(DateTime.UtcNow)}}"
               ) {
@@ -53,26 +53,26 @@ public class RemoteRepository : IRemoteRepository
                 Data,
                 UpdatedAt
               } }
-              """; 
-        
+              """;
+
         await ExecuteQuery(accessToken.AccessToken, query);
-        
-        Logger.Log($"Change pushed successfully");
+
+        Logger.Log("Change pushed successfully");
     }
-    
+
     #region Utils
 
     private async Task<string> ExecuteQuery(string accessToken, string query)
     {
-        Logger.Log($"Executing query");
+        Logger.Log("Executing query");
 
         var request = new HttpRequestMessage(HttpMethod.Post, Constants.AppSyncEndpoint)
         {
             Content = new StringContent(JsonSerializer.Serialize(new { query }), Encoding.UTF8, "application/json")
         };
-        
+
         request.Headers.Add("Authorization", accessToken);
-        
+
         var response = await Client.SendAsync(request);
 
         if (!response.IsSuccessStatusCode)
@@ -81,12 +81,12 @@ public class RemoteRepository : IRemoteRepository
             Logger.Log(msg);
             throw new HttpRequestException(msg);
         }
-        
-        Logger.Log($"Query succeeded");
+
+        Logger.Log("Query succeeded");
 
         return CheckAppSyncResponse(await response.Content.ReadAsStringAsync());
     }
-    
+
     private static string CheckAppSyncResponse(string contentString)
     {
         Logger.Log("Checking app sync response for errors");
@@ -104,26 +104,28 @@ public class RemoteRepository : IRemoteRepository
 
         if (contentJson != null && contentJson.Errors != null)
         {
-            string errors = String.Empty;
+            var errors = string.Empty;
             foreach (var error in contentJson.Errors)
             {
                 Logger.Log($"AppSync error: {error.Message}");
                 errors += error.Message + Environment.NewLine;
             }
+
             throw new ArgumentException(errors);
         }
+
         Logger.Log("No errors found");
-        
+
         return contentString;
     }
 
     private static List<Models.Task?> DeserializeUserTasks(string response)
     {
         Logger.Log("Deserializing response");
-        
+
         if (string.IsNullOrEmpty(response))
             throw new ArgumentNullException(nameof(response));
-        
+
         try
         {
             var result = JsonSerializer.Deserialize<AppSyncGetUserTasks>(response);
@@ -160,6 +162,6 @@ public class RemoteRepository : IRemoteRepository
     {
         return dateTime.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
     }
-    
+
     #endregion
 }

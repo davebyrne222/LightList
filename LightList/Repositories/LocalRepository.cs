@@ -24,15 +24,15 @@ public class LocalRepository : ILocalRepository
         };
     }
 
-    public async Task<Task> Get(int id)
+    public async Task<Task> Get(string id)
     {
         Logger.Log($"Getting task (id={id})");
         return await _database.GetItemByIdAsync(id);
     }
 
-    public async Task<int> Save(Task task)
+    public async Task<string> Save(Task task)
     {
-        Logger.Log($"Saving task (id={task.Id}, Default Id: {task.Id == default})");
+        Logger.Log($"Saving task id={task.Id}");
         task.UpdatedOnDate = DateTime.Now;
         task.IsPushedToRemote = false;
         return await _database.SaveItemAsync(task);

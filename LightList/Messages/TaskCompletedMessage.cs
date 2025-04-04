@@ -2,7 +2,9 @@ using CommunityToolkit.Mvvm.Messaging.Messages;
 
 namespace LightList.Messages;
 
-public class TaskCompletedMessage: ValueChangedMessage<int>
+public class TaskCompletedMessage : ValueChangedMessage<string>
 {
-    public TaskCompletedMessage(int taskId) : base(taskId) { }
+    public TaskCompletedMessage(string taskId) : base(taskId)
+    {
+    }
 }

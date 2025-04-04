@@ -6,39 +6,38 @@ namespace LightList.Data;
 public class TasksDatabase
 {
     private SQLiteAsyncConnection? _database;
-    private SQLiteAsyncConnection Database => _database ??= 
+
+    private SQLiteAsyncConnection Database => _database ??=
         new SQLiteAsyncConnection(
-            Constants.DatabasePath, 
-            Constants.DbFlags,
-            true
-         );
+            Constants.DatabasePath,
+            Constants.DbFlags
+        );
+
     public async Task InitialiseAsync()
     {
         Logger.Log("Creating tables");
         var result = await Database!.CreateTableAsync<Models.Task>();
         Logger.Log($"Tables: {result}");
     }
-    public TasksDatabase() { }
-    
+
     /**
      * Gets all tasks in database
      */
     public async Task<List<Models.Task>> GetItemsAsync()
     {
         Logger.Log("Retrieving all tasks");
-        
+
         var tasks = await Database.Table<Models.Task>()
             .OrderBy(t => t.CompleteOnDate)
             .OrderBy(t => t.Complete)
             .OrderBy(t => t.DueDate)
             .ToListAsync();
-        
+
         Logger.Log($"Retrieved {tasks.Count} tasks");
 
         return tasks;
-        
     }
-    
+
     /**
      * Gets issues which have not been pushed to remote DB
      */
@@ -49,50 +48,48 @@ public class TasksDatabase
         var tasks = await Database.Table<Models.Task>()
             .Where(t => t.IsPushedToRemote == false)
             .ToListAsync();
-        
+
         Logger.Log($"Retrieved {tasks.Count} tasks");
 
         return tasks;
     }
-    
-    public async Task<Models.Task> GetItemByIdAsync(int id)
+
+    public async Task<Models.Task> GetItemByIdAsync(string id)
     {
         Logger.Log($"Retrieving task (id={id})");
         return await Database.Table<Models.Task>().Where(i => i.Id == id).FirstOrDefaultAsync();
     }
-    
-    private async Task<bool> TaskExistsAsync(string uid)
+
+    private async Task<bool> TaskExistsAsync(string id)
     {
-        var task = await Database.Table<Models.Task>()
-            .Where(t => t.Uid == uid)
-            .FirstOrDefaultAsync();
-        return task != null;
+        var count = await Database.ExecuteScalarAsync<int>(
+            $"SELECT COUNT(*) FROM {nameof(Models.Task)} WHERE Id = ?", id);
+        return count > 0;
     }
-    
-    public async Task<int> SaveItemAsync(Models.Task item)
+
+    public async Task<string> SaveItemAsync(Models.Task item)
     {
-        Logger.Log($"Saving task (id={item.Id}, uid={item.Uid})");
+        Logger.Log($"Storing task id={item.Id}");
 
         int nRowsUpdated;
 
-        bool taskExist = await TaskExistsAsync(item.Uid);
-            
-        if (taskExist)
+        if (await TaskExistsAsync(item.Id))
         {
-            Logger.Log($"Task already exists. Updating");
+            Logger.Log("Task already exists. Updating");
             nRowsUpdated = await Database.UpdateAsync(item);
         }
         else
         {
-            Logger.Log($"Task is new. Adding");
+            Logger.Log("Task is new. Adding");
             nRowsUpdated = await Database.InsertAsync(item);
         }
-        
+
         if (nRowsUpdated == 0)
             throw new Exception("Failed to save task");
-        
+
         return item.Id;
     }
+
     public async Task<int> DeleteItemAsync(Models.Task item)
     {
         Logger.Log($"Deleting task (id={item.Id})");
