@@ -16,7 +16,7 @@ public class TasksDatabase
     public async Task InitialiseAsync()
     {
         Logger.Log("Creating tables");
-        var result = await Database!.CreateTableAsync<Models.Task>();
+        var result = await Database.CreateTableAsync<Models.Task>();
         Logger.Log($"Tables: {result}");
     }
 
@@ -46,7 +46,7 @@ public class TasksDatabase
         Logger.Log("Retrieving tasks that are not synced");
 
         var tasks = await Database.Table<Models.Task>()
-            .Where(t => t.IsPushedToRemote == false)
+            .Where(t => t.IsSynced == false)
             .ToListAsync();
 
         Logger.Log($"Retrieved {tasks.Count} tasks");
@@ -71,21 +71,29 @@ public class TasksDatabase
     {
         Logger.Log($"Storing task id={item.Id}");
 
-        int nRowsUpdated;
+        var nRowsUpdated = 0;
 
-        if (await TaskExistsAsync(item.Id))
+        try
         {
-            Logger.Log("Task already exists. Updating");
-            nRowsUpdated = await Database.UpdateAsync(item);
+            if (await TaskExistsAsync(item.Id))
+            {
+                Logger.Log("Task already exists. Updating");
+                nRowsUpdated = await Database.UpdateAsync(item);
+            }
+            else
+            {
+                Logger.Log("Task is new. Adding");
+                nRowsUpdated = await Database.InsertAsync(item);
+            }
         }
-        else
+        catch (SQLiteException ex)
         {
-            Logger.Log("Task is new. Adding");
-            nRowsUpdated = await Database.InsertAsync(item);
+            Logger.Log($"Database error on save: {ex.GetType()} - {ex.Message}");
+            throw;
         }
 
         if (nRowsUpdated == 0)
-            throw new Exception("Failed to save task");
+            throw new Exception("Task not saved. Unknown reason");
 
         return item.Id;
     }

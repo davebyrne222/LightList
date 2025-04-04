@@ -34,7 +34,7 @@ public class LocalRepository : ILocalRepository
     {
         Logger.Log($"Saving task id={task.Id}");
         task.UpdatedOnDate = DateTime.Now;
-        task.IsPushedToRemote = false;
+        task.IsSynced = false;
         return await _database.SaveItemAsync(task);
     }
 

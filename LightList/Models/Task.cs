@@ -12,5 +12,5 @@ public class Task
     public DateTime DueDate { get; set; } = DateTime.Now;
     public DateTime? CompleteOnDate { get; set; }
     public bool Complete { get; set; }
-    public bool IsPushedToRemote { get; set; } = false;
+    public bool IsSynced { get; set; } = false;
 }

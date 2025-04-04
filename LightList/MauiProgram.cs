@@ -130,7 +130,8 @@ public static class MauiProgram
         try
         {
             TasksDatabase? dbService = GetService<TasksDatabase>();
-            await dbService?.InitialiseAsync();
+            if (dbService is not null)
+                await dbService.InitialiseAsync();
         }
         catch (Exception ex)
         {
