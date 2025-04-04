@@ -11,14 +11,24 @@ public class SecureStorageRepository: ISecureStorageRepository
 {
     
     #region Public methods - Auth
-    public async Task SaveAuthTokensAsync(string tokensString)
+    public async Task<bool> SaveAuthTokensAsync(string tokensString)
     {
         Logger.Log("Saving auth tokens");
 
         if (string.IsNullOrWhiteSpace(tokensString) || !IsValidTokenString(tokensString))
             throw new ArgumentException("Invalid token string format. Must be convertable to type AuthTokens", nameof(tokensString));
         
-        await SecureStorage.SetAsync("AuthTokens", tokensString);
+        try
+        {
+            await SecureStorage.SetAsync("AuthTokens", tokensString);
+            Logger.Log("Auth tokens saved");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Logger.Log($"Failed to save auth tokens: {ex.GetType()} - {ex.Message}");
+            throw;
+        }
     }
 
     public async Task<AuthTokens?> GetAuthTokensAsync()
@@ -82,6 +92,7 @@ public class SecureStorageRepository: ISecureStorageRepository
         }
         catch
         {
+            Logger.Log($"Token is invalid format: {json}");
             return false;
         }
     }

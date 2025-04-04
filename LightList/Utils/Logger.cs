@@ -1,8 +1,16 @@
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace LightList.Utils;
+
+public enum LogLevel
+{
+    Debug,
+    Info,
+    Warning,
+    Error,
+    Critical
+}
+
 
 public static class Logger
 {

@@ -69,7 +69,7 @@ public class AuthService: IAuthService
 
         GlobalSignOutRequest request = new GlobalSignOutRequest
         {
-            AccessToken = tokens?.AccessToken
+            AccessToken = tokens.AccessToken
         };
 
         try
@@ -101,10 +101,7 @@ public class AuthService: IAuthService
         }
         
         // Check if access token is valid - if it is, user is logged in
-        Logger.Log("Tokens found. Checking if expired");
-        bool tokenExpired = IsTokenExpired(authTokens.AccessToken);
-
-        if (!tokenExpired)
+        if (!IsTokenExpired(authTokens.AccessToken))
         {
             Logger.Log("Token valid. User is logged in");
             return true;
@@ -112,7 +109,10 @@ public class AuthService: IAuthService
         
         // If access token expired, refresh
         Logger.Log("Token expired. Requesting refresh");
-        return await RefreshAccessTokenAsync(authTokens.RefreshToken);
+        bool refreshed = await RefreshAccessTokenAsync(authTokens);
+        
+        Logger.Log($"Access token refreshed: {refreshed}");
+        return refreshed;
     }
 
     #endregion
@@ -147,7 +147,7 @@ public class AuthService: IAuthService
         try
         {
             string authString = await response.Content.ReadAsStringAsync();
-            return _secureStorage.SaveAuthTokensAsync(authString).IsCompletedSuccessfully;
+            return await _secureStorage.SaveAuthTokensAsync(authString);
         }
         catch (Exception ex)
         {
@@ -156,7 +156,7 @@ public class AuthService: IAuthService
         }
     }
 
-    private async Task<bool> RefreshAccessTokenAsync(string refreshToken)
+    private async Task<bool> RefreshAccessTokenAsync(AuthTokens authTokens)
     {
         Logger.Log("Refreshing access token");
         
@@ -165,7 +165,7 @@ public class AuthService: IAuthService
         {
             AuthFlow = AuthFlowType.REFRESH_TOKEN_AUTH,
             ClientId = Constants.CognitoAppClientId,
-            AuthParameters = new Dictionary<string, string> { { "REFRESH_TOKEN", refreshToken } }
+            AuthParameters = new Dictionary<string, string> { { "REFRESH_TOKEN", authTokens.RefreshToken } }
         };
 
         InitiateAuthResponse response;
@@ -188,9 +188,18 @@ public class AuthService: IAuthService
             
         // Save new token
         Logger.Log("Token refreshed. Saving");
-        string tokenString = JsonSerializer.Serialize(response.AuthenticationResult);
-        return _secureStorage.SaveAuthTokensAsync(tokenString).IsCompletedSuccessfully;
 
+        try
+        {
+            authTokens.AccessToken = response.AuthenticationResult.AccessToken;
+            string tokenString = JsonSerializer.Serialize(authTokens);
+            return await _secureStorage.SaveAuthTokensAsync(tokenString);
+        }
+        catch (Exception ex)
+        {
+            Logger.Log($"Error storing access tokens: {ex.Message}");
+            throw;
+        }
     }
     
     private static bool IsTokenExpired(string token)
@@ -213,7 +222,7 @@ public class AuthService: IAuthService
         DateTime expDateTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(expiry)).UtcDateTime;
         bool expired = expDateTime < DateTime.UtcNow;
         
-        Logger.Log($"Token expired: {expired} (expiry: {expDateTime})");
+        Logger.Log($"Token expired: {expDateTime} < {DateTime.UtcNow}: {expired}");
         
         return expired;
     }

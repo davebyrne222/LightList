@@ -49,9 +49,13 @@ public partial class AppShell : Shell
         BindingContext = this;
 
         RegisterRoutes();
-        _ = GetLoginStatus();
-        
         Logger.Log("Initialized");
+    }
+    
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        await GetLoginStatus();
     }
     
     private void RegisterRoutes()
