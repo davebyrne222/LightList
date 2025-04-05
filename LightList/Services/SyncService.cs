@@ -109,7 +109,7 @@ public class SyncService : ISyncService
         _logger.Debug("Pushing updated tasks");
 
         // Retrieve all tasks that have not been synced
-        List<Models.Task> tasks = await _localRepository.GetAll(true);
+        List<Models.Task> tasks = await _localRepository.GetAll(true, false);
 
         _logger.Debug($"Retrieved {tasks.Count} un-synced tasks. Pushing to remote");
 

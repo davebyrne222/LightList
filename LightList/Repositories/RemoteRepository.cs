@@ -161,7 +161,7 @@ public class RemoteRepository : IRemoteRepository
         _logger.Debug("Converting task response to model");
         var task = JsonSerializer.Deserialize<Models.Task>(response.Data);
         if (task is not null)
-            task.UpdatedOnDate = response.UpdatedAt;
+            task.UpdatedAt = response.UpdatedAt;
         return task;
     }
 

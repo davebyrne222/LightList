@@ -4,7 +4,7 @@ namespace LightList.Repositories;
 
 public interface ILocalRepository
 {
-    Task<List<Task>> GetAll(bool onlyNotSynced = false);
+    Task<List<Task>> GetAll(bool onlyNotSynced = false, bool excludeDeleted = true);
 
     Task<Task> Get(string id);
 

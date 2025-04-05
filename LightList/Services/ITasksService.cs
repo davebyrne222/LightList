@@ -10,7 +10,7 @@ public interface ITasksService
 
     Task<string> SaveTask(Models.Task task);
 
-    void DeleteTask(Models.Task task);
+    Task DeleteTask(Models.Task task);
 
     Task SyncNowAsync();
 }

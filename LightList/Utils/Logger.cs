@@ -16,7 +16,7 @@ public class Logger : ILogger
 {
     private LogLevel _currentLogLevel;
 
-    public Logger(LogLevel logLevel = LogLevel.Debug)
+    public Logger(LogLevel logLevel = LogLevel.Info)
     {
         _currentLogLevel = logLevel;
     }

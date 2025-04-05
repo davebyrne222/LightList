@@ -29,17 +29,25 @@ public class TasksDatabase
     /**
      * Gets all tasks in database
      */
-    public async Task<List<Models.Task>> GetItemsAsync()
+    public async Task<List<Models.Task>> GetItemsAsync(bool excludeDeleted = true)
     {
-        _logger.Debug("Retrieving all tasks");
+        _logger.Info($"Retrieving all tasks (excludeDeleted: {excludeDeleted})");
 
-        var tasks = await Database.Table<Models.Task>()
-            .OrderBy(t => t.CompleteOnDate)
-            .OrderBy(t => t.Complete)
-            .OrderBy(t => t.DueDate)
+        var query = Database.Table<Models.Task>();
+
+        if (excludeDeleted)
+            query = query.Where(t => t.IsDeleted == false);
+
+        var tasks = await query
+            .OrderBy(t => t.CompleteAt)
+            .OrderBy(t => t.IsCompleted)
+            .OrderBy(t => t.DueAt)
             .ToListAsync();
 
         _logger.Debug($"Retrieved {tasks.Count} tasks");
+
+        foreach (var task in tasks)
+            _logger.Info($"--- {task.Text}: {task.IsDeleted}");
 
         return tasks;
     }
@@ -77,13 +85,15 @@ public class TasksDatabase
     {
         _logger.Debug($"Storing task id={item.Id}");
 
-        var nRowsUpdated = 0;
+        _logger.Info($"Storing task \"{item.Text}\": {item.IsDeleted}");
+
+        int nRowsUpdated;
 
         try
         {
             if (await TaskExistsAsync(item.Id))
             {
-                _logger.Debug("Task already exists. Updating");
+                _logger.Info("Task already exists. Updating");
                 nRowsUpdated = await Database.UpdateAsync(item);
             }
             else
@@ -100,13 +110,16 @@ public class TasksDatabase
 
         if (nRowsUpdated == 0)
             throw new Exception("Task not saved. Unknown reason");
+        
+        var taskUpdated = await GetItemByIdAsync(item.Id);
+        _logger.Info($"Item updated: \"{taskUpdated.Text}\": {taskUpdated.IsDeleted}");
 
         return item.Id;
     }
 
     public async Task<int> DeleteItemAsync(Models.Task item)
     {
-        _logger.Debug($"Deleting task (id={item.Id})");
+        _logger.Info($"Deleting task (id={item.Id})");
         return await Database.DeleteAsync(item);
     }
 }

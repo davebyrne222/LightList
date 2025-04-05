@@ -46,12 +46,12 @@ public class TaskViewModel : ObservableObject, IQueryAttributable
 
     public DateTime DueDate
     {
-        get => _task.DueDate;
+        get => _task.DueAt;
         set
         {
-            if (_task.DueDate != value)
+            if (_task.DueAt != value)
             {
-                _task.DueDate = value;
+                _task.DueAt = value;
                 OnPropertyChanged();
             }
         }
@@ -91,13 +91,13 @@ public class TaskViewModel : ObservableObject, IQueryAttributable
     // [ObservableProperty] private bool _complete;
     public bool Complete
     {
-        get => _task.Complete;
+        get => _task.IsCompleted;
         set
         {
-            if (_task.Complete != value)
+            if (_task.IsCompleted != value)
             {
-                _task.Complete = value;
-                _logger.Debug($"Complete changed: {value}");
+                _task.IsCompleted = value;
+                _logger.Debug($"Task completed: {value}");
                 OnPropertyChanged();
             }
         }
@@ -148,8 +148,8 @@ public class TaskViewModel : ObservableObject, IQueryAttributable
 
     private async System.Threading.Tasks.Task DeleteTaskAsync()
     {
-        _logger.Debug($"Deleted task id={_task.Id}");
-        _tasksService.DeleteTask(_task);
+        _logger.Debug($"Deleting task id={_task.Id}");
+        await _tasksService.DeleteTask(_task);
 
         _logger.Debug("Sending deleted message");
         _messenger.Send(new TaskDeletedMessage(_task.Id));

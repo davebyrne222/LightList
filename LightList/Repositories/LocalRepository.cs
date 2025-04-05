@@ -15,14 +15,14 @@ public class LocalRepository : ILocalRepository
         _logger = logger;
     }
 
-    public async Task<List<Task>> GetAll(bool onlyNotSynced = false)
+    public async Task<List<Task>> GetAll(bool onlyNotSynced = false, bool excludeDeleted = true)
     {
-        _logger.Debug($"Getting all tasks (only not synced: {onlyNotSynced})");
+        _logger.Info($"Getting all tasks (onlyNotSynced: {onlyNotSynced}, excludeDeleted: {excludeDeleted})");
 
         return onlyNotSynced switch
         {
             true => await _database.GetNotSyncedAsync(),
-            false => await _database.GetItemsAsync()
+            false => await _database.GetItemsAsync(excludeDeleted)
         };
     }
 
@@ -35,7 +35,7 @@ public class LocalRepository : ILocalRepository
     public async Task<string> Save(Task task)
     {
         _logger.Debug($"Saving task id={task.Id}");
-        task.UpdatedOnDate = DateTime.Now;
+        task.UpdatedAt = DateTime.Now;
         task.IsSynced = false;
         return await _database.SaveItemAsync(task);
     }

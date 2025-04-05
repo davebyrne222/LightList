@@ -37,10 +37,11 @@ public class TasksService : ITasksService
         return taskId;
     }
 
-    public void DeleteTask(Models.Task task)
+    public async Task DeleteTask(Models.Task task)
     {
-        _logger.Debug($"Deleting task (id={task.Id})");
-        _localRepository.Delete(task);
+        _logger.Debug($"Marking task deleted (id={task.Id})");
+        task.IsDeleted = true;
+        await SaveTask(task);
     }
 
     public async Task SyncNowAsync()
