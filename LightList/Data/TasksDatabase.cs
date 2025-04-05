@@ -31,7 +31,7 @@ public class TasksDatabase
      */
     public async Task<List<Models.Task>> GetItemsAsync(bool excludeDeleted = true)
     {
-        _logger.Info($"Retrieving all tasks (excludeDeleted: {excludeDeleted})");
+        _logger.Debug($"Retrieving all tasks (excludeDeleted: {excludeDeleted})");
 
         var query = Database.Table<Models.Task>();
 
@@ -45,10 +45,7 @@ public class TasksDatabase
             .ToListAsync();
 
         _logger.Debug($"Retrieved {tasks.Count} tasks");
-
-        foreach (var task in tasks)
-            _logger.Info($"--- {task.Text}: {task.IsDeleted}");
-
+        
         return tasks;
     }
 
@@ -85,15 +82,13 @@ public class TasksDatabase
     {
         _logger.Debug($"Storing task id={item.Id}");
 
-        _logger.Info($"Storing task \"{item.Text}\": {item.IsDeleted}");
-
         int nRowsUpdated;
 
         try
         {
             if (await TaskExistsAsync(item.Id))
             {
-                _logger.Info("Task already exists. Updating");
+                _logger.Debug("Task already exists. Updating");
                 nRowsUpdated = await Database.UpdateAsync(item);
             }
             else
@@ -110,16 +105,13 @@ public class TasksDatabase
 
         if (nRowsUpdated == 0)
             throw new Exception("Task not saved. Unknown reason");
-        
-        var taskUpdated = await GetItemByIdAsync(item.Id);
-        _logger.Info($"Item updated: \"{taskUpdated.Text}\": {taskUpdated.IsDeleted}");
 
         return item.Id;
     }
 
     public async Task<int> DeleteItemAsync(Models.Task item)
     {
-        _logger.Info($"Deleting task (id={item.Id})");
+        _logger.Debug($"Deleting task (id={item.Id})");
         return await Database.DeleteAsync(item);
     }
 }

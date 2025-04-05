@@ -17,7 +17,7 @@ public class LocalRepository : ILocalRepository
 
     public async Task<List<Task>> GetAll(bool onlyNotSynced = false, bool excludeDeleted = true)
     {
-        _logger.Info($"Getting all tasks (onlyNotSynced: {onlyNotSynced}, excludeDeleted: {excludeDeleted})");
+        _logger.Debug($"Getting all tasks (onlyNotSynced: {onlyNotSynced}, excludeDeleted: {excludeDeleted})");
 
         return onlyNotSynced switch
         {
