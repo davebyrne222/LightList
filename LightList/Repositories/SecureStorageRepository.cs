@@ -7,102 +7,114 @@ using Task = System.Threading.Tasks.Task;
 
 namespace LightList.Repositories;
 
-public class SecureStorageRepository: ISecureStorageRepository
+public class SecureStorageRepository : ISecureStorageRepository
 {
-    
+    private readonly ILogger _logger;
+
+    public SecureStorageRepository(ILogger logger)
+    {
+        _logger = logger;
+    }
+
     #region Public methods - Auth
+
     public async Task<bool> SaveAuthTokensAsync(string tokensString)
     {
-        Logger.Log("Saving auth tokens");
+        _logger.Debug("Saving auth tokens");
 
         if (string.IsNullOrWhiteSpace(tokensString) || !IsValidTokenString(tokensString))
-            throw new ArgumentException("Invalid token string format. Must be convertable to type AuthTokens", nameof(tokensString));
-        
+            throw new ArgumentException("Invalid token string format. Must be convertable to type AuthTokens",
+                nameof(tokensString));
+
         try
         {
             await SecureStorage.SetAsync("AuthTokens", tokensString);
-            Logger.Log("Auth tokens saved");
+            _logger.Debug("Auth tokens saved");
             return true;
         }
         catch (Exception ex)
         {
-            Logger.Log($"Failed to save auth tokens: {ex.GetType()} - {ex.Message}");
+            _logger.Error($"Failed to save auth tokens: {ex.GetType()} - {ex.Message}");
             throw;
         }
     }
 
     public async Task<AuthTokens?> GetAuthTokensAsync()
     {
-        Logger.Log("Retrieving auth tokens");
-        
-        string? tokensString = await SecureStorage.GetAsync("AuthTokens");
-        
-        Logger.Log($"Auth tokens found: {!string.IsNullOrEmpty(tokensString)}");
-        
+        _logger.Debug("Retrieving auth tokens");
+
+        var tokensString = await SecureStorage.GetAsync("AuthTokens");
+
+        _logger.Debug($"Auth tokens found: {!string.IsNullOrEmpty(tokensString)}");
+
         if (string.IsNullOrEmpty(tokensString))
             return null;
-        
-        AuthTokens? tokens = JsonSerializer.Deserialize<AuthTokens>(tokensString);
-        
+
+        var tokens = JsonSerializer.Deserialize<AuthTokens>(tokensString);
+
         if (tokens == null)
             return null;
-        
-        Logger.Log("Extracting user id");
+
+        _logger.Debug("Extracting user id");
         tokens.UserId = GetCognitoUserId(tokens.IdToken);
-        
+
         return tokens;
     }
-    
+
     public void DeleteAuthTokens()
     {
-        Logger.Log("Deleting auth tokens");
+        _logger.Debug("Deleting auth tokens");
         SecureStorage.Remove("AuthTokens");
     }
-    
+
     #endregion
-    
+
     #region Public methods - Sync
+
     public async Task SaveLastSyncDateAsync(DateTime lastSyncDate)
     {
-        Logger.Log($"Saving last sync date: {lastSyncDate}");
+        _logger.Debug($"Saving last sync date: {lastSyncDate}");
         await SecureStorage.SetAsync("LastSyncDate", lastSyncDate.ToString(CultureInfo.CurrentCulture));
     }
 
     public async Task<DateTime?> GetLastSyncDateAsync()
     {
-        Logger.Log("Retrieving last sync date");
-        string? dateString = await SecureStorage.GetAsync("LastSyncDate");
-        return DateTime.TryParse(dateString, out DateTime result) ? result : (DateTime?)null;
+        _logger.Debug("Retrieving last sync date");
+        var dateString = await SecureStorage.GetAsync("LastSyncDate");
+        return DateTime.TryParse(dateString, out var result) ? result : null;
     }
 
     public void DeleteLastSyncDate()
     {
-        Logger.Log("Deleting last sync date");
+        _logger.Debug("Deleting last sync date");
         SecureStorage.Remove("LastSyncDate");
     }
+
     #endregion
-    
+
     #region Utils
-    private static bool IsValidTokenString(string json)
+
+    private bool IsValidTokenString(string json)
     {
         try
         {
-            AuthTokens? tokens = JsonSerializer.Deserialize<AuthTokens>(json);
+            var tokens = JsonSerializer.Deserialize<AuthTokens>(json);
             return tokens != null;
         }
         catch
         {
-            Logger.Log($"Token is invalid format: {json}");
+            _logger.Error($"Token is invalid format: {json}");
             return false;
         }
     }
-    
-    private static string GetCognitoUserId(string jwtToken)
+
+    private string GetCognitoUserId(string jwtToken)
     {
-        Logger.Log("Extracting cognito user id");
+        _logger.Debug("Extracting cognito user id");
         var handler = new JwtSecurityTokenHandler();
         var token = handler.ReadJwtToken(jwtToken);
         return token.Claims.First(claim => claim.Type == "sub").Value;
     }
+
     #endregion
 }

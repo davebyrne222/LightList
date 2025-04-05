@@ -1,20 +1,21 @@
-﻿using System.ComponentModel;
-using LightList.Services;
-using LightList.Utils;
-using LightList.Views;
-using CommunityToolkit.Maui.Alerts;
+﻿using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.Messaging;
 using LightList.Messages;
+using LightList.Services;
+using LightList.Utils;
+using LightList.Views;
 
 namespace LightList;
 
 public partial class AppShell : Shell
 {
     #region Fields
-    
+
+    private readonly ILogger _logger;
     private readonly IAuthService _authService;
     private bool _isLoggedIn;
+
     public bool IsLoggedIn
     {
         get => _isLoggedIn;
@@ -28,36 +29,38 @@ public partial class AppShell : Shell
             }
         }
     }
+
     public bool IsLoggedOut => !IsLoggedIn;
-    
+
     private readonly ITasksService _tasksService;
     private readonly IMessenger _messenger;
-    
+
     #endregion
-    
+
     #region Init
 
-    public AppShell(IAuthService authService, ITasksService tasksService, IMessenger messenger)
+    public AppShell(ILogger logger, IAuthService authService, ITasksService tasksService, IMessenger messenger)
     {
-        Logger.Log("Initializing");
+        _logger = logger;
+        _logger.Debug("Initializing");
 
         InitializeComponent();
-        
+
         _authService = authService;
         _tasksService = tasksService;
         _messenger = messenger;
         BindingContext = this;
 
         RegisterRoutes();
-        Logger.Log("Initialized");
+        _logger.Debug("Initialized");
     }
-    
+
     protected override async void OnAppearing()
     {
         base.OnAppearing();
         await GetLoginStatus();
     }
-    
+
     private void RegisterRoutes()
     {
         Routing.RegisterRoute(nameof(TaskPage), typeof(TaskPage));
@@ -68,35 +71,36 @@ public partial class AppShell : Shell
     }
 
     #endregion
-    
+
     #region Utils
+
     private async Task CloseFlyout()
     {
         Current.FlyoutBehavior = FlyoutBehavior.Disabled;
         await Task.Delay(1000); // Small delay to allow animation
         Current.FlyoutBehavior = FlyoutBehavior.Flyout;
     }
-    
+
     private async Task GetLoginStatus()
     {
         IsLoggedIn = await _authService.IsUserLoggedIn();
-        Logger.Log($"User is logged in: {IsLoggedIn}");
+        _logger.Debug($"User is logged in: {IsLoggedIn}");
     }
 
     private async void ShowToast(string message, ToastDuration duration = ToastDuration.Short)
     {
-        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-        var toast = Toast.Make(message, duration, 14);
+        var cancellationTokenSource = new CancellationTokenSource();
+        var toast = Toast.Make(message, duration);
         await toast.Show(cancellationTokenSource.Token);
     }
-    
+
     #endregion
-    
+
     #region Event Handlers
-    
+
     private async void OnLoginClicked(object sender, EventArgs e)
     {
-        Logger.Log("Navigating to the login page");
+        _logger.Debug("Navigating to the login page");
 
         IsLoggedIn = await _authService.SignInAsync();
 
@@ -114,19 +118,15 @@ public partial class AppShell : Shell
 
     private async void OnLogoutClicked(object sender, EventArgs e)
     {
-        IsLoggedIn = ! await _authService.SignOutAsync();
-        
+        IsLoggedIn = !await _authService.SignOutAsync();
+
         if (!IsLoggedIn)
-        {
             ShowToast("Signed Out Successfully");
-            // await CloseFlyout();
-        }
+        // await CloseFlyout();
         else
-        {
             ShowToast("There was a problem signing out. Please try again.", ToastDuration.Long);
-        }
     }
-    
+
     private async void OnSyncClicked(object sender, EventArgs e)
     {
         ShowToast("Syncing...");
@@ -136,19 +136,19 @@ public partial class AppShell : Shell
 
     private async Task SyncTasks()
     {
-        Logger.Log("Syncing tasks");
+        _logger.Debug("Syncing tasks");
         try
         {
             await _tasksService.SyncNowAsync();
-            Logger.Log("Finished syncing");
+            _logger.Debug("Finished syncing");
             _messenger.Send(new TasksSyncedMessage(true));
         }
         catch (Exception ex)
         {
-            Logger.Log($"Syncing tasks failed: {ex}");
+            _logger.Error($"Syncing tasks failed: {ex}");
             ShowToast("There was a problem synchronising tasks. Please try again.", ToastDuration.Long);
         }
     }
-    
+
     #endregion
 }

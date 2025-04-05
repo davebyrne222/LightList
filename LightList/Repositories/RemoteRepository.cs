@@ -9,10 +9,16 @@ namespace LightList.Repositories;
 public class RemoteRepository : IRemoteRepository
 {
     private static readonly HttpClient Client = new();
+    private readonly ILogger _logger;
+
+    public RemoteRepository(ILogger logger)
+    {
+        _logger = logger;
+    }
 
     public async Task<List<Models.Task?>> GetUserTasks(AuthTokens accessToken, DateTime? lastSyncDate)
     {
-        Logger.Log($"Retrieving remote tasks (lastSyncDate: {(lastSyncDate.HasValue ? lastSyncDate : "NA")})");
+        _logger.Debug($"Retrieving remote tasks (lastSyncDate: {(lastSyncDate.HasValue ? lastSyncDate : "NA")})");
 
         var syncDate = lastSyncDate.HasValue ? AwsDatetimeConverter(lastSyncDate.Value) : "";
 
@@ -34,7 +40,7 @@ public class RemoteRepository : IRemoteRepository
 
     public async Task PushUserTask(AuthTokens accessToken, Models.Task task)
     {
-        Logger.Log($"Pushing task to remote (task: {task.Id})");
+        _logger.Debug($"Pushing task to remote (task: {task.Id})");
 
         var escapedData = JsonSerializer.Serialize(task)
             .Replace("\\", "\\\\")
@@ -57,14 +63,14 @@ public class RemoteRepository : IRemoteRepository
 
         await ExecuteQuery(accessToken.AccessToken, query);
 
-        Logger.Log("Change pushed successfully");
+        _logger.Debug("Change pushed successfully");
     }
 
     #region Utils
 
     private async Task<string> ExecuteQuery(string accessToken, string query)
     {
-        Logger.Log("Executing query");
+        _logger.Debug("Executing query");
 
         var request = new HttpRequestMessage(HttpMethod.Post, Constants.AppSyncEndpoint)
         {
@@ -78,18 +84,18 @@ public class RemoteRepository : IRemoteRepository
         if (!response.IsSuccessStatusCode)
         {
             var msg = $"Query failed: {response.StatusCode} - {response.ReasonPhrase}";
-            Logger.Log(msg);
+            _logger.Debug(msg);
             throw new HttpRequestException(msg);
         }
 
-        Logger.Log("Query succeeded");
+        _logger.Debug("Query succeeded");
 
         return CheckAppSyncResponse(await response.Content.ReadAsStringAsync());
     }
 
-    private static string CheckAppSyncResponse(string contentString)
+    private string CheckAppSyncResponse(string contentString)
     {
-        Logger.Log("Checking app sync response for errors");
+        _logger.Debug("Checking app sync response for errors");
 
         AppSyncGenericResponse? contentJson;
         try
@@ -98,7 +104,7 @@ public class RemoteRepository : IRemoteRepository
         }
         catch (JsonException ex)
         {
-            Logger.Log($"De-serialisation failed: {ex.Message}");
+            _logger.Error($"De-serialisation failed: {ex.Message}");
             throw;
         }
 
@@ -107,21 +113,21 @@ public class RemoteRepository : IRemoteRepository
             var errors = string.Empty;
             foreach (var error in contentJson.Errors)
             {
-                Logger.Log($"AppSync error: {error.Message}");
+                _logger.Debug($"AppSync error: {error.Message}");
                 errors += error.Message + Environment.NewLine;
             }
 
             throw new ArgumentException(errors);
         }
 
-        Logger.Log("No errors found");
+        _logger.Debug("No errors found");
 
         return contentString;
     }
 
-    private static List<Models.Task?> DeserializeUserTasks(string response)
+    private List<Models.Task?> DeserializeUserTasks(string response)
     {
-        Logger.Log("Deserializing response");
+        _logger.Debug("Deserializing response");
 
         if (string.IsNullOrEmpty(response))
             throw new ArgumentNullException(nameof(response));
@@ -133,7 +139,8 @@ public class RemoteRepository : IRemoteRepository
             if (result == null)
                 throw new NullReferenceException("Deserializing failed: Response is null");
 
-            Logger.Log($"Successfully deserialized response: {result.Data.UserTasks?.Count ?? 0} user tasks retrieved");
+            _logger.Debug(
+                $"Successfully deserialized response: {result.Data.UserTasks?.Count ?? 0} user tasks retrieved");
 
             if (result.Data.UserTasks == null)
                 return [];
@@ -144,14 +151,14 @@ public class RemoteRepository : IRemoteRepository
         }
         catch (Exception ex)
         {
-            Logger.Log($"Deserialization failed: {ex.Message}");
+            _logger.Error($"Deserialization failed: {ex.Message}");
             throw;
         }
     }
 
-    private static Models.Task? ConvertToTaskModel(AppSyncUserTask response)
+    private Models.Task? ConvertToTaskModel(AppSyncUserTask response)
     {
-        Logger.Log("Converting task response to model");
+        _logger.Debug("Converting task response to model");
         var task = JsonSerializer.Deserialize<Models.Task>(response.Data);
         if (task is not null)
             task.UpdatedOnDate = response.UpdatedAt;

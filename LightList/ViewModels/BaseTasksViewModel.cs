@@ -6,12 +6,27 @@ using LightList.Utils;
 
 namespace LightList.ViewModels;
 
-public class BaseTasksViewModel: INotifyPropertyChanged
+public class BaseTasksViewModel : INotifyPropertyChanged
 {
+    private readonly ILogger _logger;
+    private ObservableCollection<TaskViewModel> _tasks = new();
+
+    public BaseTasksViewModel(
+        ITaskViewModelFactory taskViewModelFactory,
+        ITasksService tasksService,
+        IMessenger messenger,
+        ILogger logger)
+    {
+        TaskViewModelFactory = taskViewModelFactory;
+        TasksService = tasksService;
+        Messenger = messenger;
+        _logger = logger;
+    }
+
     protected ITaskViewModelFactory TaskViewModelFactory { get; }
     protected ITasksService TasksService { get; }
     protected IMessenger Messenger { get; }
-    private ObservableCollection<TaskViewModel> _tasks = new();
+
     public ObservableCollection<TaskViewModel> AllTasks
     {
         get => _tasks;
@@ -24,18 +39,12 @@ public class BaseTasksViewModel: INotifyPropertyChanged
             }
         }
     }
+
     public event PropertyChangedEventHandler? PropertyChanged = delegate { };
 
-    public BaseTasksViewModel(ITaskViewModelFactory taskViewModelFactory, ITasksService tasksService, IMessenger messenger)
-    {
-        TaskViewModelFactory = taskViewModelFactory;
-        TasksService = tasksService;
-        Messenger = messenger;
-    }
-    
     private void OnPropertyChanged(string propertyName)
     {
-        Logger.Log($"PropertyChanged: {propertyName}");
+        _logger.Debug($"PropertyChanged: {propertyName}");
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

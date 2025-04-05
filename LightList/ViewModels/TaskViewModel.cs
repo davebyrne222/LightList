@@ -11,13 +11,16 @@ namespace LightList.ViewModels;
 
 public class TaskViewModel : ObservableObject, IQueryAttributable
 {
+    private readonly ILogger _logger;
     private readonly IMessenger _messenger;
     private readonly ITasksService _tasksService;
     private Task _task;
 
-    public TaskViewModel(ITasksService tasksService, IMessenger messenger, Task task)
+    public TaskViewModel(ITasksService tasksService, IMessenger messenger, ILogger logger, Task task)
     {
-        Logger.Log("Initializing");
+        _logger = logger;
+        _logger.Debug("Initializing");
+
         _tasksService = tasksService;
         _messenger = messenger;
         _task = task;
@@ -94,7 +97,7 @@ public class TaskViewModel : ObservableObject, IQueryAttributable
             if (_task.Complete != value)
             {
                 _task.Complete = value;
-                Logger.Log($"Complete changed: {value}");
+                _logger.Debug($"Complete changed: {value}");
                 OnPropertyChanged();
             }
         }
@@ -106,7 +109,7 @@ public class TaskViewModel : ObservableObject, IQueryAttributable
 
     async void IQueryAttributable.ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        Logger.Log("Applying query attributes");
+        _logger.Debug("Applying query attributes");
         if (query.ContainsKey("load"))
         {
             await LoadTaskAsync(query["load"].ToString()!);
@@ -116,16 +119,16 @@ public class TaskViewModel : ObservableObject, IQueryAttributable
 
     private async System.Threading.Tasks.Task LoadTaskAsync(string id)
     {
-        Logger.Log($"Loading task (id={id})");
+        _logger.Debug($"Loading task (id={id})");
         _task = await _tasksService.GetTask(id);
     }
 
     private async System.Threading.Tasks.Task SaveTaskAsync()
     {
-        Logger.Log($"Saving task (id={_task.Id})");
+        _logger.Debug($"Saving task (id={_task.Id})");
         await _tasksService.SaveTask(_task);
 
-        Logger.Log($"Saved task. Sending Message (id={_task.Id})");
+        _logger.Debug($"Saved task. Sending Message (id={_task.Id})");
         _messenger.Send(new TaskSavedMessage(_task.Id));
 
         await Shell.Current.GoToAsync("..");
@@ -133,11 +136,11 @@ public class TaskViewModel : ObservableObject, IQueryAttributable
 
     private async System.Threading.Tasks.Task CompleteTaskAsync()
     {
-        Logger.Log($"Completing task id={_task.Id}");
+        _logger.Debug($"Completing task id={_task.Id}");
         Complete = true;
         await _tasksService.SaveTask(_task);
 
-        Logger.Log($"Saved task (id={_task.Id})");
+        _logger.Debug($"Saved task (id={_task.Id})");
         _messenger.Send(new TaskCompletedMessage(_task.Id));
 
         await Shell.Current.GoToAsync("..");
@@ -145,26 +148,26 @@ public class TaskViewModel : ObservableObject, IQueryAttributable
 
     private async System.Threading.Tasks.Task DeleteTaskAsync()
     {
-        Logger.Log($"Deleted task id={_task.Id}");
+        _logger.Debug($"Deleted task id={_task.Id}");
         _tasksService.DeleteTask(_task);
 
-        Logger.Log("Sending deleted message");
+        _logger.Debug("Sending deleted message");
         _messenger.Send(new TaskDeletedMessage(_task.Id));
 
-        Logger.Log("Navigating to previous page");
+        _logger.Debug("Navigating to previous page");
         await Shell.Current.GoToAsync("..");
     }
 
     public async System.Threading.Tasks.Task Reload()
     {
-        Logger.Log($"Reloading task id={_task.Id}");
+        _logger.Debug($"Reloading task id={_task.Id}");
         await LoadTaskAsync(_task.Id);
         RefreshProperties();
     }
 
     private void RefreshProperties()
     {
-        Logger.Log("Refreshing properties");
+        _logger.Debug("Refreshing properties");
         OnPropertyChanged(nameof(Text));
         OnPropertyChanged(nameof(DueDate));
         OnPropertyChanged(nameof(NoDaysRemaining));

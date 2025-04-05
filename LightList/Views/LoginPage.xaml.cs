@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LightList.Services;
 using LightList.Utils;
 
@@ -11,13 +6,15 @@ namespace LightList.Views;
 public partial class LoginPage : ContentPage
 {
     private readonly IAuthService _authService;
-    
-    public LoginPage(IAuthService authService)
+    private readonly ILogger _logger;
+
+    public LoginPage(ILogger logger, IAuthService authService)
     {
-        Logger.Log("Initializing");
+        _logger = logger;
+        _logger.Debug("Initializing");
         InitializeComponent();
         _authService = authService;
-        Logger.Log("Initialized");
+        _logger.Debug("Initialized");
     }
 
     protected override async void OnNavigatedTo(NavigatedToEventArgs args)
@@ -28,8 +25,7 @@ public partial class LoginPage : ContentPage
 
     private async Task ManageLogin()
     {
-     
-        bool loggedIn = await LoginAsync();
+        var loggedIn = await LoginAsync();
 
         if (loggedIn)
         {
@@ -41,40 +37,36 @@ public partial class LoginPage : ContentPage
             SignInBtn.IsVisible = true;
         }
     }
-    
+
     private async Task<bool> LoginAsync()
     {
-        Logger.Log("Logging in");
-        
+        _logger.Debug("Logging in");
+
         try
         {
-            bool loggedIn = await _authService.SignInAsync();
-            Logger.Log($"Successfully Logged In: {loggedIn}");
+            var loggedIn = await _authService.SignInAsync();
+            _logger.Debug($"Successfully Logged In: {loggedIn}");
             return loggedIn;
         }
         catch (Exception ex)
         {
-            Logger.Log($"AuthError: {ex.Message}");
-            
+            _logger.Error($"AuthError: {ex.Message}");
+
             // Ensure UI is presented - web authenticator view may still be visible
-            MainThread.BeginInvokeOnMainThread(async void () =>
-            {
-                await DisplayAlert("AuthError", ex.Message, "OK");
-            });
-            
+            MainThread.BeginInvokeOnMainThread(async void () => { await DisplayAlert("AuthError", ex.Message, "OK"); });
+
             return false;
         }
     }
 
     public async void OnLoginButtonClicked(object sender, EventArgs e)
     {
-        Logger.Log("Login button clicked");
+        _logger.Debug("Login button clicked");
         await ManageLogin();
     }
-    
+
     public async void OnCloseButtonClicked(object sender, EventArgs e)
     {
-        await Shell.Current.GoToAsync($"..", true);
+        await Shell.Current.GoToAsync("..", true);
     }
-    
 }

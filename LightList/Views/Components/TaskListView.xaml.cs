@@ -11,6 +11,7 @@ public partial class TaskListView : ContentView
 {
     #region Fields
 
+    private readonly ILogger _logger;
     private readonly ITaskViewModelFactory _taskViewModelFactory;
     private readonly ITasksService _tasksService;
 
@@ -36,13 +37,16 @@ public partial class TaskListView : ContentView
     public TaskListView() : this(
         MauiProgram.GetService<ITaskViewModelFactory>(),
         MauiProgram.GetService<ITasksService>(),
-        MauiProgram.GetService<IMessenger>())
+        MauiProgram.GetService<IMessenger>(),
+        MauiProgram.GetService<ILogger>())
     {
     }
 
-    public TaskListView(ITaskViewModelFactory taskViewModelFactory, ITasksService tasksService, IMessenger messenger)
+    public TaskListView(ITaskViewModelFactory taskViewModelFactory, ITasksService tasksService, IMessenger messenger,
+        ILogger logger)
     {
-        Logger.Log("Initializing");
+        _logger = logger;
+        _logger.Debug("Initializing");
 
         InitializeComponent();
         _taskViewModelFactory = taskViewModelFactory;
@@ -63,19 +67,19 @@ public partial class TaskListView : ContentView
     // TODO: remove? Seems redundant
     private static void OnTasksChanged(BindableObject bindable, object oldValue, object newValue)
     {
-        Logger.Log($"Bindable changed: {bindable.GetType()}");
+        Console.WriteLine($"Bindable changed: {bindable.GetType()}");
     }
 
     private async void OnTaskSelected(object sender, SelectionChangedEventArgs e)
     {
-        Logger.Log($"Selection count = {e.CurrentSelection.Count}");
+        _logger.Debug($"Selection count = {e.CurrentSelection.Count}");
 
         if (e.CurrentSelection.Count == 0)
             return;
 
         var selectedTask = e.CurrentSelection[0] as TaskViewModel;
 
-        Logger.Log($"Selected task id = {selectedTask.Id}");
+        _logger.Debug($"Selected task id = {selectedTask.Id}");
 
         if (selectedTask != null)
             await Shell.Current.GoToAsync($"{nameof(TaskPage)}?load={selectedTask.Id}");
@@ -92,7 +96,7 @@ public partial class TaskListView : ContentView
     /// <param name="taskId">Id of task that was created or updated</param>
     private async Task OnTaskSaved(string taskId)
     {
-        Logger.Log($"taskId {taskId} saved. Updating task list");
+        _logger.Debug($"taskId {taskId} saved. Updating task list");
         var task = Tasks.FirstOrDefault(n => n.Id == taskId);
 
         // Task is new
@@ -100,7 +104,7 @@ public partial class TaskListView : ContentView
         {
             task = _taskViewModelFactory.Create(await _tasksService.GetTask(taskId));
             Tasks.Insert(GetInsertionIndex(task.DueDate), task);
-            Logger.Log($"New task added (id={task.Id}) to index {Tasks.IndexOf(task)}");
+            _logger.Debug($"New task added (id={task.Id}) to index {Tasks.IndexOf(task)}");
         }
         // Task was updated
         else
@@ -108,7 +112,7 @@ public partial class TaskListView : ContentView
             await task.Reload();
             var idx = GetInsertionIndex(task.DueDate) - 1;
             Tasks.Move(Tasks.IndexOf(task), idx < 0 ? 0 : idx);
-            Logger.Log($"Updated taskId {task.Id} in tasks list to index {Tasks.IndexOf(task)}");
+            _logger.Debug($"Updated taskId {task.Id} in tasks list to index {Tasks.IndexOf(task)}");
         }
 
         ScrollToTask(task);
@@ -116,20 +120,20 @@ public partial class TaskListView : ContentView
 
     private async Task OnTaskCompleted(string taskId)
     {
-        Logger.Log($"taskId = {taskId}");
+        _logger.Debug($"taskId = {taskId}");
         var matchedTask = Tasks.FirstOrDefault(n => n.Id == taskId);
 
         if (matchedTask != null)
         {
             await matchedTask.Reload();
             Tasks.Move(Tasks.IndexOf(matchedTask), Tasks.Count - 1);
-            Logger.Log($"Updated taskId {matchedTask.Id} in tasks list");
+            _logger.Debug($"Updated taskId {matchedTask.Id} in tasks list");
         }
     }
 
     private void OnTaskDeleted(string taskId)
     {
-        Logger.Log($"taskId = {taskId}");
+        _logger.Debug($"taskId = {taskId}");
         var matchedTask = Tasks.FirstOrDefault(n => n.Id == taskId);
 
         if (matchedTask != null)
@@ -151,7 +155,7 @@ public partial class TaskListView : ContentView
     /// <returns></returns>
     private int GetInsertionIndex(DateTime dueDate)
     {
-        Logger.Log("Inserting task");
+        _logger.Debug("Inserting task");
 
         // Insert before incomplete task with the next due date but
         var insertBeforeTask = Tasks.FirstOrDefault(t => t.DueDate > dueDate && t.Complete == false);
@@ -159,15 +163,16 @@ public partial class TaskListView : ContentView
         // If no incomplete tasks with later due date, add before completed tasks
         if (insertBeforeTask == null)
         {
-            Logger.Log("No incomplete task with greater due date found. Searching for complete tasks");
+            _logger.Debug("No incomplete task with greater due date found. Searching for complete tasks");
             insertBeforeTask = Tasks.FirstOrDefault(t => t.Complete);
         }
 
         // if no complete tasks, insert at end
         if (insertBeforeTask == null)
-            Logger.Log($"No complete tasks found. Inserting at end (idx={Tasks.Count})");
+            _logger.Debug($"No complete tasks found. Inserting at end (idx={Tasks.Count})");
         else
-            Logger.Log($"Inserting before task id {insertBeforeTask.Id} with index {Tasks.IndexOf(insertBeforeTask)}");
+            _logger.Debug(
+                $"Inserting before task id {insertBeforeTask.Id} with index {Tasks.IndexOf(insertBeforeTask)}");
 
         return insertBeforeTask == null ? Tasks.Count : Tasks.IndexOf(insertBeforeTask);
     }
@@ -178,7 +183,7 @@ public partial class TaskListView : ContentView
     /// <param name="task">Task to be scrolled into view</param>
     private void ScrollToTask(TaskViewModel task)
     {
-        Logger.Log($"Scrolling taskId {task.Id} into view");
+        _logger.Debug($"Scrolling taskId {task.Id} into view");
 
         if (TasksCollection != null) TasksCollection.ScrollTo(task, null, ScrollToPosition.Center);
     }

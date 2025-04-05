@@ -5,7 +5,13 @@ namespace LightList.Data;
 
 public class TasksDatabase
 {
+    private readonly ILogger _logger;
     private SQLiteAsyncConnection? _database;
+
+    public TasksDatabase(ILogger logger)
+    {
+        _logger = logger;
+    }
 
     private SQLiteAsyncConnection Database => _database ??=
         new SQLiteAsyncConnection(
@@ -15,9 +21,9 @@ public class TasksDatabase
 
     public async Task InitialiseAsync()
     {
-        Logger.Log("Creating tables");
+        _logger.Debug("Creating tables");
         var result = await Database.CreateTableAsync<Models.Task>();
-        Logger.Log($"Tables: {result}");
+        _logger.Debug($"Tables: {result}");
     }
 
     /**
@@ -25,7 +31,7 @@ public class TasksDatabase
      */
     public async Task<List<Models.Task>> GetItemsAsync()
     {
-        Logger.Log("Retrieving all tasks");
+        _logger.Debug("Retrieving all tasks");
 
         var tasks = await Database.Table<Models.Task>()
             .OrderBy(t => t.CompleteOnDate)
@@ -33,7 +39,7 @@ public class TasksDatabase
             .OrderBy(t => t.DueDate)
             .ToListAsync();
 
-        Logger.Log($"Retrieved {tasks.Count} tasks");
+        _logger.Debug($"Retrieved {tasks.Count} tasks");
 
         return tasks;
     }
@@ -43,20 +49,20 @@ public class TasksDatabase
      */
     public async Task<List<Models.Task>> GetNotSyncedAsync()
     {
-        Logger.Log("Retrieving tasks that are not synced");
+        _logger.Debug("Retrieving tasks that are not synced");
 
         var tasks = await Database.Table<Models.Task>()
             .Where(t => t.IsSynced == false)
             .ToListAsync();
 
-        Logger.Log($"Retrieved {tasks.Count} tasks");
+        _logger.Debug($"Retrieved {tasks.Count} tasks");
 
         return tasks;
     }
 
     public async Task<Models.Task> GetItemByIdAsync(string id)
     {
-        Logger.Log($"Retrieving task (id={id})");
+        _logger.Debug($"Retrieving task (id={id})");
         return await Database.Table<Models.Task>().Where(i => i.Id == id).FirstOrDefaultAsync();
     }
 
@@ -69,7 +75,7 @@ public class TasksDatabase
 
     public async Task<string> SaveItemAsync(Models.Task item)
     {
-        Logger.Log($"Storing task id={item.Id}");
+        _logger.Debug($"Storing task id={item.Id}");
 
         var nRowsUpdated = 0;
 
@@ -77,18 +83,18 @@ public class TasksDatabase
         {
             if (await TaskExistsAsync(item.Id))
             {
-                Logger.Log("Task already exists. Updating");
+                _logger.Debug("Task already exists. Updating");
                 nRowsUpdated = await Database.UpdateAsync(item);
             }
             else
             {
-                Logger.Log("Task is new. Adding");
+                _logger.Debug("Task is new. Adding");
                 nRowsUpdated = await Database.InsertAsync(item);
             }
         }
         catch (SQLiteException ex)
         {
-            Logger.Log($"Database error on save: {ex.GetType()} - {ex.Message}");
+            _logger.Error($"Database error on save: {ex.GetType()} - {ex.Message}");
             throw;
         }
 
@@ -100,7 +106,7 @@ public class TasksDatabase
 
     public async Task<int> DeleteItemAsync(Models.Task item)
     {
-        Logger.Log($"Deleting task (id={item.Id})");
+        _logger.Debug($"Deleting task (id={item.Id})");
         return await Database.DeleteAsync(item);
     }
 }
