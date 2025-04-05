@@ -17,11 +17,12 @@ public class TasksByDueDateViewModel : BaseTasksViewModel
         ILogger logger) : base(taskViewModelFactory, tasksService, messenger, logger)
     {
         _logger = logger;
-        _ = InitializeTasks();
-        Messenger.Register<TasksSyncedMessage>(this, async (recipient, _) => { await InitializeTasks(); });
+        // _ = SetTasks();
+        Task.Run(async () => await SetTasks()).Wait();
+        Messenger.Register<TasksSyncedMessage>(this, async (recipient, _) => { await SetTasks(); });
     }
 
-    private async Task InitializeTasks()
+    private async Task SetTasks()
     {
         var tasks = await TasksService.GetTasks();
         AllTasks = new ObservableCollection<TaskViewModel>(tasks.Select(n => TaskViewModelFactory.Create(n)));
