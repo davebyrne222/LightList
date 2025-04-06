@@ -1,21 +1,31 @@
 using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.Messaging;
+using LightList.Messages;
 using LightList.Services;
 using LightList.Utils;
 
 namespace LightList.ViewModels;
 
-public class TasksByLabelViewModel: BaseTasksViewModel
-{ 
-    public TasksByLabelViewModel(ITaskViewModelFactory taskViewModelFactory, ITasksService tasksService) : base(taskViewModelFactory, tasksService)
+public class TasksByLabelViewModel : BaseTasksViewModel
+{
+    private readonly ILogger _logger;
+
+    public TasksByLabelViewModel(
+        ITaskViewModelFactory taskViewModelFactory,
+        ITasksService tasksService,
+        IMessenger messenger,
+        ILogger logger) : base(taskViewModelFactory, tasksService, messenger, logger)
     {
-        _ = InitializeTasks();
+        _logger = logger;
+        // _ = SetTasks();
+        Task.Run(async () => await SetTasks()).Wait();
+        Messenger.Register<TasksSyncedMessage>(this, async (recipient, _) => { await SetTasks(); });
     }
 
-    private async Task InitializeTasks()
+    private async Task SetTasks()
     {
         var tasks = await TasksService.GetTasks();
         AllTasks = new ObservableCollection<TaskViewModel>(tasks.Select(n => TaskViewModelFactory.Create(n)));
-        Logger.Log($"Retrieved {AllTasks.Count} tasks");
-
+        _logger.Debug($"Retrieved {AllTasks.Count} tasks");
     }
 }

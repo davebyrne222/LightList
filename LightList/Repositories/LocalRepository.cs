@@ -1,40 +1,41 @@
-using System.Text.Json;
 using LightList.Data;
 using LightList.Utils;
+using Task = LightList.Models.Task;
 
 namespace LightList.Repositories;
 
-public class LocalRepository: ILocalRepository
+public class LocalRepository : ILocalRepository
 {
     private readonly TasksDatabase _database;
+    private readonly ILogger _logger;
 
-    public LocalRepository(TasksDatabase database)
+    public LocalRepository(TasksDatabase database, ILogger logger)
     {
         _database = database;
-    }
-    
-    public async Task<List<Models.Task>> GetAll()
-    {
-        Logger.Log("Getting all tasks");
-        return await _database.GetItemsAsync();
-    }
-    
-    public async Task<Models.Task> Get(int id)
-    {
-        Logger.Log($"Getting task (id={id})");
-        return await _database.GetItemAsync(id);
+        _logger = logger;
     }
 
-    public async Task<int> Save(Models.Task task)
+    public async Task<List<Task>> GetAll(bool excludeSynced = false, bool excludeDeleted = true)
     {
-        Logger.Log($"Saving task (id={task.Id}, Default Id: {task.Id == default})");
-        task.UpdatedOnDate = DateTime.Now;
+        _logger.Debug($"Getting all tasks (excludeSynced: {excludeSynced}, excludeDeleted: {excludeDeleted})");
+        return await _database.GetItemsAsync(excludeSynced, excludeDeleted);
+    }
+
+    public async Task<Task> Get(string id)
+    {
+        _logger.Debug($"Getting task (id={id})");
+        return await _database.GetItemByIdAsync(id);
+    }
+
+    public async Task<string> Save(Task task)
+    {
+        _logger.Debug($"Saving task id={task.Id}");
         return await _database.SaveItemAsync(task);
     }
 
-    public async void Delete(Models.Task task)
+    public async void Delete(Task task)
     {
-        Logger.Log($"Deleting task (id={task.Id})");
+        _logger.Debug($"Deleting task (id={task.Id})");
         await _database.DeleteItemAsync(task);
     }
 }

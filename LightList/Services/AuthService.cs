@@ -1,36 +1,38 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Authentication;
-using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json;
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
 using Amazon.Runtime;
-using CommunityToolkit.Maui.Core.Views;
 using LightList.Models;
 using LightList.Repositories;
 using LightList.Utils;
-using Task = System.Threading.Tasks.Task;
 
 namespace LightList.Services;
 
-public class AuthService: IAuthService
+public class AuthService : IAuthService
 {
+    private readonly ILogger _logger;
     private readonly ISecureStorageRepository _secureStorage;
     private AmazonCognitoIdentityProviderClient? _provider;
-    private AmazonCognitoIdentityProviderClient Provider => _provider ??=
-        new AmazonCognitoIdentityProviderClient(new AnonymousAWSCredentials(), Constants.AwsRegion);
-    
-    public AuthService(ISecureStorageRepository repository)
+
+    public AuthService(ILogger logger, ISecureStorageRepository repository)
     {
-        Logger.Log("Initializing");
+        _logger = logger;
+        _logger.Debug("Initializing");
         _secureStorage = repository;
-        Logger.Log("Initialized");
+        _logger.Debug("Initialized");
     }
 
+    private AmazonCognitoIdentityProviderClient Provider => _provider ??=
+        new AmazonCognitoIdentityProviderClient(new AnonymousAWSCredentials(), Constants.AwsRegion);
+
     #region Public Methods
+
     public async Task<bool> SignInAsync()
     {
-        Logger.Log($"Redirecting to Cognito Auth: {new Uri(Constants.CognitoAuthUrl)}");
+        _logger.Debug($"Redirecting to Cognito Auth: {new Uri(Constants.CognitoAuthUrl)}");
 
         try
         {
@@ -39,7 +41,7 @@ public class AuthService: IAuthService
                 new Uri(Constants.AuthRedirectUrl)
             );
 
-            Logger.Log($"Authenticated: {authResult.Properties["code"] != null}");
+            _logger.Debug($"Authenticated: {authResult.Properties["code"] != null}");
 
             if (authResult.Properties["code"] != null)
                 return await ExchangeCodeForTokensAsync(authResult.Properties["code"]);
@@ -50,26 +52,25 @@ public class AuthService: IAuthService
         }
         catch (Exception ex)
         {
-            Logger.Log($"Exception while signing in: {ex.GetType().FullName} - {ex.Message}");
+            _logger.Error($"Exception while signing in: {ex.GetType().FullName} - {ex.Message}");
         }
-        
+
         return false;
     }
 
     public async Task<bool> SignOutAsync()
     {
-
         // Sign out from cognito
-        Logger.Log($"Signing out: requesting cognito sign out");
+        _logger.Debug("Signing out: requesting cognito sign out");
 
-        AuthTokens? tokens = await _secureStorage.GetAuthTokensAsync();
-        
+        var tokens = await _secureStorage.GetAuthTokensAsync();
+
         if (tokens == null)
             return true;
 
-        GlobalSignOutRequest request = new GlobalSignOutRequest
+        var request = new GlobalSignOutRequest
         {
-            AccessToken = tokens?.AccessToken
+            AccessToken = tokens.AccessToken
         };
 
         try
@@ -79,51 +80,50 @@ public class AuthService: IAuthService
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error signing out from cognito: {ex.GetType().FullName} - {ex.Message}");
-            return false;   
+            _logger.Error($"Error signing out from cognito: {ex.GetType().FullName} - {ex.Message}");
         }
-        
+
         // Delete stored tokens
         _secureStorage.DeleteAuthTokens();
 
         return true;
     }
 
-    #endregion
-
     public async Task<bool> IsUserLoggedIn()
     {
-        Logger.Log("Checking if user is logged in");
-        
-        AuthTokens? authTokens = await _secureStorage.GetAuthTokensAsync();
+        _logger.Debug("Checking if user is logged in");
+
+        var authTokens = await _secureStorage.GetAuthTokensAsync();
 
         if (authTokens == null)
         {
-            Logger.Log("No auth tokens found");
+            _logger.Debug("No auth tokens found");
             return false;
         }
-        
-        // Check if access token is valid - if it is, user is logged in
-        Logger.Log("Tokens found. Checking if expired");
-        bool tokenExpired = IsTokenExpired(authTokens.AccessToken);
 
-        if (!tokenExpired)
+        // Check if access token is valid - if it is, user is logged in
+        if (!IsTokenExpired(authTokens.AccessToken))
         {
-            Logger.Log("Token valid. User is logged in");
+            _logger.Debug("Token valid. User is logged in");
             return true;
         }
-        
+
         // If access token expired, refresh
-        Logger.Log("Token expired. Requesting refresh");
-        return await RefreshAccessTokenAsync(authTokens.RefreshToken);
+        _logger.Debug("Token expired. Requesting refresh");
+        var refreshed = await RefreshAccessTokenAsync(authTokens);
+
+        _logger.Debug($"Access token refreshed: {refreshed}");
+        return refreshed;
     }
+
+    #endregion
 
     #region Utils
 
     private async Task<bool> ExchangeCodeForTokensAsync(string authCode)
     {
-        Logger.Log("Exchanging auth code for JWTs");
-        
+        _logger.Debug("Exchanging auth code for JWTs");
+
         // Exchange code
         var client = new HttpClient();
         var requestBody = new FormUrlEncodedContent(new Dictionary<string, string>
@@ -134,70 +134,80 @@ public class AuthService: IAuthService
             { "redirect_uri", Constants.AuthRedirectUrl }
         });
 
-        HttpResponseMessage response = await client.PostAsync(Constants.CognitoTokenExchangeUrl, requestBody);
+        var response = await client.PostAsync(Constants.CognitoTokenExchangeUrl, requestBody);
 
         if (!response.IsSuccessStatusCode)
         {
-            Logger.Log($"Exchange failed: {response.StatusCode} - {response.ReasonPhrase}");
+            _logger.Debug($"Exchange failed: {response.StatusCode} - {response.ReasonPhrase}");
             return false;
         }
-        
-        Logger.Log($"Exchange successful. Saving tokens");
-        
+
+        _logger.Debug("Exchange successful. Saving tokens");
+
         // save tokens
         try
         {
-            string authString = await response.Content.ReadAsStringAsync();
-            return _secureStorage.SaveAuthTokensAsync(authString).IsCompletedSuccessfully;
+            var authString = await response.Content.ReadAsStringAsync();
+            return await _secureStorage.SaveAuthTokensAsync(authString);
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error storing access tokens: {ex.Message}");
+            _logger.Error($"Error storing access tokens: {ex.Message}");
             throw;
         }
     }
 
-    private async Task<bool> RefreshAccessTokenAsync(string refreshToken)
+    private async Task<bool> RefreshAccessTokenAsync(AuthTokens authTokens)
     {
-        Logger.Log("Refreshing access token");
-        
+        _logger.Debug("Refreshing access token");
+
         // Request new token
         var request = new InitiateAuthRequest
         {
             AuthFlow = AuthFlowType.REFRESH_TOKEN_AUTH,
             ClientId = Constants.CognitoAppClientId,
-            AuthParameters = new Dictionary<string, string> { { "REFRESH_TOKEN", refreshToken } }
+            AuthParameters = new Dictionary<string, string> { { "REFRESH_TOKEN", authTokens.RefreshToken } }
         };
 
         InitiateAuthResponse response;
-        
+
         try
         {
             response = await Provider.InitiateAuthAsync(request);
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error refreshing auth tokens: {ex.GetType().FullName} - {ex.Message}");
+            _logger.Error($"Error refreshing auth tokens: {ex.GetType().FullName} - {ex.Message}");
             throw;
         }
-        
-        if (response.HttpStatusCode != HttpStatusCode.OK)
-            throw new AuthenticationException($"Failed to refresh access token. HTTP Status: {response.HttpStatusCode} (Challenge: {response.ChallengeName})");
-            
-        if (response.AuthenticationResult == null)
-            throw new AuthenticationException($"Failed to refresh access token. AuthenticationResult == null");
-            
-        // Save new token
-        Logger.Log("Token refreshed. Saving");
-        string tokenString = JsonSerializer.Serialize(response.AuthenticationResult);
-        return _secureStorage.SaveAuthTokensAsync(tokenString).IsCompletedSuccessfully;
 
+        if (response.HttpStatusCode != HttpStatusCode.OK)
+            throw new AuthenticationException(
+                $"Failed to refresh access token. HTTP Status: {response.HttpStatusCode} (Challenge: {response.ChallengeName})");
+
+        if (response.AuthenticationResult == null)
+            throw new AuthenticationException("Failed to refresh access token. AuthenticationResult == null");
+
+        // Save new token
+        _logger.Debug("Token refreshed. Saving");
+
+        try
+        {
+            authTokens.AccessToken = response.AuthenticationResult.AccessToken;
+            var tokenString = JsonSerializer.Serialize(authTokens);
+            return await _secureStorage.SaveAuthTokensAsync(tokenString);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Error storing access tokens: {ex.Message}");
+            throw;
+        }
     }
-    
-    private static bool IsTokenExpired(string token)
+
+    private bool IsTokenExpired(string token)
     {
-        Logger.Log("Checking if access token is expired");
-        
+        _logger.Debug("Checking if access token is expired");
+
         // Get 'exp' claim
         JwtSecurityTokenHandler handler = new();
         var jwtToken = handler.ReadJwtToken(token);
@@ -206,18 +216,18 @@ public class AuthService: IAuthService
         // If no 'exp' claim, token is _likely_ valid (may not be on auth server)
         if (string.IsNullOrEmpty(expiry))
         {
-            Logger.Log("No expiry claim found");
+            _logger.Debug("No expiry claim found");
             return false;
         }
 
         // Check if exp has passed
-        DateTime expDateTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(expiry)).UtcDateTime;
-        bool expired = expDateTime < DateTime.UtcNow;
-        
-        Logger.Log($"Token expired: {expired} (expiry: {expDateTime})");
-        
+        var expDateTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(expiry)).UtcDateTime;
+        var expired = expDateTime < DateTime.UtcNow;
+
+        _logger.Debug($"Token expired: {expDateTime} < {DateTime.UtcNow}: {expired}");
+
         return expired;
     }
-    
+
     #endregion
 }

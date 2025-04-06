@@ -6,7 +6,10 @@ namespace LightList.Repositories;
 
 public interface ISecureStorageRepository
 {
-    Task SaveAuthTokensAsync(string tokensString);
+    Task<bool> SaveAuthTokensAsync(string tokensString);
     Task<AuthTokens?> GetAuthTokensAsync();
     void DeleteAuthTokens();
+    Task SaveLastSyncDateAsync(DateTime lastSyncDate);
+    Task<DateTime?> GetLastSyncDateAsync();
+    public void DeleteLastSyncDate();
 }

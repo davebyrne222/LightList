@@ -1,42 +1,52 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
-using CommunityToolkit.Maui;
-using Microsoft.Extensions.Logging;
+﻿using CommunityToolkit.Maui;
+using CommunityToolkit.Mvvm.Messaging;
+using LightList.Data;
+using LightList.Models;
 using LightList.Repositories;
 using LightList.Services;
+using LightList.Utils;
 using LightList.ViewModels;
 using LightList.Views;
 using LightList.Views.Components;
-using LightList.Data;
-using LightList.Utils;
+using Microsoft.Extensions.Logging;
+using ILogger = LightList.Utils.ILogger;
+using Task = System.Threading.Tasks.Task;
 
 namespace LightList;
 
 public static class MauiProgram
 {
     private static IServiceProvider _serviceProvider = null!;
+    private static LoggerContext _loggerContext = null!;
+    private static ILogger _logger = null!;
 
     public static TService? GetService<TService>()
-        => _serviceProvider.GetService<TService>();
-    
+    {
+        return _serviceProvider.GetService<TService>();
+    }
+
     public static MauiApp CreateMauiApp()
     {
-        Logger.Log("Creating MauiApp & Registering Services");
+        Console.WriteLine("Creating MauiApp & Registering Services");
 
-        MauiApp app = CreateBuilder();
-        
+        var app = CreateBuilder();
         _serviceProvider = app.Services;
+        _loggerContext = _serviceProvider.GetService<LoggerContext>()!;
+        _logger = _serviceProvider.GetService<ILogger>()!;
+        
+        _loggerContext.Group = "App Creation";
 
         try
         {
-            // _ = StartUpAsync(); // <-- async startup. App will be ready before database
             Task.Run(async () => await StartUpAsync()).Wait();
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error starting up: {ex.GetType().FullName} - {ex.Message}");
+            Console.WriteLine($"Error during init: {ex.GetType().FullName} - {ex.Message}");
             throw;
         }
-        
+
+        _loggerContext.Reset();
         return app;
     }
 
@@ -52,25 +62,31 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 fonts.AddFont("ionicons.ttf", "Ionicons");
             });
-        
+
         // Register Database
         builder.Services.AddSingleton<TasksDatabase>();
-        
+
         // Register Repositories
         builder.Services.AddSingleton<ILocalRepository, LocalRepository>();
         builder.Services.AddSingleton<ISecureStorageRepository, SecureStorageRepository>();
+        builder.Services.AddSingleton<IRemoteRepository, RemoteRepository>();
 
         // Register Services
         builder.Services.AddSingleton<ITasksService, TasksService>();
         builder.Services.AddSingleton<IAuthService, AuthService>();
-        
+        builder.Services.AddSingleton<ISyncService, SyncService>();
+
         // Register Messenger
         builder.Services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
-        
+
         // Register Models
         builder.Services.AddTransient<Models.Task>();
-        builder.Services.AddTransient<Models.AuthTokens>();
-        
+        builder.Services.AddTransient<AuthTokens>();
+        builder.Services.AddTransient<AppSyncUserTasks>();
+        builder.Services.AddTransient<AppSyncUserTask>();
+        builder.Services.AddTransient<AppSyncGenericResponse>();
+        builder.Services.AddTransient<AppSyncErrorObject>();
+
         // Register ViewModels
         builder.Services.AddSingleton<NavBarViewModel>();
         builder.Services.AddTransient<TaskViewModel>();
@@ -79,30 +95,32 @@ public static class MauiProgram
         builder.Services.AddSingleton<AllTasksViewModel>();
         builder.Services.AddSingleton<TasksByDueDateViewModel>();
         builder.Services.AddSingleton<TasksByLabelViewModel>();
-        
+
         // Register Views
+        builder.Services.AddSingleton<AppShell>();
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<TaskPage>();
         builder.Services.AddSingleton<AllTasksPage>();
         builder.Services.AddSingleton<TasksByDueDatePage>();
         builder.Services.AddSingleton<TasksByLabelPage>();
-        
+
         // Register View Components
         builder.Services.AddScoped<TaskListView>();
         builder.Services.AddSingleton<NavBar>();
-        
-        // Misc
-        builder.Services.AddSingleton<AppShell>();
+
+        // Utils
+        builder.Services.AddSingleton<LoggerContext>();
+        builder.Services.AddSingleton<ILogger, Logger>();
         
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
         return builder.Build();
     }
-    
+
     private static async Task StartUpAsync()
     {
-        Logger.Log("Starting StartUp routine");
+        _logger.Debug("Starting init routine");
 
         try
         {
@@ -110,26 +128,27 @@ public static class MauiProgram
         }
         catch (Exception ex)
         {
-            Logger.Log($"StartUp routine failed: {ex.GetType().FullName} {ex.Message}");
+            _logger.Error($"Init routine failed: {ex.GetType().FullName} {ex.Message}");
             throw;
         }
     }
-    
+
     private static async Task InitializeDatabaseAsync()
     {
-        Logger.Log("Initializing Database");
-        
+        _logger.Debug("Initializing Database");
+
         try
         {
-            TasksDatabase? dbService = GetService<TasksDatabase>();
-            await dbService?.InitialiseAsync();
+            var dbService = GetService<TasksDatabase>();
+            if (dbService is not null)
+                await dbService.InitialiseAsync();
         }
         catch (Exception ex)
         {
-            Logger.Log($"Error initialising database: {ex.GetType().FullName} - {ex.Message}");
+            _logger.Critical($"Error initialising database: {ex.GetType().FullName} - {ex.Message}");
             throw;
         }
-        
-        Logger.Log("Database initialized");
+
+        _logger.Debug("Database initialized");
     }
 }
