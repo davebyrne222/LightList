@@ -20,13 +20,20 @@ public class AllTasksViewModel : BaseTasksViewModel
         _logger = logger;
         // _ = SetTasks();
         Task.Run(async () => await SetTasks()).Wait();
-        Messenger.Register<TasksSyncedMessage>(this, async (recipient, _) => { await SetTasks(); });
+        Messenger.Register<TasksSyncedMessage>(this, async (recipient, _) => { await OnTasksSynced(); });
     }
 
     private async Task SetTasks()
     {
+        _logger.Debug("Updating all tasks");
         var tasks = await TasksService.GetTasks();
         AllTasks = new ObservableCollection<TaskViewModel>(tasks.Select(n => TaskViewModelFactory.Create(n)));
         _logger.Debug($"Retrieved {AllTasks.Count} tasks");
+    }
+
+    private async Task OnTasksSynced()
+    {
+        _logger.Debug("Updating all tasks");
+        await SetTasks();
     }
 }

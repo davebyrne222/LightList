@@ -29,42 +29,30 @@ public class TasksDatabase
     /**
      * Gets all tasks in database
      */
-    public async Task<List<Models.Task>> GetItemsAsync(bool excludeDeleted = true)
+    public async Task<List<Models.Task>> GetItemsAsync(bool excludeSynced = false, bool excludeDeleted = true)
     {
-        _logger.Debug($"Retrieving all tasks (excludeDeleted: {excludeDeleted})");
+        _logger.Debug($"Retrieving all tasks (excludeSynced: {excludeSynced}, excludeDeleted: {excludeDeleted})");
 
         var query = Database.Table<Models.Task>();
 
-        if (excludeDeleted)
-            query = query.Where(t => t.IsDeleted == false);
+        if (excludeSynced)
+            query = query.Where(task => task.IsSynced == false);
 
-        var tasks = await query
+        if (excludeDeleted)
+            query = query.Where(task => task.IsDeleted == false);
+
+        // Sort
+        query = query
             .OrderBy(t => t.CompleteAt)
             .OrderBy(t => t.IsCompleted)
-            .OrderBy(t => t.DueAt)
-            .ToListAsync();
+            .OrderBy(t => t.DueAt);
 
+        // Execute query
+        var tasks = await query.ToListAsync();
         _logger.Debug($"Retrieved {tasks.Count} tasks");
-        
         return tasks;
     }
-
-    /**
-     * Gets issues which have not been pushed to remote DB
-     */
-    public async Task<List<Models.Task>> GetNotSyncedAsync()
-    {
-        _logger.Debug("Retrieving tasks that are not synced");
-
-        var tasks = await Database.Table<Models.Task>()
-            .Where(t => t.IsSynced == false)
-            .ToListAsync();
-
-        _logger.Debug($"Retrieved {tasks.Count} tasks");
-
-        return tasks;
-    }
-
+    
     public async Task<Models.Task> GetItemByIdAsync(string id)
     {
         _logger.Debug($"Retrieving task (id={id})");

@@ -17,6 +17,7 @@ namespace LightList;
 public static class MauiProgram
 {
     private static IServiceProvider _serviceProvider = null!;
+    private static LoggerContext _loggerContext = null!;
     private static ILogger _logger = null!;
 
     public static TService? GetService<TService>()
@@ -30,7 +31,10 @@ public static class MauiProgram
 
         var app = CreateBuilder();
         _serviceProvider = app.Services;
+        _loggerContext = _serviceProvider.GetService<LoggerContext>()!;
         _logger = _serviceProvider.GetService<ILogger>()!;
+        
+        _loggerContext.Group = "App Creation";
 
         try
         {
@@ -38,10 +42,11 @@ public static class MauiProgram
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error starting up: {ex.GetType().FullName} - {ex.Message}");
+            Console.WriteLine($"Error during init: {ex.GetType().FullName} - {ex.Message}");
             throw;
         }
 
+        _loggerContext.Reset();
         return app;
     }
 
@@ -92,6 +97,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<TasksByLabelViewModel>();
 
         // Register Views
+        builder.Services.AddSingleton<AppShell>();
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<TaskPage>();
         builder.Services.AddSingleton<AllTasksPage>();
@@ -102,10 +108,10 @@ public static class MauiProgram
         builder.Services.AddScoped<TaskListView>();
         builder.Services.AddSingleton<NavBar>();
 
-        // Misc
-        builder.Services.AddSingleton<AppShell>();
+        // Utils
+        builder.Services.AddSingleton<LoggerContext>();
         builder.Services.AddSingleton<ILogger, Logger>();
-
+        
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
@@ -114,7 +120,7 @@ public static class MauiProgram
 
     private static async Task StartUpAsync()
     {
-        Console.WriteLine("Starting StartUp routine");
+        _logger.Debug("Starting init routine");
 
         try
         {
@@ -122,7 +128,7 @@ public static class MauiProgram
         }
         catch (Exception ex)
         {
-            _logger.Error($"StartUp routine failed: {ex.GetType().FullName} {ex.Message}");
+            _logger.Error($"Init routine failed: {ex.GetType().FullName} {ex.Message}");
             throw;
         }
     }

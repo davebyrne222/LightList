@@ -21,8 +21,7 @@ public partial class TaskListView : ContentView
             typeof(ObservableCollection<TaskViewModel>),
             typeof(TaskListView),
             new ObservableCollection<TaskViewModel>(),
-            BindingMode.TwoWay,
-            propertyChanged: OnTasksChanged);
+            BindingMode.TwoWay);
 
     public ObservableCollection<TaskViewModel> Tasks
     {
@@ -64,7 +63,7 @@ public partial class TaskListView : ContentView
 
     #region Event Handlers
 
-    // TODO: remove? Seems redundant
+    // TODO: remove
     private static void OnTasksChanged(BindableObject bindable, object oldValue, object newValue)
     {
         Console.WriteLine($"Bindable changed: {bindable.GetType()}");

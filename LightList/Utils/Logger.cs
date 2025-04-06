@@ -14,10 +14,12 @@ public enum LogLevel
 
 public class Logger : ILogger
 {
+    private readonly LoggerContext _context;
     private LogLevel _currentLogLevel;
 
-    public Logger(LogLevel logLevel = LogLevel.Info)
+    public Logger(LoggerContext context, LogLevel logLevel = LogLevel.Debug)
     {
+        _context = context;
         _currentLogLevel = logLevel;
     }
 
@@ -26,69 +28,51 @@ public class Logger : ILogger
         _currentLogLevel = logLevel;
     }
 
-    public void Debug(
-        string message,
+    public void Debug(string message, string? group = null,
         [CallerMemberName] string methodName = "",
-        [CallerFilePath] string filePath = "")
-    {
-        var className = Path.GetFileNameWithoutExtension(filePath);
-        Log(LogLevel.Debug, $"{className}.{methodName}", message);
-    }
+        [CallerFilePath] string filePath = "") =>
+        LogInternal(LogLevel.Debug, message, group, methodName, filePath);
 
-    public void Info(string message,
+    public void Info(string message, string? group = null,
         [CallerMemberName] string methodName = "",
-        [CallerFilePath] string filePath = "")
-    {
-        var className = Path.GetFileNameWithoutExtension(filePath);
-        Log(LogLevel.Info, $"{className}.{methodName}", message);
-    }
+        [CallerFilePath] string filePath = "") =>
+        LogInternal(LogLevel.Info, message, group, methodName, filePath);
 
-    public void Warning(string message,
+    public void Warning(string message, string? group = null,
         [CallerMemberName] string methodName = "",
-        [CallerFilePath] string filePath = "")
-    {
-        var className = Path.GetFileNameWithoutExtension(filePath);
-        Log(LogLevel.Warning, $"{className}.{methodName}", message);
-    }
+        [CallerFilePath] string filePath = "") =>
+        LogInternal(LogLevel.Warning, message, group, methodName, filePath);
 
-    public void Error(string message,
+    public void Error(string message, string? group = null,
         [CallerMemberName] string methodName = "",
-        [CallerFilePath] string filePath = "")
-    {
-        var className = Path.GetFileNameWithoutExtension(filePath);
-        Log(LogLevel.Error, $"{className}.{methodName}", message);
-    }
+        [CallerFilePath] string filePath = "") =>
+        LogInternal(LogLevel.Error, message, group, methodName, filePath);
 
-    public void Critical(string message,
+    public void Critical(string message, string? group = null,
         [CallerMemberName] string methodName = "",
-        [CallerFilePath] string filePath = "")
-    {
-        var className = Path.GetFileNameWithoutExtension(filePath);
-        Log(LogLevel.Critical, $"{className}.{methodName}", message);
-    }
+        [CallerFilePath] string filePath = "") =>
+        LogInternal(LogLevel.Critical, message, group, methodName, filePath);
 
-    private void Log(
-        LogLevel logLevel,
-        string caller,
-        string message
-    )
+    private void LogInternal(LogLevel logLevel, string message, string? group, string methodName, string filePath)
     {
         if (logLevel < _currentLogLevel) return;
-        
-        var prefix = GetPrefixForLogLevel(logLevel);
-        Console.WriteLine($"[{prefix,-7}] [{caller,-50}] - {message}");
+
+        string groupName = group ?? _context.Group;
+        string levelName = Enum.GetName(typeof(LogLevel), logLevel) ?? "NA";
+        string className = Path.GetFileNameWithoutExtension(filePath);
+
+        LogToConsole(levelName, message, groupName, className, methodName);
     }
 
-    private string GetPrefixForLogLevel(LogLevel level)
+    // Log to console or if not available, whatever the standard output is
+    private void LogToConsole(
+        string logLevel,
+        string message,
+        string group,
+        string? className = null,
+        string? methodName = null
+    )
     {
-        return level switch
-        {
-            LogLevel.Debug => "DEBUG",
-            LogLevel.Info => "INFO",
-            LogLevel.Warning => "WARNING",
-            LogLevel.Error => "ERROR",
-            LogLevel.Critical => "CRITICAL",
-            _ => "NA"
-        };
+        Console.WriteLine($"[{logLevel,-7}] [{group,-15}] [{className,-25}] [{methodName,-25}] - {message}");
     }
 }

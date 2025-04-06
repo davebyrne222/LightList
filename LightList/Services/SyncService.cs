@@ -111,11 +111,18 @@ public class SyncService : ISyncService
         // Retrieve all tasks that have not been synced
         List<Models.Task> tasks = await _localRepository.GetAll(true, false);
 
+        if (tasks.Count == 0)
+        {
+            _logger.Debug("No un-synced tasks found. Skipping push");
+            return;
+        }
+        
         _logger.Debug($"Retrieved {tasks.Count} un-synced tasks. Pushing to remote");
 
         // Sync each task: send to remote and set synced indicator locally
         foreach (var task in tasks)
         {
+            _logger.Debug($"Pushing task {task.Id}");
             await _remoteRepository.PushUserTask(accessToken, task);
             task.IsSynced = true;
             await _localRepository.Save(task);

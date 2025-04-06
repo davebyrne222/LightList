@@ -11,17 +11,17 @@ public partial class App : Application
     private readonly ILogger _logger;
     private readonly AppShell _shell;
 
-    public App(ILogger logger, AppShell shell)
+    public App(LoggerContext loggerContext, ILogger logger, AppShell shell)
     {
         _logger = logger;
-        _logger.Debug("App initializing");
+        _logger.Debug("App Init");
+        
         InitializeComponent();
         _shell = shell;
 #if IOS
         CustomiseDatepicker();
         CustomiseEditor();
 #endif
-        _logger.Debug("App initialized");
     }
 
     protected override Window CreateWindow(IActivationState? activationState)

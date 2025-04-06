@@ -4,5 +4,8 @@ namespace LightList.Messages;
 
 public class TasksSyncedMessage: ValueChangedMessage<bool>
 {
-    public TasksSyncedMessage(bool _) : base(_) { }
+    public TasksSyncedMessage(bool _) : base(_)
+    {
+        Console.WriteLine("TasksSyncedMessage triggered");
+    }
 }
