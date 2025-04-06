@@ -72,6 +72,8 @@ public class RemoteRepository : IRemoteRepository
     {
         _logger.Debug("Executing query");
 
+        query = query.Replace("\n", "");
+
         var request = new HttpRequestMessage(HttpMethod.Post, Constants.AppSyncEndpoint)
         {
             Content = new StringContent(JsonSerializer.Serialize(new { query }), Encoding.UTF8, "application/json")
@@ -88,7 +90,7 @@ public class RemoteRepository : IRemoteRepository
             throw new HttpRequestException(msg);
         }
 
-        _logger.Debug("Query succeeded");
+        _logger.Debug($"Query succeeded (response code: {response.StatusCode})");
 
         return CheckAppSyncResponse(await response.Content.ReadAsStringAsync());
     }

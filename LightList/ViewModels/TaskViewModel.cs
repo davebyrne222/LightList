@@ -12,12 +12,15 @@ namespace LightList.ViewModels;
 public class TaskViewModel : ObservableObject, IQueryAttributable
 {
     private readonly ILogger _logger;
+    private readonly LoggerContext _loggerContext;
     private readonly IMessenger _messenger;
     private readonly ITasksService _tasksService;
     private Task _task;
 
-    public TaskViewModel(ITasksService tasksService, IMessenger messenger, ILogger logger, Task task)
+    public TaskViewModel(LoggerContext loggerContext, ILogger logger, ITasksService tasksService, IMessenger messenger,
+        Task task)
     {
+        _loggerContext = loggerContext;
         _logger = logger;
         _logger.Debug("Initializing");
 
@@ -119,12 +122,18 @@ public class TaskViewModel : ObservableObject, IQueryAttributable
 
     private async System.Threading.Tasks.Task LoadTaskAsync(string id)
     {
+        _loggerContext.Group = "Load Task";
         _logger.Debug($"Loading task (id={id})");
+
         _task = await _tasksService.GetTask(id);
+
+        _loggerContext.Reset();
     }
 
     private async System.Threading.Tasks.Task SaveTaskAsync()
     {
+        _loggerContext.Group = "Save Task";
+
         _logger.Debug($"Saving task (id={_task.Id})");
         await _tasksService.SaveTask(_task);
 
@@ -132,10 +141,14 @@ public class TaskViewModel : ObservableObject, IQueryAttributable
         _messenger.Send(new TaskSavedMessage(_task.Id));
 
         await Shell.Current.GoToAsync("..");
+
+        _loggerContext.Reset();
     }
 
     private async System.Threading.Tasks.Task CompleteTaskAsync()
     {
+        _loggerContext.Group = "Complete Task";
+
         _logger.Debug($"Completing task id={_task.Id}");
         Complete = true;
         await _tasksService.SaveTask(_task);
@@ -144,10 +157,14 @@ public class TaskViewModel : ObservableObject, IQueryAttributable
         _messenger.Send(new TaskCompletedMessage(_task.Id));
 
         await Shell.Current.GoToAsync("..");
+
+        _loggerContext.Reset();
     }
 
     private async System.Threading.Tasks.Task DeleteTaskAsync()
     {
+        _loggerContext.Group = "Delete Task";
+
         _logger.Debug($"Deleting task id={_task.Id}");
         await _tasksService.DeleteTask(_task);
 
@@ -156,13 +173,19 @@ public class TaskViewModel : ObservableObject, IQueryAttributable
 
         _logger.Debug("Navigating to previous page");
         await Shell.Current.GoToAsync("..");
+
+        _loggerContext.Reset();
     }
 
     public async System.Threading.Tasks.Task Reload()
     {
+        _loggerContext.Group = "Reload Task";
+
         _logger.Debug($"Reloading task id={_task.Id}");
         await LoadTaskAsync(_task.Id);
         RefreshProperties();
+
+        _loggerContext.Reset();
     }
 
     private void RefreshProperties()

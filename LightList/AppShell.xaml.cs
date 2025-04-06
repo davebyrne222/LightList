@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.Messaging;
-using LightList.Messages;
 using LightList.Services;
 using LightList.Utils;
 using LightList.Views;
@@ -40,11 +39,12 @@ public partial class AppShell : Shell
 
     #region Init
 
-    public AppShell(LoggerContext context, ILogger logger, IAuthService authService, ITasksService tasksService, IMessenger messenger)
+    public AppShell(LoggerContext context, ILogger logger, IAuthService authService, ITasksService tasksService,
+        IMessenger messenger)
     {
         _loggerContext = context;
         _logger = logger;
-        
+
         _loggerContext.Group = "Shell init";
         _logger.Debug("Initializing");
 
@@ -56,11 +56,11 @@ public partial class AppShell : Shell
         BindingContext = this;
 
         RegisterRoutes();
-        
+
         _logger.Debug("Initialized");
         _loggerContext.Reset();
     }
-    
+
     private void RegisterRoutes()
     {
         Routing.RegisterRoute(nameof(TaskPage), typeof(TaskPage));
@@ -73,23 +73,23 @@ public partial class AppShell : Shell
     #endregion
 
     #region Event Handlers
-    
+
     protected override async void OnAppearing()
     {
         _loggerContext.Group = "Shell Appearing";
         _logger.Debug("Appearing");
-        
+
         base.OnAppearing();
-        
+
         _loggerContext.Group = "- Login";
         await GetLoginStatus();
-        
+
         _loggerContext.Group = "- Sync";
         if (IsLoggedIn)
             await SyncTasks();
         else
             _logger.Debug("Not logged in. Skipping sync");
-        
+
         _loggerContext.Reset();
     }
 
@@ -128,9 +128,9 @@ public partial class AppShell : Shell
         await SyncTasks();
         ShowToast("Syncing complete");
     }
-    
+
     #endregion
-    
+
     #region Utils
 
     private async Task CloseFlyout()
@@ -152,7 +152,7 @@ public partial class AppShell : Shell
         var toast = Toast.Make(message, duration);
         await toast.Show(cancellationTokenSource.Token);
     }
-    
+
     private async Task SyncTasks()
     {
         _logger.Debug("Syncing tasks");
@@ -160,11 +160,10 @@ public partial class AppShell : Shell
         {
             await _tasksService.SyncNowAsync();
             _logger.Debug("Finished syncing");
-
         }
         catch (Exception ex)
         {
-            _logger.Error($"Syncing tasks failed: {ex}");
+            _logger.Error($"Syncing tasks failed: {ex.GetType()} - {ex.Message}");
             ShowToast("There was a problem synchronising tasks. Please try again.", ToastDuration.Long);
         }
     }

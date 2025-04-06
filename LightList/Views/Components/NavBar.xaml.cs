@@ -4,7 +4,7 @@ namespace LightList.Views.Components;
 
 public partial class NavBar : ContentView
 {
-    public NavBar() : this(MauiProgram.GetService<NavBarViewModel>())
+    public NavBar() : this(MauiProgram.GetService<NavBarViewModel>() ?? throw new InvalidOperationException())
     {
     }
 

@@ -30,11 +30,6 @@ public class LocalRepository : ILocalRepository
     public async Task<string> Save(Task task)
     {
         _logger.Debug($"Saving task id={task.Id}");
-        
-        // TODO: relocate these updates to Task service
-        task.UpdatedAt = DateTime.Now;
-        task.IsSynced = false;
-        
         return await _database.SaveItemAsync(task);
     }
 

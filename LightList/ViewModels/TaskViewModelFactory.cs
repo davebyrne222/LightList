@@ -8,11 +8,14 @@ namespace LightList.ViewModels;
 public class TaskViewModelFactory : ITaskViewModelFactory
 {
     private readonly ILogger _logger;
+    private readonly LoggerContext _loggerContext;
     private readonly IMessenger _messenger;
     private readonly ITasksService _tasksService;
 
-    public TaskViewModelFactory(ITasksService tasksService, IMessenger messenger, ILogger logger)
+    public TaskViewModelFactory(LoggerContext loggerContext, ILogger logger, ITasksService tasksService,
+        IMessenger messenger)
     {
+        _loggerContext = loggerContext;
         _logger = logger;
         _tasksService = tasksService;
         _messenger = messenger;
@@ -20,6 +23,6 @@ public class TaskViewModelFactory : ITaskViewModelFactory
 
     public TaskViewModel Create(Task task)
     {
-        return new TaskViewModel(_tasksService, _messenger, _logger, task);
+        return new TaskViewModel(_loggerContext, _logger, _tasksService, _messenger, task);
     }
 }

@@ -1,13 +1,28 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows.Input;
+using LightList.Utils;
+using LightList.Views;
 
 namespace LightList.ViewModels;
 
-public class NavBarViewModel: INotifyPropertyChanged
+public class NavBarViewModel : INotifyPropertyChanged
 {
+    private readonly ILogger _logger;
+    private readonly LoggerContext _loggerContext;
     private string _selectedView = "All";
-    
+
+    public NavBarViewModel(LoggerContext loggerContext, ILogger logger)
+    {
+        _loggerContext = loggerContext;
+        _logger = logger;
+
+        // TODO: replace with AsyncRelayCommand (community toolkit)
+        OpenMenuCommand = new Command(OpenMenu);
+        AddTaskCommand = new Command(AddTask);
+        NavigateCommand = new Command<string>(NavigateToPage);
+    }
+
     public string SelectedView
     {
         get => _selectedView;
@@ -17,17 +32,12 @@ public class NavBarViewModel: INotifyPropertyChanged
             OnPropertyChanged(nameof(SelectedView));
         }
     }
+
     public ICommand OpenMenuCommand { get; }
     public ICommand AddTaskCommand { get; }
     public ICommand NavigateCommand { get; }
 
-    public NavBarViewModel()
-    {
-        // TODO: replace with AsyncRelayCommand (community toolkit)
-        OpenMenuCommand = new Command(OpenMenu);
-        AddTaskCommand = new Command(AddTask);
-        NavigateCommand = new Command<string>(NavigateToPage);
-    }
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private static void OpenMenu()
     {
@@ -37,23 +47,27 @@ public class NavBarViewModel: INotifyPropertyChanged
 
     private async void AddTask()
     {
-        if (Shell.Current.CurrentPage is Views.TaskPage)
+        _loggerContext.Group = "Add Task";
+        _logger.Debug("Adding new task");
+
+        if (Shell.Current.CurrentPage is TaskPage)
             return;
-        
-        Debug.WriteLine($"---[NavBarViewModel.AddTask] Navigating to {nameof(Views.TaskPage)}");
-        await Shell.Current.GoToAsync(nameof(Views.TaskPage));
+
+        await Shell.Current.GoToAsync(nameof(TaskPage));
+
+        _loggerContext.Reset();
     }
-    
+
     private async void NavigateToPage(string pageName)
     {
-        string? route = pageName switch
+        var route = pageName switch
         {
-            "All" => nameof(Views.AllTasksPage),
-            "Due" => nameof(Views.TasksByDueDatePage),
-            "Label" => nameof(Views.TasksByLabelPage),
+            "All" => nameof(AllTasksPage),
+            "Due" => nameof(TasksByDueDatePage),
+            "Label" => nameof(TasksByLabelPage),
             _ => null
         };
-        
+
         if (route == null || Shell.Current.CurrentPage?.GetType().Name == route)
             return;
 
@@ -63,8 +77,7 @@ public class NavBarViewModel: INotifyPropertyChanged
         Debug.WriteLine($"---[NavBarViewModel.NavigateToPage] Navigating to {route}");
         await Shell.Current.GoToAsync($"//{route}", false);
     }
-    
-    public event PropertyChangedEventHandler? PropertyChanged;
+
     private void OnPropertyChanged(string propertyName)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
