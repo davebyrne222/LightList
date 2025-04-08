@@ -1,5 +1,8 @@
+using System.Reflection;
 using LightList.Utils;
 using SQLite;
+using LightList.Models;
+using Task = System.Threading.Tasks.Task;
 
 namespace LightList.Data;
 
@@ -7,23 +10,36 @@ public class TasksDatabase
 {
     private readonly ILogger _logger;
     private SQLiteAsyncConnection? _database;
+    private SQLiteAsyncConnection Database => _database ??=
+        new SQLiteAsyncConnection(
+            Constants.DatabasePath,
+            Constants.DbFlags
+        );
+    private static readonly List<string> Tables = [ // N.B: Order is important!
+        "LightList.Data.Scripts.CreateLabelTable.sql",
+        "LightList.Data.Scripts.CreateTaskTable.sql",
+        "LightList.Data.Scripts.CreateIndexes.sql"
+    ];
 
     public TasksDatabase(ILogger logger)
     {
         _logger = logger;
     }
 
-    private SQLiteAsyncConnection Database => _database ??=
-        new SQLiteAsyncConnection(
-            Constants.DatabasePath,
-            Constants.DbFlags
-        );
-
     public async Task InitialiseAsync()
     {
         _logger.Debug("Creating tables");
-        var result = await Database.CreateTableAsync<Models.Task>();
-        _logger.Debug($"Tables: {result}");
+
+        // Enable FKs; SQLite does not enable by default
+        await Database.ExecuteAsync("DROP TABLE IF EXISTS Task;");
+        await Database.ExecuteAsync("PRAGMA foreign_keys = ON;");
+        
+        // Create tables:
+        foreach (var table in Tables)
+        {
+            var result = await ExecuteSqlFromFileAsync(table);
+            _logger.Debug($"Table '{table}' created: {result} (no. rows affected)");
+        }
     }
 
     /**
@@ -52,7 +68,7 @@ public class TasksDatabase
         _logger.Debug($"Retrieved {tasks.Count} tasks");
         return tasks;
     }
-    
+
     public async Task<Models.Task> GetItemByIdAsync(string id)
     {
         _logger.Debug($"Retrieving task (id={id})");
@@ -101,5 +117,17 @@ public class TasksDatabase
     {
         _logger.Debug($"Deleting task (id={item.Id})");
         return await Database.DeleteAsync(item);
+    }
+    
+    private async Task<int> ExecuteSqlFromFileAsync(string fileName)
+    {
+        await using Stream? stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(fileName);
+        
+        if (stream == null)
+            throw new FileNotFoundException($"Embedded SQL resource not found: {fileName}");
+
+        using var reader = new StreamReader(stream);
+        var sql = await reader.ReadToEndAsync();
+        return await Database.ExecuteAsync(sql);
     }
 }

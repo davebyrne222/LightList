@@ -17,7 +17,6 @@ public class TasksByDueDateViewModel : BaseTasksViewModel
         ILogger logger) : base(taskViewModelFactory, tasksService, messenger, logger)
     {
         _logger = logger;
-        // _ = SetTasks();
         Task.Run(async () => await SetTasks()).Wait();
         Messenger.Register<TasksSyncedMessage>(this, async (recipient, _) => { await SetTasks(); });
     }

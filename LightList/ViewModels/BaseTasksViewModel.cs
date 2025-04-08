@@ -9,6 +9,8 @@ namespace LightList.ViewModels;
 public class BaseTasksViewModel : INotifyPropertyChanged
 {
     private readonly ILogger _logger;
+
+    private DateOnly _selectedDate;
     private ObservableCollection<TaskViewModel> _tasks = new();
 
     public BaseTasksViewModel(
@@ -21,6 +23,28 @@ public class BaseTasksViewModel : INotifyPropertyChanged
         TasksService = tasksService;
         Messenger = messenger;
         _logger = logger;
+    }
+
+    public ObservableCollection<DateOnly> AvailableDates { get; } = new()
+    {
+        new DateOnly(2025, 04, 06),
+        new DateOnly(2025, 04, 07),
+        new DateOnly(2025, 04, 08),
+        new DateOnly(2025, 04, 09),
+        new DateOnly(2025, 04, 10)
+    };
+
+    public DateOnly SelectedDate
+    {
+        get => _selectedDate;
+        set
+        {
+            if (_selectedDate != value)
+            {
+                _selectedDate = value;
+                OnPropertyChanged(nameof(SelectedDate));
+            }
+        }
     }
 
     protected ITaskViewModelFactory TaskViewModelFactory { get; }

@@ -17,7 +17,11 @@ public class TaskViewModel : ObservableObject, IQueryAttributable
     private readonly ITasksService _tasksService;
     private Task _task;
 
-    public TaskViewModel(LoggerContext loggerContext, ILogger logger, ITasksService tasksService, IMessenger messenger,
+    public TaskViewModel(
+        LoggerContext loggerContext,
+        ILogger logger,
+        ITasksService tasksService,
+        IMessenger messenger,
         Task task)
     {
         _loggerContext = loggerContext;
@@ -79,9 +83,9 @@ public class TaskViewModel : ObservableObject, IQueryAttributable
         }
     }
 
-    public string Label
+    public string? Label
     {
-        get => _task.Label ?? string.Empty;
+        get => _task.Label;
         set
         {
             if (_task.Label != value) _task.Label = value;
