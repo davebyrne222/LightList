@@ -8,9 +8,15 @@ public interface ITasksService
 
     Task<List<Models.Task>> GetTasks();
 
-    Task<string> SaveTask(Models.Task task);
+    Task SaveTask(Models.Task task);
 
     Task DeleteTask(Models.Task task);
 
     Task SyncNowAsync();
+
+    Task<List<Models.Label>> GetLabels();
+
+    Task SaveLabel(Models.Label label);
+
+    Task DeleteLabel(Models.Label label);
 }

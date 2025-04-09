@@ -6,105 +6,119 @@ using Task = System.Threading.Tasks.Task;
 
 namespace LightList.Services;
 
-public class TasksService : ITasksService
+public class TasksService : BaseService, ITasksService
 {
+    
+    #region fields
+
+    private readonly IMessenger _messenger;
+    private readonly ILocalRepository _localRepository;
+    private readonly ISyncService _syncService;
+
+    #endregion
+    
     #region ctor
 
-    public TasksService(IMessenger messenger, ILogger logger, ILocalRepository localRepository,
-        ISyncService syncService)
+    public TasksService(
+        IMessenger messenger, 
+        ILogger logger, 
+        ILocalRepository localRepository,
+        ISyncService syncService) : base(logger)
     {
         _messenger = messenger;
-        _logger = logger;
         _localRepository = localRepository;
         _syncService = syncService;
     }
 
     #endregion
 
-    #region fields
-
-    private readonly IMessenger _messenger;
-    private readonly ILocalRepository _localRepository;
-    private readonly ILogger _logger;
-    private readonly ISyncService _syncService;
-
-    #endregion
-
-    #region Publilc methods
+    #region Public methods - Tasks
 
     public async Task<Models.Task> GetTask(string taskId)
     {
         _logger.Debug($"Getting task id={taskId}");
-        return await _localRepository.Get(taskId);
+        return await ExecuteWithLogging(async () => await _localRepository.GetTask(taskId), "Error retrieving task");
     }
 
     public async Task<List<Models.Task>> GetTasks()
     {
         _logger.Debug("Getting all tasks");
-        return await _localRepository.GetAll();
+        return await ExecuteWithLogging(async () => await _localRepository.GetAllTasks(), "Error retrieving all tasks");
     }
 
-    public async Task<string> SaveTask(Models.Task task)
+    public async Task SaveTask(Models.Task task)
     {
         _logger.Debug($"Saving task (id={task.Id})");
-
-        // update metadata
-        task.UpdatedAt = DateTime.Now;
-        task.IsSynced = false;
-
-        try
-        {
-            // save remotely
-            await SaveRemote(task);
-            task.IsSynced = true;
-        }
-        catch (Exception ex)
-        {
-            _logger.Error($"Error saving task to remote: {ex.GetType()} - {ex.Message}");
-        }
-        finally
+        await ExecuteWithLogging(async () =>
         {
             // save locally
-            await SaveLocally(task);
-        }
+            task.UpdatedAt = DateTime.Now;
+            task.IsSynced = false;
+            await _localRepository.SaveTask(task);
 
-        return task.Id;
+            // save remotely
+            await _syncService.PushChangesAsync([task]);
+
+            // update sync status
+            task.IsSynced = true;
+            await _localRepository.SaveTask(task);
+        }, "Error saving task");
     }
 
     public async Task DeleteTask(Models.Task task)
     {
         _logger.Debug($"Marking task deleted (id={task.Id})");
-
-        // update meta data
         task.IsDeleted = true;
-
-        // save
-        await SaveTask(task);
+        await ExecuteWithLogging(async () => await SaveTask(task), "Error marking task deleted");
     }
+
+    #endregion
+
+    #region Public methods - Labels
+
+    public async Task<List<Models.Label>> GetLabels()
+    {
+        _logger.Debug("Getting all labels");
+        return await ExecuteWithLogging(async () => await _localRepository.GetAllLabels(), "Error getting all labels");
+    }
+
+    public async Task SaveLabel(Models.Label label)
+    {
+        _logger.Debug($"Saving label '{label.Name}'");
+        
+        await ExecuteWithLogging(async () =>
+        {
+            // save locally
+            label.UpdatedAt = DateTime.Now;
+            label.IsSynced = false;
+            await _localRepository.SaveLabel(label);
+
+            // save remotely TODO
+            // await _syncService.PushChangesAsync([task]);
+
+            // update sync status
+            label.IsSynced = true;
+            await _localRepository.SaveLabel(label);
+        }, "Error saving label");
+    }
+
+    public async Task DeleteLabel(Models.Label label)
+    {
+        _logger.Debug($"Marking label '{label.Name}' deleted");
+        label.IsDeleted = true;
+        await ExecuteWithLogging(async () => await SaveLabel(label), "Error while deleting label");
+    }
+
+    #endregion
+    
+    #region Public methods - sync
 
     public async Task SyncNowAsync()
     {
         _logger.Debug("Syncing tasks");
 
-        try
-        {
-            await PushChangesAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.Error($"Error syncing tasks to remote: {ex.GetType()} - {ex.Message}");
-            throw;
-        }
-
-        try
-        {
-            await PullChangesAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.Error($"Error synching tasks from remote: {ex.GetType()} - {ex.Message}");
-            throw;
-        }
+        await ExecuteWithLogging(async () => await PushTaskChangesAsync(), "Error syncing tasks to remote");
+        await ExecuteWithLogging(async () => await PullTaskChangesAsync(), "Error syncing tasks from remote");
 
         _logger.Debug("Finished syncing tasks");
     }
@@ -112,41 +126,12 @@ public class TasksService : ITasksService
     #endregion
 
     #region utils
-
-    private async Task SaveLocally(Models.Task task)
-    {
-        _logger.Debug($"Saving task (id={task.Id})");
-
-        try
-        {
-            await _localRepository.Save(task);
-        }
-        catch (Exception ex)
-        {
-            _logger.Error($"Unexpected error while saving task: {ex.GetType()} - {ex.Message}");
-            throw;
-        }
-    }
-
-    private async Task SaveRemote(Models.Task task)
-    {
-        _logger.Debug($"Pushing task to remote (id={task.Id})");
-        try
-        {
-            await _syncService.PushChangesAsync([task]);
-        }
-        catch (Exception ex)
-        {
-            _logger.Error($"Error pushing task to remote: {ex.GetType()} - {ex.Message}");
-            throw;
-        }
-    }
-
-    private async Task PushChangesAsync()
+    
+    private async Task PushTaskChangesAsync()
     {
         // Retrieve all tasks that have not been synced
         _logger.Debug("Pushing un-synced tasks");
-        List<Models.Task> tasks = await _localRepository.GetAll(true, false);
+        List<Models.Task> tasks = await _localRepository.GetAllTasks(true, false);
 
         if (tasks.Count == 0)
         {
@@ -163,11 +148,11 @@ public class TasksService : ITasksService
         foreach (var task in tasks)
         {
             task.IsSynced = true;
-            await SaveLocally(task);
+            await _localRepository.SaveTask(task);
         }
     }
 
-    private async Task PullChangesAsync()
+    private async Task PullTaskChangesAsync()
     {
         // Pull all new/updated tasks from remote
         _logger.Debug("Pulling new/updated tasks");
@@ -186,7 +171,7 @@ public class TasksService : ITasksService
             if (task != null)
             {
                 task.IsSynced = true;
-                await SaveLocally(task);
+                await _localRepository.SaveTask(task);
             }
 
         // Notify listeners that tasks have changed
