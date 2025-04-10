@@ -33,7 +33,8 @@ public class TasksDatabase
         _logger.Debug("Creating tables");
 
         // Enable FKs; SQLite does not enable by default
-        await Database.ExecuteAsync("DROP TABLE IF EXISTS Task;");
+        // await Database.ExecuteAsync("DROP TABLE IF EXISTS Task;");
+        // await Database.ExecuteAsync("DROP TABLE IF EXISTS Label;");
         await Database.ExecuteAsync("PRAGMA foreign_keys = ON;");
 
         // Create tables:
@@ -83,7 +84,7 @@ public class TasksDatabase
     {
         _logger.Debug($"Storing task id={item.Id}");
 
-        if (await ItemExistsAsync(nameof(Models.Task), item.Id))
+        if (await ItemExistsAsync(nameof(Models.Task), "Id", item.Id))
         {
             _logger.Debug("Task already exists. Updating");
             return await Database.UpdateAsync(item);
@@ -111,6 +112,13 @@ public class TasksDatabase
     public async Task<int> SaveLabelAsync(Models.Label label)
     {
         _logger.Debug($"Storing label '{label.Name}'");
+        
+        if (await ItemExistsAsync(nameof(Models.Label), "Name", label.Name))
+        {
+            _logger.Debug("Task already exists. Updating");
+            return await Database.UpdateAsync(label);
+        }
+        
         return await Database.InsertAsync(label);
     }
     
@@ -124,10 +132,10 @@ public class TasksDatabase
 
     #region Utils
 
-    private async Task<bool> ItemExistsAsync(string tableName, string id)
+    private async Task<bool> ItemExistsAsync(string tableName, string colName, string value)
     {
         var count = await Database.ExecuteScalarAsync<int>(
-            $"SELECT COUNT(*) FROM {tableName} WHERE Id = ?", id);
+            $"SELECT COUNT(*) FROM {tableName} WHERE {colName} = ?", value);
         return count > 0;
     }
 

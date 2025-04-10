@@ -9,4 +9,11 @@ public partial class TasksByLabelPage : ContentPage
         InitializeComponent();
         BindingContext = viewModel;
     }
+
+    protected async override void OnAppearing()
+    {
+        base.OnAppearing();
+        if (BindingContext is TasksByLabelViewModel vm)
+            await vm.OnAppearing();
+    }
 }

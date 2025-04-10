@@ -1,18 +1,24 @@
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
+using CommunityToolkit.Maui.Core.Views;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using LightList.Services;
 using LightList.Utils;
 
 namespace LightList.ViewModels;
 
-public class BaseTasksViewModel : INotifyPropertyChanged
+public partial class BaseTasksViewModel : ObservableObject
 {
     private readonly ILogger _logger;
-
-    private DateOnly _selectedDate;
-    private ObservableCollection<TaskViewModel> _tasks = new();
-
+    protected ITaskViewModelFactory TaskViewModelFactory { get; }
+    protected ITasksService TasksService { get; }
+    protected IMessenger Messenger { get; }
+    [ObservableProperty] private ObservableCollection<TaskViewModel> _allTasks = new();
+    [ObservableProperty] private ObservableCollection<string?> _labels = new();
+    [ObservableProperty] private ObservableCollection<DateOnly?> _dueDates = new();
+    
     public BaseTasksViewModel(
         ITaskViewModelFactory taskViewModelFactory,
         ITasksService tasksService,
@@ -24,51 +30,58 @@ public class BaseTasksViewModel : INotifyPropertyChanged
         Messenger = messenger;
         _logger = logger;
     }
-
-    public ObservableCollection<DateOnly> AvailableDates { get; } = new()
+    
+    protected async Task GetTasks()
     {
-        new DateOnly(2025, 04, 06),
-        new DateOnly(2025, 04, 07),
-        new DateOnly(2025, 04, 08),
-        new DateOnly(2025, 04, 09),
-        new DateOnly(2025, 04, 10)
-    };
-
-    public DateOnly SelectedDate
-    {
-        get => _selectedDate;
-        set
+        _logger.Debug($"Retrieving tasks");
+        try
         {
-            if (_selectedDate != value)
-            {
-                _selectedDate = value;
-                OnPropertyChanged(nameof(SelectedDate));
-            }
+            var tasks = await TasksService.GetTasks();
+            AllTasks = new ObservableCollection<TaskViewModel>(tasks.Select(n => TaskViewModelFactory.Create(n)));
+            _logger.Debug($"Retrieved {AllTasks.Count} tasks");
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Failed to get tasks: {ex.GetType()} - {ex.Message}");
+            throw; // TODO: await DisplayAlert("Error retrieving tasks. Please try again", ex.Message, "OK");
         }
     }
 
-    protected ITaskViewModelFactory TaskViewModelFactory { get; }
-    protected ITasksService TasksService { get; }
-    protected IMessenger Messenger { get; }
-
-    public ObservableCollection<TaskViewModel> AllTasks
+    protected async Task GetLabels()
     {
-        get => _tasks;
-        set
+        _logger.Debug($"Retrieving labels");
+
+        try
         {
-            if (_tasks != value)
-            {
-                _tasks = value;
-                OnPropertyChanged(nameof(AllTasks));
-            }
+            var labels = await TasksService.GetLabels();
+
+            Labels = new ObservableCollection<string?>(labels.Select(n => n.Name));
+
+            Labels.Insert(0, null); // allow filter cancellation
+
+            _logger.Debug($"Retrieved {Labels.Count} labels");
         }
+        catch (Exception ex)
+        {
+            _logger.Error($"Failed to get labels: {ex.GetType()} - {ex.Message}");
+            throw; // TODO: await DisplayAlert("Error retrieving labels. Please try again", ex.Message, "OK");
+        }
+        
+    }
+    
+    partial void OnAllTasksChanged(ObservableCollection<TaskViewModel>? oldValue, ObservableCollection<TaskViewModel> newValue)
+    {
+        _logger.Debug($"All tasks changed");
+        
+        if (oldValue != null)
+            oldValue.CollectionChanged -= AllTasks_CollectionChanged;
+
+        newValue.CollectionChanged += AllTasks_CollectionChanged;
     }
 
-    public event PropertyChangedEventHandler? PropertyChanged = delegate { };
-
-    private void OnPropertyChanged(string propertyName)
+    protected virtual void AllTasks_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        _logger.Debug($"PropertyChanged: {propertyName}");
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        // Do nothing - derived class to override
     }
 }
+

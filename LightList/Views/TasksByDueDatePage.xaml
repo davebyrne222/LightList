@@ -17,7 +17,7 @@
             <Label FontSize="22" Margin="10">Due Date</Label>
             <Picker
                 Title="Choose Date"
-                ItemsSource="{Binding AvailableDates}"
+                ItemsSource="{Binding DueDates}"
                 SelectedItem="{Binding SelectedDate}"
                 ItemDisplayBinding="{Binding}" />
         </FlexLayout>

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using CommunityToolkit.Mvvm.Messaging;
 using LightList.Messages;
 using LightList.Repositories;
@@ -97,8 +98,8 @@ public class TasksService : BaseService, ITasksService
             // await _syncService.PushChangesAsync([task]);
 
             // update sync status
-            label.IsSynced = true;
-            await _localRepository.SaveLabel(label);
+            // label.IsSynced = true;
+            // await _localRepository.SaveLabel(label);
         }, "Error saving label");
     }
 

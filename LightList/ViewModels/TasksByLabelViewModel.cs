@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using LightList.Messages;
 using LightList.Services;
@@ -6,9 +8,12 @@ using LightList.Utils;
 
 namespace LightList.ViewModels;
 
-public class TasksByLabelViewModel : BaseTasksViewModel
+public partial class TasksByLabelViewModel : BaseTasksViewModel
 {
     private readonly ILogger _logger;
+
+    [ObservableProperty] private ObservableCollection<TaskViewModel> _tasksFiltered = new();
+    [ObservableProperty] private string? _selectedLabel;
 
     public TasksByLabelViewModel(
         ITaskViewModelFactory taskViewModelFactory,
@@ -17,15 +22,39 @@ public class TasksByLabelViewModel : BaseTasksViewModel
         ILogger logger) : base(taskViewModelFactory, tasksService, messenger, logger)
     {
         _logger = logger;
-        // _ = SetTasks();
-        Task.Run(async () => await SetTasks()).Wait();
-        Messenger.Register<TasksSyncedMessage>(this, async (recipient, _) => { await SetTasks(); });
+        Messenger.Register<TasksSyncedMessage>(this, async (recipient, _) => { await GetTasks(); });
+        // AllTasks.CollectionChanged += AllTasks_CollectionChanged;
+    }
+    
+    public async Task OnAppearing()
+    {
+        _logger.Debug($"OnAppearing");
+        await base.GetTasks();
+        await base.GetLabels();
+        GetFilteredTasks();
+    }
+    
+    private void GetFilteredTasks()
+    {
+        _logger.Debug("Getting filtered tasks");
+
+        // Deselect filter
+        if (SelectedLabel == null)
+        {
+            TasksFiltered = AllTasks;
+            return;
+        }
+        
+        var filtered = AllTasks
+            .Where(task => task.Label != null && task.Label.Contains(SelectedLabel))
+            .ToList();
+
+        TasksFiltered = new ObservableCollection<TaskViewModel>(filtered);
+        
+        _logger.Debug($"Got {filtered.Count} tasks");
     }
 
-    private async Task SetTasks()
-    {
-        var tasks = await TasksService.GetTasks();
-        AllTasks = new ObservableCollection<TaskViewModel>(tasks.Select(n => TaskViewModelFactory.Create(n)));
-        _logger.Debug($"Retrieved {AllTasks.Count} tasks");
-    }
+    protected override void AllTasks_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => GetFilteredTasks();
+
+    partial void OnSelectedLabelChanged(string? oldValue, string? newValue) => GetFilteredTasks();
 }
