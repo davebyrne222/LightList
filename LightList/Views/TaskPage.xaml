@@ -8,7 +8,7 @@
              Title="Task"
              Shell.NavBarIsVisible="True">
 
-    <VerticalStackLayout Spacing="30" Margin="20" VerticalOptions="Center">
+    <VerticalStackLayout Spacing="30" Margin="20" VerticalOptions="Start">
         <VerticalStackLayout HorizontalOptions="Fill" Spacing="5">
             <Label Text="Summary" StyleClass="MenuItemLabel"/>
             <Editor Placeholder="Enter your task"
@@ -16,19 +16,37 @@
                     HeightRequest="100" />
         </VerticalStackLayout>
         
-        <VerticalStackLayout HorizontalOptions="Fill" Spacing="5">
-            <Label Text="Due Date" StyleClass="MenuItemLabel"/>
-            <Grid ColumnDefinitions="2*,1*" ColumnSpacing="5">
-                <DatePicker Date="{Binding DueDate}" />
-                <TimePicker Grid.Column="1"/>
-            </Grid>
-        </VerticalStackLayout>
-        
-        <VerticalStackLayout HorizontalOptions="Fill" Spacing="5">
-            <Label Text="Tag" StyleClass="MenuItemLabel"/>
-            <Entry Placeholder="Enter your label"
-                   Text="{Binding Label}"
-                   HeightRequest="50" />
+        <VerticalStackLayout HorizontalOptions="Fill" VerticalOptions="Fill" Spacing="20" Background="White">
+            <FlexLayout Direction="Row"
+                        AlignItems="Center"
+                        JustifyContent="SpaceBetween"
+                        Grow="1">
+                <Label Text="Due Date"/>
+                <Grid ColumnDefinitions="2*,1*" ColumnSpacing="5">
+                    <DatePicker Date="{Binding DueDate}" />
+                    <TimePicker Time="{Binding DueDate}" Grid.Column="1"/>
+                </Grid>
+            </FlexLayout>
+            
+            <FlexLayout Direction="Row"
+                        AlignItems="Center"
+                        JustifyContent="SpaceBetween"
+                        Grow="1">
+                <Label Text="Label"/>
+                <Grid ColumnDefinitions="2*,1*" ColumnSpacing="5">
+                    <Picker
+                        Title="Select Label"
+                        ItemsSource="{Binding Labels}"
+                        SelectedItem="{Binding SelectedLabel, Mode=TwoWay}"
+                        ItemDisplayBinding="{Binding}"
+                        Margin="10"/>
+                    <ImageButton
+                        Grid.Column="1"
+                        Source="{FontImageSource Glyph='&#xf489;', FontFamily='Ionicons', Color=Black}"
+                        HorizontalOptions="End"
+                        Style="{StaticResource ActionBarButtonStyle}" />
+                </Grid>
+            </FlexLayout>
         </VerticalStackLayout>
         
         <Grid ColumnDefinitions="*,*" ColumnSpacing="5">

@@ -23,7 +23,6 @@ public partial class TasksByLabelViewModel : BaseTasksViewModel
     {
         _logger = logger;
         Messenger.Register<TasksSyncedMessage>(this, async (recipient, _) => { await GetTasks(); });
-        // AllTasks.CollectionChanged += AllTasks_CollectionChanged;
     }
     
     public async Task OnAppearing()
@@ -46,7 +45,7 @@ public partial class TasksByLabelViewModel : BaseTasksViewModel
         }
         
         var filtered = AllTasks
-            .Where(task => task.Label != null && task.Label.Contains(SelectedLabel))
+            .Where(task => task.SelectedLabel != null && task.SelectedLabel.Contains(SelectedLabel))
             .ToList();
 
         TasksFiltered = new ObservableCollection<TaskViewModel>(filtered);

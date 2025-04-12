@@ -66,7 +66,6 @@ public partial class BaseTasksViewModel : ObservableObject
             _logger.Error($"Failed to get labels: {ex.GetType()} - {ex.Message}");
             throw; // TODO: await DisplayAlert("Error retrieving labels. Please try again", ex.Message, "OK");
         }
-        
     }
     
     partial void OnAllTasksChanged(ObservableCollection<TaskViewModel>? oldValue, ObservableCollection<TaskViewModel> newValue)
