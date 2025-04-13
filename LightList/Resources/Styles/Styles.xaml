@@ -539,7 +539,7 @@
     
     <Style TargetType="Border" Class="MenuGroup">
         <Setter Property="BackgroundColor" Value="White" />
-        <Setter Property="Padding" Value="0, 10" />
+        <Setter Property="Padding" Value="0" />
         <Setter Property="Margin" Value="0" />
         <Setter Property="Stroke" Value="{StaticResource Gray100}"></Setter>
         <Setter Property="StrokeShape" Value="RoundRectangle 10" />

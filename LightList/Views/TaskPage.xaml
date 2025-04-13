@@ -8,7 +8,7 @@
              Title="Task"
              Shell.NavBarIsVisible="True">
 
-    <VerticalStackLayout Spacing="30" Margin="20" VerticalOptions="Start">
+    <VerticalStackLayout Spacing="20" Margin="20" VerticalOptions="Start">
         <VerticalStackLayout HorizontalOptions="Fill" Spacing="5">
             <Label Text="Description" StyleClass="MenuGroupLabel"/>
             <Editor Placeholder="Enter your task"
@@ -18,7 +18,6 @@
         
         <Border StyleClass="MenuGroup">
             <VerticalStackLayout HorizontalOptions="Fill" VerticalOptions="Fill" Spacing="2" >
-                
                 <FlexLayout Direction="Row"
                             AlignItems="Center"
                             JustifyContent="SpaceBetween"
