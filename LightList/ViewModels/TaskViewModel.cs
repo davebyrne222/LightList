@@ -144,9 +144,22 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
     public async Task AddLabelAsync(string label)
     {
         _logger.Debug($"Adding label (label={label})");
+        
+        // Save label
         Models.Label model = new();
         model.Name = label;
-        await _tasksService.SaveLabel(model);
+
+        try
+        {
+            await _tasksService.SaveLabel(model);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Failed to save label: {ex.GetType()} - {ex.Message}");
+            throw; // TODO: show alert
+        }
+        
+        // Update UI
         Labels.Add(label);
         SelectedLabel = label;
     }
