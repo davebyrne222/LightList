@@ -35,7 +35,7 @@ public partial class TasksByLabelViewModel : BaseTasksViewModel
     
     private void GetFilteredTasks()
     {
-        _logger.Debug("Getting filtered tasks");
+        _logger.Debug($"Getting filtered tasks: (label: {SelectedLabel})");
 
         // Deselect filter
         if (SelectedLabel == null)
@@ -45,7 +45,7 @@ public partial class TasksByLabelViewModel : BaseTasksViewModel
         }
         
         var filtered = AllTasks
-            .Where(task => task.SelectedLabel != null && task.SelectedLabel.Contains(SelectedLabel))
+            .Where(task => task.Label != null && task.Label.Contains(SelectedLabel))
             .ToList();
 
         TasksFiltered = new ObservableCollection<TaskViewModel>(filtered);
