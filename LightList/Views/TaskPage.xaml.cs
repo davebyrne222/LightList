@@ -9,4 +9,14 @@ public partial class TaskPage : ContentPage
         InitializeComponent();
         BindingContext = viewModel;
     }
+    
+    private async void OnNewLabelButtonClicked(object sender, EventArgs e)
+    {
+        var result = await DisplayPromptAsync("New Label", "", placeholder: "Label");
+        if (!string.IsNullOrWhiteSpace(result))
+        {
+            var vm = BindingContext as TaskViewModel;
+            vm?.AddLabelAsync(result);
+        }
+    }
 }
