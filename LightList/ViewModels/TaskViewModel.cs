@@ -118,9 +118,18 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
     private async Task LoadTaskAsync(string id)
     {
         _logger.Debug($"Loading task (id={id})");
-        _task = await _tasksService.GetTask(id);
-        SelectedLabel = _task.Label;
-        RefreshProperties();
+
+        try
+        {
+            _task = await _tasksService.GetTask(id);
+            SelectedLabel = _task.Label;
+            RefreshProperties();
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Failed to load task: {ex.GetType()} - {ex.Message}");
+            throw; // TODO: show alert
+        }
     }
     
     private async Task LoadLabelsAsync()
@@ -145,13 +154,16 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
     {
         _logger.Debug($"Adding label (label={label})");
         
-        // Save label
-        Models.Label model = new();
-        model.Name = label;
-
         try
         {
+            // Save label
+            Models.Label model = new();
+            model.Name = label;
             await _tasksService.SaveLabel(model);
+            
+            // Update UI
+            Labels.Add(label);
+            SelectedLabel = label;
         }
         catch (Exception ex)
         {
@@ -159,9 +171,6 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
             throw; // TODO: show alert
         }
         
-        // Update UI
-        Labels.Add(label);
-        SelectedLabel = label;
     }
 
     private async Task SaveTaskAsync()
