@@ -26,30 +26,79 @@ public class SyncService : ISyncService
 
     #region Public Methods
 
-    public async Task PushChangesAsync(List<Models.Task> tasks)
+    public async Task PushTasksAsync(List<Models.Task> tasks)
     {
-        _logger.Debug("Pushing changes");
-        await HandlePushQuery(tokens => PushUpdatedTasksAsync(tokens, tasks));
+        _logger.Debug("Pushing tasks");
+        await HandlePushQuery(tokens => PushUpdatedItemsAsync(_remoteRepository.PushUserTask, tokens, tasks));
     }
 
-    public async Task<List<Models.Task?>> PullChangesAsync()
+    public async Task<List<Models.Task?>> PullTasksAsync()
     {
-        _logger.Debug("Pulling changes");
-        return await HandlePullQuery(GetUpdatedTasksAsync);
+        _logger.Debug("Pulling tasks");
+        return await HandlePullQuery<Models.Task>(tokens => GetUpdatedItemsAsync(_remoteRepository.GetUserTasks, tokens));
+    }
+    
+    public async Task PushLabelsAsync(List<Models.Label> labels)
+    {
+        _logger.Debug("Pushing labels");
+        await HandlePushQuery(tokens => PushUpdatedItemsAsync(_remoteRepository.PushUserLabel, tokens, labels));
+    }
+
+    public async Task<List<Models.Label?>> PullLabelsAsync()
+    {
+        _logger.Debug("Pulling labels");
+        return await HandlePullQuery<Models.Label>(tokens => GetUpdatedItemsAsync(_remoteRepository.GetUserLabels, tokens));
     }
 
     #endregion
 
     #region Utils
+    
+    private async Task PushUpdatedItemsAsync<T>(Func<AuthTokens, T, Task> action, AuthTokens accessToken, List<T> items)
+    {
+        _logger.Debug("Pushing updated items");
+
+        if (items.Count == 0)
+        {
+            _logger.Debug("No un-synced tasks found. Skipping push");
+            return;
+        }
+
+        _logger.Debug($"Pushing {items.Count} items to remote");
+
+        foreach (var task in items)
+        {
+            _logger.Debug($"Pushing item");
+
+            // TODO: try-catch? If failed, continue with remaining items? 
+            await action(accessToken, task);
+        }
+
+        _logger.Debug($"Finished pushing {items.Count} tasks");
+    }
+
+    private async Task<List<T?>> GetUpdatedItemsAsync<T>(Func<AuthTokens, DateTime?, Task<List<T?>>> action, AuthTokens accessToken)
+    {
+        _logger.Debug("Retrieving updated items");
+
+        // Retrieve new tasks from remote db - new = Updated time >= secure storage sync time
+        List<T?> items = await action(
+            accessToken,
+            await _secureStorage.GetLastSyncDateAsync());
+
+        _logger.Debug($"Retrieved {items.Count} items");
+
+        return items;
+    }
 
     private async Task HandlePushQuery(Func<AuthTokens, Task> action)
     {
         await HandleQuery(action);
     }
 
-    private async Task<List<Models.Task?>> HandlePullQuery(Func<AuthTokens, Task<List<Models.Task?>>> action)
+    private async Task<List<T?>> HandlePullQuery<T>(Func<AuthTokens, Task<List<T?>>> action)
     {
-        List<Models.Task?> result = [];
+        List<T?> result = [];
         await HandleQuery(async tokens => result = await action(tokens));
         return result;
     }
@@ -81,49 +130,5 @@ public class SyncService : ISyncService
 
         _logger.Debug($"Finished executing {action.Method.Name}");
     }
-
-    private async Task PushUpdatedTasksAsync(AuthTokens accessToken, List<Models.Task> tasks)
-    {
-        _logger.Debug("Pushing updated tasks");
-
-        if (tasks.Count == 0)
-        {
-            _logger.Debug("No un-synced tasks found. Skipping push");
-            return;
-        }
-
-        _logger.Debug($"Pushing {tasks.Count} tasks to remote");
-
-        foreach (var task in tasks)
-        {
-            _logger.Debug($"Pushing task {task.Id}");
-
-            // TODO: try-catch? If failed, continue with remaining items? 
-            await _remoteRepository.PushUserTask(accessToken, task);
-        }
-
-        _logger.Debug($"Finished pushing {tasks.Count} tasks");
-    }
-
-    private async Task<List<Models.Task?>> GetUpdatedTasksAsync(AuthTokens accessToken)
-    {
-        _logger.Debug("Retrieving updated tasks");
-
-        // Record current time to update secure storage once sync is finished
-        var syncStartTime = DateTime.UtcNow;
-
-        // Retrieve new tasks from remote db - new = Updated time >= secure storage sync time
-        List<Models.Task?> tasks = await _remoteRepository.GetUserTasks(
-            accessToken,
-            await _secureStorage.GetLastSyncDateAsync());
-
-        _logger.Debug($"Retrieved {tasks.Count} tasks");
-
-        // Update sync time in secure storage
-        await _secureStorage.SaveLastSyncDateAsync(syncStartTime);
-
-        return tasks;
-    }
-
     #endregion
 }

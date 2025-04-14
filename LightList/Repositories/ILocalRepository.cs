@@ -13,7 +13,7 @@ public interface ILocalRepository
 
     Task<int> DeleteTask(Models.Task task);
 
-    Task<List<Models.Label>> GetAllLabels();
+    Task<List<Models.Label>> GetAllLabels(bool excludeSynced = false, bool excludeDeleted = true);
     
     Task<int> SaveLabel(Models.Label label);
 

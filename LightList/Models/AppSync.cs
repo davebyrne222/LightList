@@ -41,3 +41,27 @@ public class AppSyncUserTask
     [JsonPropertyName("UpdatedAt")]
     public DateTime UpdatedAt { get; set; }
 }
+
+public class AppSyncGetUserLabels
+{
+    [JsonPropertyName("data")]
+    public AppSyncUserLabels Data { get; set; } = new();
+}
+
+public class AppSyncUserLabels
+{
+    [JsonPropertyName("getUserLabels")]
+    public List<AppSyncUserLabel>? UserLabels { get; set; } = new();
+}
+
+public class AppSyncUserLabel
+{
+    [JsonPropertyName("ItemId")]
+    public string ItemId { get; set; }
+
+    [JsonPropertyName("Data")]
+    public string Data { get; set; }
+
+    [JsonPropertyName("UpdatedAt")]
+    public DateTime UpdatedAt { get; set; }
+}

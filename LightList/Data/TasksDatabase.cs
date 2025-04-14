@@ -103,10 +103,26 @@ public class TasksDatabase
     
     #region Public methods - Labels
 
-    public async Task<List<Models.Label>> GetLabelsAsync()
+    public async Task<List<Models.Label>> GetLabelsAsync(bool excludeSynced = false, bool excludeDeleted = true)
     {
-        _logger.Debug("Retrieving all labels");
-        return await Database.Table<Models.Label>().ToListAsync();
+        _logger.Debug($"Retrieving all labels (excludeSynced: {excludeSynced}, excludeDeleted: {excludeDeleted})");
+
+        var query = Database.Table<Models.Label>();
+
+        if (excludeSynced)
+            query = query.Where(label => label.IsSynced == false);
+
+        if (excludeDeleted)
+            query = query.Where(label => label.IsDeleted == false);
+
+        // Sort
+        query = query
+            .OrderBy(l => l.Name);
+
+        // Execute query
+        var labels = await query.ToListAsync();
+        _logger.Debug($"Retrieved {labels.Count} labels");
+        return labels;
     }
 
     public async Task<int> SaveLabelAsync(Models.Label label)
@@ -115,7 +131,7 @@ public class TasksDatabase
         
         if (await ItemExistsAsync(nameof(Models.Label), "Name", label.Name))
         {
-            _logger.Debug("Task already exists. Updating");
+            _logger.Debug("Label already exists. Updating");
             return await Database.UpdateAsync(label);
         }
         

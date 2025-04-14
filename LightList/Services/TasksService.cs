@@ -13,6 +13,7 @@ public class TasksService : BaseService, ITasksService
     #region fields
 
     private readonly IMessenger _messenger;
+    private readonly ISecureStorageRepository _secureStorage;
     private readonly ILocalRepository _localRepository;
     private readonly ISyncService _syncService;
 
@@ -22,11 +23,13 @@ public class TasksService : BaseService, ITasksService
 
     public TasksService(
         IMessenger messenger, 
-        ILogger logger, 
+        ILogger logger,
+        ISecureStorageRepository secureStorage,
         ILocalRepository localRepository,
         ISyncService syncService) : base(logger)
     {
         _messenger = messenger;
+        _secureStorage = secureStorage;
         _localRepository = localRepository;
         _syncService = syncService;
     }
@@ -58,7 +61,7 @@ public class TasksService : BaseService, ITasksService
             await _localRepository.SaveTask(task);
 
             // save remotely
-            await _syncService.PushChangesAsync([task]);
+            await _syncService.PushTasksAsync([task]);
 
             // update sync status
             task.IsSynced = true;
@@ -94,12 +97,12 @@ public class TasksService : BaseService, ITasksService
             label.IsSynced = false;
             await _localRepository.SaveLabel(label);
 
-            // save remotely TODO
-            // await _syncService.PushChangesAsync([task]);
+            // save remotely
+            await _syncService.PushLabelsAsync([label]);
 
             // update sync status
-            // label.IsSynced = true;
-            // await _localRepository.SaveLabel(label);
+            label.IsSynced = true;
+            await _localRepository.SaveLabel(label);
         }, "Error saving label");
     }
 
@@ -116,17 +119,78 @@ public class TasksService : BaseService, ITasksService
 
     public async Task SyncNowAsync()
     {
-        _logger.Debug("Syncing tasks");
-
+        _logger.Debug("Syncing with remote");
+        
+        // Record current time to update secure storage once sync is finished
+        var syncStartTime = DateTime.UtcNow;
+        
+        await ExecuteWithLogging(async () => await PushLabelChangesAsync(), "Error syncing labels to remote");
+        await ExecuteWithLogging(async () => await PullLabelChangesAsync(), "Error syncing labels from remote");
         await ExecuteWithLogging(async () => await PushTaskChangesAsync(), "Error syncing tasks to remote");
         await ExecuteWithLogging(async () => await PullTaskChangesAsync(), "Error syncing tasks from remote");
+        
+        // Update sync time in secure storage
+        await _secureStorage.SaveLastSyncDateAsync(syncStartTime);
 
-        _logger.Debug("Finished syncing tasks");
+        _logger.Debug("Finished syncing");
     }
 
     #endregion
 
     #region utils
+    
+    private async Task PushLabelChangesAsync()
+    {
+        // Retrieve all tasks that have not been synced
+        _logger.Debug("Pushing un-synced labels");
+        List<Models.Label> labels = await _localRepository.GetAllLabels(true, false);
+
+        if (labels.Count == 0)
+        {
+            _logger.Debug("No labels found");
+            return;
+        }
+
+        _logger.Debug($"Found {labels.Count} un-synced labels. Pushing");
+
+        // Push to remote
+        await _syncService.PushLabelsAsync(labels);
+
+        // Update sync status in local database
+        foreach (var label in labels)
+        {
+            label.IsSynced = true;
+            await _localRepository.SaveLabel(label);
+        }
+    }
+
+    private async Task PullLabelChangesAsync()
+    {
+        // Pull all new/updated tasks from remote
+        _logger.Debug("Pulling new/updated labels");
+        var labels = await _syncService.PullLabelsAsync();
+        
+        if (labels.Count == 0)
+        {
+            _logger.Debug("No labels found");
+            return;
+        }
+
+        _logger.Debug($"Retrieved {labels.Count} labels. Saving locally");
+
+        // Store to local db
+        foreach (var label in labels)
+            if (label != null)
+            {
+                label.IsSynced = true;
+                await _localRepository.SaveLabel(label);
+            }
+
+        // Notify listeners that tasks have changed
+        _messenger.Send(new LabelsSyncedMessage(true));
+
+        _logger.Debug("Labels saved to local database");
+    }
     
     private async Task PushTaskChangesAsync()
     {
@@ -143,7 +207,7 @@ public class TasksService : BaseService, ITasksService
         _logger.Debug($"Found {tasks.Count} un-synced tasks. Pushing");
 
         // Push to remote
-        await _syncService.PushChangesAsync(tasks);
+        await _syncService.PushTasksAsync(tasks);
 
         // Update sync status in local database
         foreach (var task in tasks)
@@ -157,7 +221,7 @@ public class TasksService : BaseService, ITasksService
     {
         // Pull all new/updated tasks from remote
         _logger.Debug("Pulling new/updated tasks");
-        var tasks = await _syncService.PullChangesAsync();
+        var tasks = await _syncService.PullTasksAsync();
 
         if (tasks.Count == 0)
         {
@@ -180,6 +244,6 @@ public class TasksService : BaseService, ITasksService
 
         _logger.Debug("Tasks saved to local database");
     }
-
+    
     #endregion
 }

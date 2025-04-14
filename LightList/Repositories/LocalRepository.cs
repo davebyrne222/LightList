@@ -40,10 +40,10 @@ public class LocalRepository : ILocalRepository
         return await _database.DeleteTaskAsync(task);
     }
     
-    public async Task<List<Models.Label>> GetAllLabels()
+    public async Task<List<Models.Label>> GetAllLabels(bool excludeSynced = false, bool excludeDeleted = true)
     {
-        _logger.Debug($"Getting all labels");
-        return await _database.GetLabelsAsync();
+        _logger.Debug($"Getting all labels (excludeSynced: {excludeSynced}, excludeDeleted: {excludeDeleted})");
+        return await _database.GetLabelsAsync(excludeSynced, excludeDeleted);
     }
     
     public async Task<int> SaveLabel(Models.Label label)
