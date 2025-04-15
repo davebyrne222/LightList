@@ -162,7 +162,7 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
             await _tasksService.SaveLabel(model);
             
             // Update UI
-            Labels.Add(label);
+            await LoadLabelsAsync();
             SelectedLabel = label;
         }
         catch (Exception ex)
@@ -170,7 +170,6 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
             _logger.Error($"Failed to save label: {ex.GetType()} - {ex.Message}");
             throw; // TODO: show alert
         }
-        
     }
 
     private async Task SaveTaskAsync()
