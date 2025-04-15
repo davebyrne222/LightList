@@ -1,6 +1,4 @@
-using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Messaging;
-using LightList.Messages;
 using LightList.Services;
 using LightList.Utils;
 
@@ -17,15 +15,12 @@ public class TasksByDueDateViewModel : BaseTasksViewModel
         ILogger logger) : base(taskViewModelFactory, tasksService, messenger, logger)
     {
         _logger = logger;
-        // _ = SetTasks();
-        Task.Run(async () => await SetTasks()).Wait();
-        Messenger.Register<TasksSyncedMessage>(this, async (recipient, _) => { await SetTasks(); });
     }
 
-    private async Task SetTasks()
+    public async Task OnAppearing()
     {
-        var tasks = await TasksService.GetTasks();
-        AllTasks = new ObservableCollection<TaskViewModel>(tasks.Select(n => TaskViewModelFactory.Create(n)));
-        _logger.Debug($"Retrieved {AllTasks.Count} tasks");
+        _logger.Debug("OnAppearing");
+        await GetTasks();
+        await GetLabels();
     }
 }

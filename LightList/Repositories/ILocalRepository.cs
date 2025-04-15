@@ -1,14 +1,21 @@
-using Task = LightList.Models.Task;
+using LightList.Models;
+using Task = System.Threading.Tasks.Task;
 
 namespace LightList.Repositories;
 
 public interface ILocalRepository
 {
-    Task<List<Task>> GetAll(bool onlyNotSynced = false, bool excludeDeleted = true);
+    Task<List<Models.Task>> GetAllTasks(bool onlyNotSynced = false, bool excludeDeleted = true);
 
-    Task<Task> Get(string id);
+    Task<Models.Task> GetTask(string id);
 
-    Task<string> Save(Task task);
+    Task<int> SaveTask(Models.Task task);
 
-    void Delete(Task task);
+    Task<int> DeleteTask(Models.Task task);
+
+    Task<List<Models.Label>> GetAllLabels(bool excludeSynced = false, bool excludeDeleted = true);
+    
+    Task<int> SaveLabel(Models.Label label);
+
+    Task<int> DeleteLabel(Models.Label label);
 }

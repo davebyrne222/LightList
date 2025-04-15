@@ -45,7 +45,7 @@
         <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
         <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers>
         <CodesignKey>Apple Development: david.byrne222@gmail.com (V8C7QANGA5)</CodesignKey>
-        <CodesignProvision>Mac Team Provisioning Profile: com.davidbyrne222.lightlist</CodesignProvision>
+        <CodesignProvision>Mac Catalyst Team Provisioning Profile: com.davidbyrne222.lightlist</CodesignProvision>
         <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     </PropertyGroup>
 
@@ -106,6 +106,12 @@
 
     <ItemGroup>
       <AdditionalFiles Include="Views\TasksByDueDatePage.xaml" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="Data\Scripts\CreateLabelTable.sql" />
+        <EmbeddedResource Include="Data\Scripts\CreateTaskTable.sql" />
+        <EmbeddedResource Include="Data\Scripts\CreateIndexes.sql" />
     </ItemGroup>
 
 </Project>

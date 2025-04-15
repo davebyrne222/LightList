@@ -10,6 +10,7 @@ using LightList.Views;
 using LightList.Views.Components;
 using Microsoft.Extensions.Logging;
 using ILogger = LightList.Utils.ILogger;
+using Label = LightList.Models.Label;
 using Task = System.Threading.Tasks.Task;
 
 namespace LightList;
@@ -33,7 +34,7 @@ public static class MauiProgram
         _serviceProvider = app.Services;
         _loggerContext = _serviceProvider.GetService<LoggerContext>()!;
         _logger = _serviceProvider.GetService<ILogger>()!;
-        
+
         _loggerContext.Group = "App Creation";
 
         try
@@ -81,6 +82,7 @@ public static class MauiProgram
 
         // Register Models
         builder.Services.AddTransient<Models.Task>();
+        builder.Services.AddTransient<Label>();
         builder.Services.AddTransient<AuthTokens>();
         builder.Services.AddTransient<AppSyncUserTasks>();
         builder.Services.AddTransient<AppSyncUserTask>();
@@ -111,7 +113,7 @@ public static class MauiProgram
         // Utils
         builder.Services.AddSingleton<LoggerContext>();
         builder.Services.AddSingleton<ILogger, Logger>();
-        
+
 #if DEBUG
         builder.Logging.AddDebug();
 #endif

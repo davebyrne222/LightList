@@ -12,14 +12,20 @@
         <FlexLayout Grid.Row="1"
                     Direction="Row"
                     AlignItems="Center"
-                    JustifyContent="Start"
+                    JustifyContent="SpaceBetween"
                     Grow="1">
             <Label FontSize="22" Margin="10">Label</Label>
+            <Picker
+                Title="Select Label"
+                ItemsSource="{Binding Labels}"
+                SelectedItem="{Binding SelectedLabel}"
+                ItemDisplayBinding="{Binding}"
+                Margin="10"/>
         </FlexLayout>
         
         <components:TaskListView
             Grid.Row="2"
-            Tasks="{Binding AllTasks}"/>
+            Tasks="{Binding TasksFiltered}"/>
         
     </Grid>
 </ContentPage>

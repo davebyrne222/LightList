@@ -16,28 +16,8 @@ public class RemoteRepository : IRemoteRepository
         _logger = logger;
     }
 
-    public async Task<List<Models.Task?>> GetUserTasks(AuthTokens accessToken, DateTime? lastSyncDate)
-    {
-        _logger.Debug($"Retrieving remote tasks (lastSyncDate: {(lastSyncDate.HasValue ? lastSyncDate : "NA")})");
-
-        var syncDate = lastSyncDate.HasValue ? AwsDatetimeConverter(lastSyncDate.Value) : "";
-
-        var query =
-            $$"""
-              query { getUserTasks(     
-                UserId: "{{accessToken.UserId}}"
-                {{(lastSyncDate.HasValue ? $", UpdatedOnOrAfter: \"{syncDate}\"" : "")}}
-              ) {
-                ItemId,
-                Data,
-                UpdatedAt
-              } }
-              """;
-
-        var result = await ExecuteQuery(accessToken.AccessToken, query);
-        return DeserializeUserTasks(result);
-    }
-
+    #region Public methods - Tasks
+    
     public async Task PushUserTask(AuthTokens accessToken, Models.Task task)
     {
         _logger.Debug($"Pushing task to remote (task: {task.Id})");
@@ -65,7 +45,99 @@ public class RemoteRepository : IRemoteRepository
 
         _logger.Debug("Change pushed successfully");
     }
+    
+    public async Task<List<Models.Task?>> GetUserTasks(AuthTokens accessToken, DateTime? lastSyncDate)
+    {
+        _logger.Debug($"Retrieving remote tasks (lastSyncDate: {(lastSyncDate.HasValue ? lastSyncDate : "NA")})");
 
+        var syncDate = lastSyncDate.HasValue ? AwsDatetimeConverter(lastSyncDate.Value) : "";
+
+        var query =
+            $$"""
+              query { getUserTasks(     
+                UserId: "{{accessToken.UserId}}"
+                {{(lastSyncDate.HasValue ? $", UpdatedOnOrAfter: \"{syncDate}\"" : "")}}
+              ) {
+                ItemId,
+                Data,
+                UpdatedAt
+              } }
+              """;
+
+        string result = await ExecuteQuery(accessToken.AccessToken, query);
+        var appSyncObj = DeserializeAppSyncResponse<AppSyncGetUserTasks>(result);
+
+        if (appSyncObj.Data.UserTasks == null)
+            return [];
+        
+        return appSyncObj.Data.UserTasks.Select(
+            ConvertToModel<Models.Task, AppSyncUserTask>
+        ).ToList();
+    }
+
+    #endregion
+
+    #region Public methods - Labels
+
+    public async Task PushUserLabel(AuthTokens accessToken, Models.Label label)
+    {
+        _logger.Debug($"Pushing label to remote (label: {label.Name})");
+
+        var escapedData = JsonSerializer.Serialize(label)
+            .Replace("\\", "\\\\")
+            .Replace("\"", "\\\"");
+
+        var query =
+            $$"""
+              mutation { saveUserLabel(
+                UserId: "{{accessToken.UserId}}",
+                Name: "{{label.Name}}",
+                Data: "{{escapedData}}",
+                UpdatedAt: "{{AwsDatetimeConverter(DateTime.UtcNow)}}"
+              ) {
+                UserId,
+                Name,
+                Data,
+                UpdatedAt
+              } }
+              """;
+
+        await ExecuteQuery(accessToken.AccessToken, query);
+
+        _logger.Debug("Change pushed successfully");
+    }
+    
+    public async Task<List<Models.Label?>> GetUserLabels(AuthTokens accessToken, DateTime? lastSyncDate)
+    {
+        _logger.Debug($"Retrieving remote labels (lastSyncDate: {(lastSyncDate.HasValue ? lastSyncDate : "NA")})");
+
+        var syncDate = lastSyncDate.HasValue ? AwsDatetimeConverter(lastSyncDate.Value) : "";
+
+        var query =
+            $$"""
+              query { getUserLabels(     
+                UserId: "{{accessToken.UserId}}"
+                {{(lastSyncDate.HasValue ? $", UpdatedOnOrAfter: \"{syncDate}\"" : "")}}
+              ) {
+                Name,
+                Data,
+                UpdatedAt
+              } }
+              """;
+
+        string result = await ExecuteQuery(accessToken.AccessToken, query);
+        var appSyncObj = DeserializeAppSyncResponse<AppSyncGetUserLabels>(result);
+
+        if (appSyncObj.Data.UserLabels == null)
+            return [];
+        
+        return appSyncObj.Data.UserLabels.Select(
+            ConvertToModel<Models.Label, AppSyncUserLabel>
+        ).ToList();
+    }
+
+    #endregion
+    
     #region Utils
 
     private async Task<string> ExecuteQuery(string accessToken, string query)
@@ -126,8 +198,8 @@ public class RemoteRepository : IRemoteRepository
 
         return contentString;
     }
-
-    private List<Models.Task?> DeserializeUserTasks(string response)
+    
+    private T DeserializeAppSyncResponse<T>(string response)
     {
         _logger.Debug("Deserializing response");
 
@@ -136,20 +208,14 @@ public class RemoteRepository : IRemoteRepository
 
         try
         {
-            var result = JsonSerializer.Deserialize<AppSyncGetUserTasks>(response);
+            var result = JsonSerializer.Deserialize<T>(response);
 
             if (result == null)
                 throw new NullReferenceException("Deserializing failed: Response is null");
 
-            _logger.Debug(
-                $"Successfully deserialized response: {result.Data.UserTasks?.Count ?? 0} user tasks retrieved");
-
-            if (result.Data.UserTasks == null)
-                return [];
-
-            return result.Data.UserTasks.Select(
-                ConvertToTaskModel
-            ).ToList();
+            _logger.Debug("Successfully deserialized response");
+            
+            return result;
         }
         catch (Exception ex)
         {
@@ -157,14 +223,37 @@ public class RemoteRepository : IRemoteRepository
             throw;
         }
     }
-
-    private Models.Task? ConvertToTaskModel(AppSyncUserTask response)
+    
+    private TModel? ConvertToModel<TModel, TWrapper>(TWrapper response)
+        where TModel : class
+        where TWrapper : class
     {
-        _logger.Debug("Converting task response to model");
-        var task = JsonSerializer.Deserialize<Models.Task>(response.Data);
-        if (task is not null)
-            task.UpdatedAt = response.UpdatedAt;
-        return task;
+        _logger.Debug($"Converting {typeof(TModel).Name} response to model");
+
+        var dataProp = typeof(TWrapper).GetProperty("Data");
+        var updatedAtProp = typeof(TWrapper).GetProperty("UpdatedAt");
+
+        if (dataProp == null || updatedAtProp == null)
+            throw new InvalidOperationException($"Wrapper {typeof(TWrapper).Name} must have Data and UpdatedAt properties.");
+
+        var dataJson = dataProp.GetValue(response) as string;
+        var updatedAt = (DateTime) updatedAtProp.GetValue(response)!;
+
+        if (string.IsNullOrEmpty(dataJson))
+            return null;
+
+        var model = JsonSerializer.Deserialize<TModel>(dataJson);
+        if (model == null)
+            return null;
+
+        // Set UpdatedAt on model
+        var updatedAtOnModel = typeof(TModel).GetProperty("UpdatedAt");
+        if (updatedAtOnModel != null && updatedAtOnModel.CanWrite)
+        {
+            updatedAtOnModel.SetValue(model, updatedAt);
+        }
+
+        return model;
     }
 
     private static string AwsDatetimeConverter(DateTime dateTime)

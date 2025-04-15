@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -5,23 +6,30 @@ using CommunityToolkit.Mvvm.Messaging;
 using LightList.Messages;
 using LightList.Services;
 using LightList.Utils;
-using Task = LightList.Models.Task;
+using Task = System.Threading.Tasks.Task;
 
 namespace LightList.ViewModels;
 
-public class TaskViewModel : ObservableObject, IQueryAttributable
+public partial class TaskViewModel : ObservableObject, IQueryAttributable
 {
     private readonly ILogger _logger;
     private readonly LoggerContext _loggerContext;
     private readonly IMessenger _messenger;
     private readonly ITasksService _tasksService;
-    private Task _task;
+    [ObservableProperty] private ObservableCollection<string?> _labels = new();
+    [ObservableProperty] private string? _selectedLabel;
+    private Models.Task _task;
 
-    public TaskViewModel(LoggerContext loggerContext, ILogger logger, ITasksService tasksService, IMessenger messenger,
-        Task task)
+    public TaskViewModel(
+        LoggerContext loggerContext,
+        ILogger logger,
+        ITasksService tasksService,
+        IMessenger messenger,
+        Models.Task task)
     {
         _loggerContext = loggerContext;
         _logger = logger;
+
         _logger.Debug("Initializing");
 
         _tasksService = tasksService;
@@ -79,19 +87,8 @@ public class TaskViewModel : ObservableObject, IQueryAttributable
         }
     }
 
-    public string Label
-    {
-        get => _task.Label ?? string.Empty;
-        set
-        {
-            if (_task.Label != value) _task.Label = value;
-            OnPropertyChanged();
-        }
-    }
+    public string? Label => _task.Label;
 
-    public bool HasLabel => !string.IsNullOrEmpty(_task.Label);
-
-    // [ObservableProperty] private bool _complete;
     public bool Complete
     {
         get => _task.IsCompleted;
@@ -112,29 +109,83 @@ public class TaskViewModel : ObservableObject, IQueryAttributable
 
     async void IQueryAttributable.ApplyQueryAttributes(IDictionary<string, object> query)
     {
+        _loggerContext.Group = "Page Load";
         _logger.Debug("Applying query attributes");
-        if (query.ContainsKey("load"))
+
+        await LoadLabelsAsync();
+
+        if (query.TryGetValue("load", out var value))
         {
-            await LoadTaskAsync(query["load"].ToString()!);
-            RefreshProperties();
+            _logger.Debug("Loading task");
+            await LoadTaskAsync(value.ToString()!);
         }
-    }
-
-    private async System.Threading.Tasks.Task LoadTaskAsync(string id)
-    {
-        _loggerContext.Group = "Load Task";
-        _logger.Debug($"Loading task (id={id})");
-
-        _task = await _tasksService.GetTask(id);
 
         _loggerContext.Reset();
     }
 
-    private async System.Threading.Tasks.Task SaveTaskAsync()
+    private async Task LoadTaskAsync(string id)
+    {
+        _logger.Debug($"Loading task (id={id})");
+
+        try
+        {
+            _task = await _tasksService.GetTask(id);
+            SelectedLabel = _task.Label;
+            RefreshProperties();
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Failed to load task: {ex.GetType()} - {ex.Message}");
+            throw; // TODO: show alert
+        }
+    }
+
+    private async Task LoadLabelsAsync()
+    {
+        _logger.Debug("Retrieving labels");
+
+        try
+        {
+            var labels = await _tasksService.GetLabels();
+            Labels = new ObservableCollection<string?>(labels.Select(n => n.Name));
+            _logger.Debug($"Retrieved {Labels.Count} labels");
+            Labels.Insert(0, null); // allow de-select
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Failed to get labels: {ex.GetType()} - {ex.Message}");
+            throw; // TODO: await DisplayAlert("Error retrieving labels. Please try again", ex.Message, "OK");
+        }
+    }
+
+    public async Task AddLabelAsync(string label)
+    {
+        _logger.Debug($"Adding label (label={label})");
+
+        try
+        {
+            // Save label
+            Models.Label model = new();
+            model.Name = label;
+            await _tasksService.SaveLabel(model);
+
+            // Update UI
+            await LoadLabelsAsync();
+            SelectedLabel = label;
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Failed to save label: {ex.GetType()} - {ex.Message}");
+            throw; // TODO: show alert
+        }
+    }
+
+    private async Task SaveTaskAsync()
     {
         _loggerContext.Group = "Save Task";
 
         _logger.Debug($"Saving task (id={_task.Id})");
+
         await _tasksService.SaveTask(_task);
 
         _logger.Debug($"Saved task. Sending Message (id={_task.Id})");
@@ -145,7 +196,7 @@ public class TaskViewModel : ObservableObject, IQueryAttributable
         _loggerContext.Reset();
     }
 
-    private async System.Threading.Tasks.Task CompleteTaskAsync()
+    private async Task CompleteTaskAsync()
     {
         _loggerContext.Group = "Complete Task";
 
@@ -161,7 +212,7 @@ public class TaskViewModel : ObservableObject, IQueryAttributable
         _loggerContext.Reset();
     }
 
-    private async System.Threading.Tasks.Task DeleteTaskAsync()
+    private async Task DeleteTaskAsync()
     {
         _loggerContext.Group = "Delete Task";
 
@@ -177,7 +228,7 @@ public class TaskViewModel : ObservableObject, IQueryAttributable
         _loggerContext.Reset();
     }
 
-    public async System.Threading.Tasks.Task Reload()
+    public async Task Reload()
     {
         _loggerContext.Group = "Reload Task";
 
@@ -196,5 +247,10 @@ public class TaskViewModel : ObservableObject, IQueryAttributable
         OnPropertyChanged(nameof(NoDaysRemaining));
         OnPropertyChanged(nameof(NoDaysRemainingLbl));
         OnPropertyChanged(nameof(Label));
+    }
+
+    partial void OnSelectedLabelChanged(string? oldValue, string? newValue)
+    {
+        _task.Label = SelectedLabel;
     }
 }

@@ -8,36 +8,65 @@
              Title="Task"
              Shell.NavBarIsVisible="True">
 
-    <VerticalStackLayout Spacing="30" Margin="20" VerticalOptions="Center">
+    <VerticalStackLayout Spacing="20" Margin="20" VerticalOptions="Start">
         <VerticalStackLayout HorizontalOptions="Fill" Spacing="5">
-            <Label Text="Summary" StyleClass="MenuItemLabel"/>
+            <Label Text="Description" StyleClass="MenuGroupLabel"/>
             <Editor Placeholder="Enter your task"
                     Text="{Binding Text}"
                     HeightRequest="100" />
         </VerticalStackLayout>
         
-        <VerticalStackLayout HorizontalOptions="Fill" Spacing="5">
-            <Label Text="Due Date" StyleClass="MenuItemLabel"/>
-            <Grid ColumnDefinitions="2*,1*" ColumnSpacing="5">
-                <DatePicker Date="{Binding DueDate}" />
-                <TimePicker Grid.Column="1"/>
-            </Grid>
-        </VerticalStackLayout>
+        <Border StyleClass="MenuGroup">
+            <VerticalStackLayout HorizontalOptions="Fill" VerticalOptions="Fill" Spacing="2" >
+                <FlexLayout Direction="Row"
+                            AlignItems="Center"
+                            JustifyContent="SpaceBetween"
+                            HeightRequest="50"
+                            Margin="5, 0"
+                            Grow="1">
+                    <Label Text="Due Date"/>
+                    <Grid ColumnDefinitions="2*, 1*" ColumnSpacing="5" WidthRequest="180">
+                        <DatePicker Date="{Binding DueDate}"/>
+                        <TimePicker Time="{Binding DueDate}" Grid.Column="1"/>
+                    </Grid>
+                </FlexLayout>
+                
+                <BoxView Style="{StaticResource TaskItemSeparator}" Margin="10, 0, 0, 0"/>
+            
+                <FlexLayout Direction="Row"
+                            AlignItems="Center"
+                            JustifyContent="SpaceBetween"
+                            HeightRequest="50"
+                            Margin="5, 0"
+                            Grow="1">
+                    <Label Text="Label"/>
+                    <Grid ColumnDefinitions="2*, 1*" ColumnSpacing="5" WidthRequest="180">
+                        <Picker
+                            Title="{OnPlatform 
+                                    iOS='Select a Label', 
+                                    MacCatalyst=''}"
+                            ItemsSource="{Binding Labels}"
+                            SelectedItem="{Binding SelectedLabel, Mode=TwoWay}"
+                            ItemDisplayBinding="{Binding}"/> <!-- Bug: showing title on MacCatalyst hides picker options -->
+                        <ImageButton
+                            Grid.Column="1"
+                            Source="{FontImageSource Glyph='&#xf489;', FontFamily='Ionicons', Size='60', Color={StaticResource Gray200}}"
+                            Clicked="OnNewLabelButtonClicked"
+                            HorizontalOptions="Center"
+                            Style="{StaticResource MenuImageButtonStyle}" />
+                    </Grid>
+                </FlexLayout>
+            </VerticalStackLayout>
+        </Border>
         
-        <VerticalStackLayout HorizontalOptions="Fill" Spacing="5">
-            <Label Text="Tag" StyleClass="MenuItemLabel"/>
-            <Entry Placeholder="Enter your label"
-                   Text="{Binding Label}"
-                   HeightRequest="50" />
-        </VerticalStackLayout>
         
         <Grid ColumnDefinitions="*,*" ColumnSpacing="5">
-            <Button Text="Save"
-                    Command="{Binding SaveCommand}" />
-
-            <Button Grid.Column="1"
-                    Text="Delete"
+            <Button Text="Delete"
                     Command="{Binding DeleteCommand}" />
+            
+            <Button Grid.Column="1" 
+                    Text="Save"
+                    Command="{Binding SaveCommand}" />
         </Grid>
     </VerticalStackLayout>
 </ContentPage>

@@ -1,6 +1,4 @@
-using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Messaging;
-using LightList.Messages;
 using LightList.Services;
 using LightList.Utils;
 
@@ -18,22 +16,12 @@ public class AllTasksViewModel : BaseTasksViewModel
     ) : base(taskViewModelFactory, tasksService, messenger, logger)
     {
         _logger = logger;
-        // _ = SetTasks();
-        Task.Run(async () => await SetTasks()).Wait();
-        Messenger.Register<TasksSyncedMessage>(this, async (recipient, _) => { await OnTasksSynced(); });
     }
 
-    private async Task SetTasks()
+    public async Task OnAppearing()
     {
-        _logger.Debug("Updating all tasks");
-        var tasks = await TasksService.GetTasks();
-        AllTasks = new ObservableCollection<TaskViewModel>(tasks.Select(n => TaskViewModelFactory.Create(n)));
-        _logger.Debug($"Retrieved {AllTasks.Count} tasks");
-    }
-
-    private async Task OnTasksSynced()
-    {
-        _logger.Debug("Updating all tasks");
-        await SetTasks();
+        _logger.Debug("OnAppearing");
+        await GetTasks();
+        await GetLabels();
     }
 }
