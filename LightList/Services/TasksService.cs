@@ -180,11 +180,17 @@ public class TasksService : BaseService, ITasksService
 
         // Store to local db
         foreach (var label in labels)
-            if (label != null)
-            {
-                label.IsSynced = true;
-                await _localRepository.SaveLabel(label);
-            }
+        {
+            if (label == null)
+                continue;
+
+            if (label.IsDeleted)
+                await _localRepository.DeleteLabel(label); 
+            
+            label.IsSynced = true;
+            await _localRepository.SaveLabel(label);
+        }
+            
 
         // Notify listeners that tasks have changed
         _messenger.Send(new LabelsSyncedMessage(true));
