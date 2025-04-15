@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using LightList.Messages;
 using LightList.Services;
 using LightList.Utils;
+using Task = System.Threading.Tasks.Task;
 
 namespace LightList.ViewModels;
 
@@ -15,9 +16,32 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
     private readonly LoggerContext _loggerContext;
     private readonly IMessenger _messenger;
     private readonly ITasksService _tasksService;
+    [ObservableProperty] private ObservableCollection<string?> _labels = new();
+    [ObservableProperty] private string? _selectedLabel;
     private Models.Task _task;
 
+    public TaskViewModel(
+        LoggerContext loggerContext,
+        ILogger logger,
+        ITasksService tasksService,
+        IMessenger messenger,
+        Models.Task task)
+    {
+        _loggerContext = loggerContext;
+        _logger = logger;
+
+        _logger.Debug("Initializing");
+
+        _tasksService = tasksService;
+        _messenger = messenger;
+        _task = task;
+        SaveCommand = new AsyncRelayCommand(SaveTaskAsync);
+        CompleteCommand = new AsyncRelayCommand(CompleteTaskAsync);
+        DeleteCommand = new AsyncRelayCommand(DeleteTaskAsync);
+    }
+
     public string Id => _task.Id;
+
     public string Text
     {
         get => _task.Text;
@@ -30,6 +54,7 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
             }
         }
     }
+
     public DateTime DueDate
     {
         get => _task.DueAt;
@@ -42,7 +67,9 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
             }
         }
     }
+
     public int NoDaysRemaining => DueDate.Subtract(DateTime.Today).Days;
+
     public string NoDaysRemainingLbl
     {
         get
@@ -59,9 +86,9 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
             }
         }
     }
+
     public string? Label => _task.Label;
-    [ObservableProperty] private string? _selectedLabel;
-    [ObservableProperty] private ObservableCollection<string?> _labels = new();
+
     public bool Complete
     {
         get => _task.IsCompleted;
@@ -75,43 +102,24 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
             }
         }
     }
+
     public ICommand SaveCommand { get; private set; }
     public ICommand CompleteCommand { get; private set; }
     public ICommand DeleteCommand { get; private set; }
-    
-    public TaskViewModel(
-        LoggerContext loggerContext,
-        ILogger logger,
-        ITasksService tasksService,
-        IMessenger messenger,
-        Models.Task task)
-    {
-        _loggerContext = loggerContext;
-        _logger = logger;
-        
-        _logger.Debug("Initializing");
-        
-        _tasksService = tasksService;
-        _messenger = messenger;
-        _task = task;
-        SaveCommand = new AsyncRelayCommand(SaveTaskAsync);
-        CompleteCommand = new AsyncRelayCommand(CompleteTaskAsync);
-        DeleteCommand = new AsyncRelayCommand(DeleteTaskAsync);
-    }
-    
+
     async void IQueryAttributable.ApplyQueryAttributes(IDictionary<string, object> query)
     {
         _loggerContext.Group = "Page Load";
         _logger.Debug("Applying query attributes");
-        
+
         await LoadLabelsAsync();
-        
+
         if (query.TryGetValue("load", out var value))
         {
             _logger.Debug("Loading task");
             await LoadTaskAsync(value.ToString()!);
         }
-        
+
         _loggerContext.Reset();
     }
 
@@ -131,10 +139,10 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
             throw; // TODO: show alert
         }
     }
-    
+
     private async Task LoadLabelsAsync()
     {
-        _logger.Debug($"Retrieving labels");
+        _logger.Debug("Retrieving labels");
 
         try
         {
@@ -153,14 +161,14 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
     public async Task AddLabelAsync(string label)
     {
         _logger.Debug($"Adding label (label={label})");
-        
+
         try
         {
             // Save label
             Models.Label model = new();
             model.Name = label;
             await _tasksService.SaveLabel(model);
-            
+
             // Update UI
             await LoadLabelsAsync();
             SelectedLabel = label;
@@ -177,7 +185,7 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
         _loggerContext.Group = "Save Task";
 
         _logger.Debug($"Saving task (id={_task.Id})");
-        
+
         await _tasksService.SaveTask(_task);
 
         _logger.Debug($"Saved task. Sending Message (id={_task.Id})");
@@ -240,9 +248,9 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
         OnPropertyChanged(nameof(NoDaysRemainingLbl));
         OnPropertyChanged(nameof(Label));
     }
-    
+
     partial void OnSelectedLabelChanged(string? oldValue, string? newValue)
     {
         _task.Label = SelectedLabel;
-    } 
+    }
 }
