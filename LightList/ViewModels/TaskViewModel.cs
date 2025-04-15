@@ -140,8 +140,8 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
         {
             var labels = await _tasksService.GetLabels();
             Labels = new ObservableCollection<string?>(labels.Select(n => n.Name));
-            Labels.Insert(0, null); // allow de-select
             _logger.Debug($"Retrieved {Labels.Count} labels");
+            Labels.Insert(0, null); // allow de-select
         }
         catch (Exception ex)
         {

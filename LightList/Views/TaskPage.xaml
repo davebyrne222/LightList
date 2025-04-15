@@ -42,10 +42,12 @@
                     <Label Text="Label"/>
                     <Grid ColumnDefinitions="2*, 1*" ColumnSpacing="5" WidthRequest="180">
                         <Picker
-                            Title="Select Label"
+                            Title="{OnPlatform 
+                                    iOS='Select a Label', 
+                                    MacCatalyst=''}"
                             ItemsSource="{Binding Labels}"
                             SelectedItem="{Binding SelectedLabel, Mode=TwoWay}"
-                            ItemDisplayBinding="{Binding}"/>
+                            ItemDisplayBinding="{Binding}"/> <!-- Bug: showing title on MacCatalyst hides picker options -->
                         <ImageButton
                             Grid.Column="1"
                             Source="{FontImageSource Glyph='&#xf489;', FontFamily='Ionicons', Size='60', Color={StaticResource Gray200}}"
