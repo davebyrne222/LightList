@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using LightList.Messages;
 using LightList.Services;
 using LightList.Utils;
+using Label = LightList.Models.Label;
 using Task = System.Threading.Tasks.Task;
 
 namespace LightList.ViewModels;
@@ -55,7 +56,7 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
         }
     }
 
-    public DateTime DueDate
+    public DateTime DueAt
     {
         get => _task.DueAt;
         set
@@ -68,7 +69,7 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
         }
     }
 
-    public int NoDaysRemaining => DueDate.Subtract(DateTime.Today).Days;
+    public int NoDaysRemaining => DueAt.Subtract(DateTime.Today).Days;
 
     public string NoDaysRemainingLbl
     {
@@ -165,13 +166,15 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
         try
         {
             // Save label
-            Models.Label model = new();
+            Label model = new();
             model.Name = label;
             await _tasksService.SaveLabel(model);
 
             // Update UI
             await LoadLabelsAsync();
             SelectedLabel = label;
+            _messenger.Send(new LabelsSyncedMessage(true));
+
         }
         catch (Exception ex)
         {
@@ -189,6 +192,7 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
         await _tasksService.SaveTask(_task);
 
         _logger.Debug($"Saved task. Sending Message (id={_task.Id})");
+
         _messenger.Send(new TaskSavedMessage(_task.Id));
 
         await Shell.Current.GoToAsync("..");
@@ -243,7 +247,7 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
     {
         _logger.Debug("Refreshing properties");
         OnPropertyChanged(nameof(Text));
-        OnPropertyChanged(nameof(DueDate));
+        OnPropertyChanged(nameof(DueAt));
         OnPropertyChanged(nameof(NoDaysRemaining));
         OnPropertyChanged(nameof(NoDaysRemainingLbl));
         OnPropertyChanged(nameof(Label));

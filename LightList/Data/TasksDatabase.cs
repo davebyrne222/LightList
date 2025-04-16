@@ -2,6 +2,8 @@ using System.Reflection;
 using LightList.Utils;
 using SQLite;
 using Task = System.Threading.Tasks.Task;
+using System.Linq;
+
 
 namespace LightList.Data;
 
@@ -97,6 +99,51 @@ public class TasksDatabase
     {
         _logger.Debug($"Deleting task (id={item.Id})");
         return await Database.DeleteAsync(item);
+    }
+
+    public class DueDateWrapper
+    {
+        [Column("DueDate")]
+        public DateTime DueDate { get; set; }
+    }
+    
+    /**
+     * Using SQLite DATE function and sqlite-net-pcl returns default
+     * value and so using DISTINCT results in only a default date being returned
+     *
+     * Issue raised at: https://github.com/praeclarum/sqlite-net/issues/1275
+     *
+     * Until resolved, must use workaround
+     *
+     * TODO: fix
+     */
+    
+    public async Task<List<DateOnly>> GetUniqueDueDatesAsync()
+    {
+        _logger.Debug("Retrieving unique due dates");
+        
+        // **N.B**: See bug described above
+        //
+        // var dueDates = await Database.QueryAsync<DueDateWrapper>(
+        //     "SELECT DISTINCT DATE(DueAt) AS DueDate FROM Task"
+        // );
+        //
+        // List<DateOnly> uniqueDueDates = dueDates.Select(d => DateOnly.FromDateTime(d.DueDate)).ToList();
+        
+        // BUG WORKAROUND:
+        // ---
+        var dueDates = await Database.QueryAsync<DueDateWrapper>(
+            "SELECT DISTINCT DueAt AS DueDate FROM Task WHERE IsDeleted = 0"
+        );
+        
+        var uniqueDueDates = new HashSet<DateOnly>(
+            dueDates.Select(d => DateOnly.FromDateTime(d.DueDate))
+        ).ToList();
+        // ---
+        
+        _logger.Debug($"Retrieved {uniqueDueDates.Count} unique dates");
+        
+        return uniqueDueDates;
     }
 
     #endregion

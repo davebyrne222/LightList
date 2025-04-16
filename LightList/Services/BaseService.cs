@@ -4,11 +4,11 @@ namespace LightList.Services;
 
 public abstract class BaseService
 {
-    protected readonly ILogger _logger;
+    protected readonly ILogger Logger;
 
     protected BaseService(ILogger logger)
     {
-        _logger = logger;
+        Logger = logger;
     }
 
     protected async Task ExecuteWithLogging(Func<Task> action, string context)
@@ -19,7 +19,7 @@ public abstract class BaseService
         }
         catch (Exception ex)
         {
-            _logger.Error($"{context}: {ex.GetType()} - {ex.Message}");
+            Logger.Error($"{context}: {ex.GetType()} - {ex.Message}");
             throw;
         }
     }
@@ -32,7 +32,7 @@ public abstract class BaseService
         }
         catch (Exception ex)
         {
-            _logger.Error($"{context}: {ex.GetType()} - {ex.Message}");
+            Logger.Error($"{context}: {ex.GetType()} - {ex.Message}");
             throw;
         }
     }

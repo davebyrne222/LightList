@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.Messaging;
+using LightList.Messages;
 using LightList.Services;
 using LightList.Utils;
 using LightList.Views;
@@ -95,6 +96,7 @@ public partial class AppShell : Shell
 
     private async void OnLoginClicked(object sender, EventArgs e)
     {
+        _loggerContext.Group = "Shell Login";
         _logger.Debug("Navigating to the login page");
 
         IsLoggedIn = await _authService.SignInAsync();
@@ -109,10 +111,14 @@ public partial class AppShell : Shell
         {
             ShowToast("There was a problem signing in. Please try again.", ToastDuration.Long);
         }
+
+        _loggerContext.Reset();
     }
 
     private async void OnLogoutClicked(object sender, EventArgs e)
     {
+        _loggerContext.Group = "Shell Logout";
+
         IsLoggedIn = !await _authService.SignOutAsync();
 
         if (!IsLoggedIn)
@@ -120,13 +126,19 @@ public partial class AppShell : Shell
         // await CloseFlyout();
         else
             ShowToast("There was a problem signing out. Please try again.", ToastDuration.Long);
+
+        _loggerContext.Reset();
     }
 
     private async void OnSyncClicked(object sender, EventArgs e)
     {
+        _loggerContext.Group = "Shell Sync";
+
         ShowToast("Syncing...");
         await SyncTasks();
         ShowToast("Syncing complete");
+
+        _loggerContext.Reset();
     }
 
     #endregion
@@ -160,6 +172,10 @@ public partial class AppShell : Shell
         {
             await _tasksService.SyncNowAsync();
             _logger.Debug("Finished syncing");
+
+            // Notify listeners that labels have changed
+            _messenger.Send(new LabelsSyncedMessage(true));
+            _messenger.Send(new TasksSyncedMessage(true));
         }
         catch (Exception ex)
         {

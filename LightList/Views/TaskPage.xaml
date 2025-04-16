@@ -26,8 +26,8 @@
                             Grow="1">
                     <Label Text="Due Date"/>
                     <Grid ColumnDefinitions="2*, 1*" ColumnSpacing="5" WidthRequest="180">
-                        <DatePicker Date="{Binding DueDate}"/>
-                        <TimePicker Time="{Binding DueDate}" Grid.Column="1"/>
+                        <DatePicker Date="{Binding DueAt}"/>
+                        <TimePicker Time="{Binding DueAt}" Grid.Column="1"/>
                     </Grid>
                 </FlexLayout>
                 
