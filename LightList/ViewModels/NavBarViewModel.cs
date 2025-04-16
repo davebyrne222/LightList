@@ -74,8 +74,8 @@ public class NavBarViewModel : INotifyPropertyChanged
         // Update styling
         SelectedView = pageName;
 
-        Debug.WriteLine($"---[NavBarViewModel.NavigateToPage] Navigating to {route}");
-        await Shell.Current.GoToAsync($"//{route}", false);
+        _logger.Debug($"Navigating to {route}");
+        await Shell.Current.GoToAsync($"//{route}", true);
     }
 
     private void OnPropertyChanged(string propertyName)
