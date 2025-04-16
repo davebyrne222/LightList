@@ -133,7 +133,7 @@ public class TasksDatabase
         // BUG WORKAROUND:
         // ---
         var dueDates = await Database.QueryAsync<DueDateWrapper>(
-            "SELECT DISTINCT DueAt AS DueDate FROM Task"
+            "SELECT DISTINCT DueAt AS DueDate FROM Task WHERE IsDeleted = 0"
         );
         
         var uniqueDueDates = new HashSet<DateOnly>(
