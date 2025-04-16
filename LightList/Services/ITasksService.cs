@@ -12,6 +12,8 @@ public interface ITasksService
 
     Task DeleteTask(Models.Task task);
 
+    Task<List<DateOnly>> GetDueDates();
+
     Task SyncNowAsync();
 
     Task<List<Models.Label>> GetLabels();

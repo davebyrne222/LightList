@@ -40,6 +40,12 @@ public class LocalRepository : ILocalRepository
         return await _database.DeleteTaskAsync(task);
     }
     
+    public async Task<List<DateOnly>> GetDueDates()
+    {
+        _logger.Debug("Getting due dates");
+        return await _database.GetUniqueDueDatesAsync();
+    }
+    
     public async Task<List<Models.Label>> GetAllLabels(bool excludeSynced = false, bool excludeDeleted = true)
     {
         _logger.Debug($"Getting all labels (excludeSynced: {excludeSynced}, excludeDeleted: {excludeDeleted})");

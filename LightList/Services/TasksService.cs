@@ -76,6 +76,12 @@ public class TasksService : BaseService, ITasksService
         await ExecuteWithLogging(async () => await SaveTask(task), "Error marking task deleted");
     }
 
+    public async Task<List<DateOnly>> GetDueDates()
+    {
+        _logger.Debug("Getting due dates");
+        return await ExecuteWithLogging(async () => await _localRepository.GetDueDates(), "Error marking task deleted");
+    }
+
     #endregion
 
     #region Public methods - Labels

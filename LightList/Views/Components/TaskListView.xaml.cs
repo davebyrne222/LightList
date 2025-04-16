@@ -62,13 +62,7 @@ public partial class TaskListView : ContentView
     #endregion
 
     #region Event Handlers
-
-    // TODO: remove
-    private static void OnTasksChanged(BindableObject bindable, object oldValue, object newValue)
-    {
-        Console.WriteLine($"Bindable changed: {bindable.GetType()}");
-    }
-
+    
     private async void OnTaskSelected(object sender, SelectionChangedEventArgs e)
     {
         _logger.Debug($"Selection count = {e.CurrentSelection.Count}");
@@ -78,7 +72,7 @@ public partial class TaskListView : ContentView
 
         var selectedTask = e.CurrentSelection[0] as TaskViewModel;
 
-        _logger.Debug($"Selected task id = {selectedTask.Id}");
+        _logger.Debug($"Selected task id = {selectedTask?.Id}");
 
         if (selectedTask != null)
             await Shell.Current.GoToAsync($"{nameof(TaskPage)}?load={selectedTask.Id}");
@@ -102,14 +96,14 @@ public partial class TaskListView : ContentView
         if (task == null)
         {
             task = _taskViewModelFactory.Create(await _tasksService.GetTask(taskId));
-            Tasks.Insert(GetInsertionIndex(task.DueDate), task);
+            Tasks.Insert(GetInsertionIndex(task.DueAt), task);
             _logger.Debug($"New task added (id={task.Id}) to index {Tasks.IndexOf(task)}");
         }
         // Task was updated
         else
         {
             await task.Reload();
-            var idx = GetInsertionIndex(task.DueDate) - 1;
+            var idx = GetInsertionIndex(task.DueAt) - 1;
             Tasks.Move(Tasks.IndexOf(task), idx < 0 ? 0 : idx);
             _logger.Debug($"Updated taskId {task.Id} in tasks list to index {Tasks.IndexOf(task)}");
         }
@@ -157,7 +151,7 @@ public partial class TaskListView : ContentView
         _logger.Debug("Inserting task");
 
         // Insert before incomplete task with the next due date but
-        var insertBeforeTask = Tasks.FirstOrDefault(t => t.DueDate > dueDate && t.Complete == false);
+        var insertBeforeTask = Tasks.FirstOrDefault(t => t.DueAt > dueDate && t.Complete == false);
 
         // If no incomplete tasks with later due date, add before completed tasks
         if (insertBeforeTask == null)

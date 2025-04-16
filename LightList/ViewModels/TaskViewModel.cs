@@ -55,7 +55,7 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
         }
     }
 
-    public DateTime DueDate
+    public DateTime DueAt
     {
         get => _task.DueAt;
         set
@@ -68,7 +68,7 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
         }
     }
 
-    public int NoDaysRemaining => DueDate.Subtract(DateTime.Today).Days;
+    public int NoDaysRemaining => DueAt.Subtract(DateTime.Today).Days;
 
     public string NoDaysRemainingLbl
     {
@@ -243,7 +243,7 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
     {
         _logger.Debug("Refreshing properties");
         OnPropertyChanged(nameof(Text));
-        OnPropertyChanged(nameof(DueDate));
+        OnPropertyChanged(nameof(DueAt));
         OnPropertyChanged(nameof(NoDaysRemaining));
         OnPropertyChanged(nameof(NoDaysRemainingLbl));
         OnPropertyChanged(nameof(Label));

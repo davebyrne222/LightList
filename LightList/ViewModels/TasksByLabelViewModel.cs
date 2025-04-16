@@ -11,7 +11,6 @@ public partial class TasksByLabelViewModel : BaseTasksViewModel
 {
     private readonly ILogger _logger;
     [ObservableProperty] private string? _selectedLabel;
-
     [ObservableProperty] private ObservableCollection<TaskViewModel> _tasksFiltered = new();
 
     public TasksByLabelViewModel(

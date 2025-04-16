@@ -9,11 +9,11 @@ public partial class TasksByDueDatePage : ContentPage
         InitializeComponent();
         BindingContext = viewModel;
     }
-
-    protected override async void OnAppearing()
+    
+    protected override async void OnNavigatedTo(NavigatedToEventArgs args)
     {
-        base.OnAppearing();
+        base.OnNavigatedTo(args);
         if (BindingContext is TasksByDueDateViewModel vm)
-            await vm.OnAppearing();
+            await vm.OnNavigatedTo();
     }
 }

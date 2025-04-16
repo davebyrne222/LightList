@@ -13,7 +13,6 @@ public partial class BaseTasksViewModel : ObservableObject
 {
     private readonly ILogger _logger;
     [ObservableProperty] private ObservableCollection<TaskViewModel> _allTasks = new();
-    [ObservableProperty] private ObservableCollection<DateOnly?> _dueDates = new();
     [ObservableProperty] private ObservableCollection<string?> _labels = new();
 
     public BaseTasksViewModel(
@@ -30,10 +29,16 @@ public partial class BaseTasksViewModel : ObservableObject
         Messenger.Register<TasksSyncedMessage>(this, async (recipient, _) => { await GetTasks(); });
         Messenger.Register<LabelsSyncedMessage>(this, async (recipient, _) => { await GetLabels(); });
     }
-
+    
     protected ITaskViewModelFactory TaskViewModelFactory { get; }
     protected ITasksService TasksService { get; }
     protected IMessenger Messenger { get; }
+
+    protected async Task OnNavigatedTo()
+    {
+        _logger.Debug("OnNavigatedTo");
+        await GetTasks();
+    }
 
     protected async Task GetTasks()
     {
@@ -73,7 +78,7 @@ public partial class BaseTasksViewModel : ObservableObject
             throw; // TODO: await DisplayAlert("Error retrieving labels. Please try again", ex.Message, "OK");
         }
     }
-
+    
     partial void OnAllTasksChanged(
         ObservableCollection<TaskViewModel>? oldValue,
         ObservableCollection<TaskViewModel> newValue)

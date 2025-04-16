@@ -24,7 +24,7 @@
 
         <components:TaskListView
             Grid.Row="2"
-            Tasks="{Binding AllTasks}" />
+            Tasks="{Binding TasksFiltered}" />
 
     </Grid>
 </ContentPage>
