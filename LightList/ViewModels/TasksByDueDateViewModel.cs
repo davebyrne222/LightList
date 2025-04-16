@@ -11,9 +11,9 @@ public partial class TasksByDueDateViewModel : BaseTasksViewModel
 {
     private readonly ILogger _logger;
     [ObservableProperty] private ObservableCollection<string?> _dueDates = new();
+    private bool _hasInitialized; // prevent retrieving data everytime page is navigated to
     [ObservableProperty] private string? _selectedDate;
     [ObservableProperty] private ObservableCollection<TaskViewModel> _tasksFiltered = new();
-    private bool _hasInitialized;
 
     public TasksByDueDateViewModel(
         ITaskViewModelFactory taskViewModelFactory,
@@ -28,16 +28,15 @@ public partial class TasksByDueDateViewModel : BaseTasksViewModel
     {
         if (_hasInitialized)
             return;
-        
+
         _logger.Debug("OnNavigatedTo");
         await base.OnNavigatedTo();
         await GetDueDates();
         GetFilteredTasks();
         _hasInitialized = true;
-
     }
-    
-    protected async override void AllTasks_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+
+    protected override async void AllTasks_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         await GetDueDates();
         GetFilteredTasks();
@@ -47,21 +46,21 @@ public partial class TasksByDueDateViewModel : BaseTasksViewModel
     {
         GetFilteredTasks();
     }
-    
+
     private async Task GetDueDates()
     {
         _logger.Debug("Retrieving due dates");
 
         try
         {
-            List<DateOnly> dueDates = await TasksService.GetDueDates();
+            var dueDates = await TasksService.GetDueDates();
 
             var dates = new ObservableCollection<string?>(dueDates.Select(n => n.ToShortDateString()));
-            
+
             _logger.Debug($"Retrieved {dates.Count} due dates");
-            
+
             dates.Insert(0, null); // allow filter cancellation
-            
+
             DueDates = dates;
         }
         catch (Exception ex)
@@ -69,7 +68,6 @@ public partial class TasksByDueDateViewModel : BaseTasksViewModel
             _logger.Error($"Failed to get due dates: {ex.GetType()} - {ex.Message}");
             throw; // TODO: await DisplayAlert("Error retrieving DueDates. Please try again", ex.Message, "OK");
         }
-
     }
 
     private void GetFilteredTasks()

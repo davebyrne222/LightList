@@ -10,6 +10,7 @@ namespace LightList.ViewModels;
 public partial class TasksByLabelViewModel : BaseTasksViewModel
 {
     private readonly ILogger _logger;
+    private bool _hasInitialized; // prevent retrieving data everytime page is navigated to
     [ObservableProperty] private string? _selectedLabel;
     [ObservableProperty] private ObservableCollection<TaskViewModel> _tasksFiltered = new();
 
@@ -22,12 +23,16 @@ public partial class TasksByLabelViewModel : BaseTasksViewModel
         _logger = logger;
     }
 
-    public async Task OnAppearing()
+    public new async Task OnNavigatedTo()
     {
-        _logger.Debug("OnAppearing");
+        if (_hasInitialized)
+            return;
+
+        _logger.Debug("OnNavigatedTo");
         await GetTasks();
         await GetLabels();
         GetFilteredTasks();
+        _hasInitialized = true;
     }
 
     protected override void AllTasks_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

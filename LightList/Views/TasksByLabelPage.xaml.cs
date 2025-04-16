@@ -10,10 +10,10 @@ public partial class TasksByLabelPage : ContentPage
         BindingContext = viewModel;
     }
 
-    protected async override void OnAppearing()
+    protected override async void OnNavigatedTo(NavigatedToEventArgs args)
     {
-        base.OnAppearing();
+        base.OnNavigatedTo(args);
         if (BindingContext is TasksByLabelViewModel vm)
-            await vm.OnAppearing();
+            await vm.OnNavigatedTo();
     }
 }

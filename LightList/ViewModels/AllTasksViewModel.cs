@@ -7,6 +7,7 @@ namespace LightList.ViewModels;
 public class AllTasksViewModel : BaseTasksViewModel
 {
     private readonly ILogger _logger;
+    private bool _hasInitialized; // prevent retrieving data everytime page is navigated to
 
     public AllTasksViewModel(
         ITaskViewModelFactory taskViewModelFactory,
@@ -18,10 +19,13 @@ public class AllTasksViewModel : BaseTasksViewModel
         _logger = logger;
     }
 
-    public async Task OnAppearing()
+    public new async Task OnNavigatedTo()
     {
+        if (_hasInitialized)
+            return;
+
         _logger.Debug("OnAppearing");
-        await GetTasks();
-        await GetLabels();
+        await base.OnNavigatedTo();
+        _hasInitialized = true;
     }
 }
