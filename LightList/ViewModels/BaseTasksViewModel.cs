@@ -5,7 +5,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using LightList.Messages;
 using LightList.Services;
 using LightList.Utils;
-using Label = LightList.Models.Label;
 
 namespace LightList.ViewModels;
 
@@ -13,7 +12,6 @@ public partial class BaseTasksViewModel : ObservableObject
 {
     private readonly ILogger _logger;
     [ObservableProperty] private ObservableCollection<TaskViewModel> _allTasks = new();
-    [ObservableProperty] private ObservableCollection<string?> _labels = new();
 
     public BaseTasksViewModel(
         ITaskViewModelFactory taskViewModelFactory,
@@ -27,9 +25,8 @@ public partial class BaseTasksViewModel : ObservableObject
         _logger = logger;
 
         Messenger.Register<TasksSyncedMessage>(this, async (recipient, _) => { await GetTasks(); });
-        Messenger.Register<LabelsSyncedMessage>(this, async (recipient, _) => { await GetLabels(); });
     }
-    
+
     protected ITaskViewModelFactory TaskViewModelFactory { get; }
     protected ITasksService TasksService { get; }
     protected IMessenger Messenger { get; }
@@ -56,29 +53,6 @@ public partial class BaseTasksViewModel : ObservableObject
         }
     }
 
-    protected async Task GetLabels()
-    {
-        _logger.Debug("Retrieving labels");
-
-        try
-        {
-            List<Label> labels = await TasksService.GetLabels();
-
-            var labelNames = new ObservableCollection<string?>(labels.Select(n => n.Name));
-
-            _logger.Debug($"Retrieved {labelNames.Count} labels");
-
-            labelNames.Insert(0, null); // allow filter cancellation
-
-            Labels = labelNames; // do last to only trigger OnLabelsChanged after adding null
-        }
-        catch (Exception ex)
-        {
-            _logger.Error($"Failed to get labels: {ex.GetType()} - {ex.Message}");
-            throw; // TODO: await DisplayAlert("Error retrieving labels. Please try again", ex.Message, "OK");
-        }
-    }
-    
     partial void OnAllTasksChanged(
         ObservableCollection<TaskViewModel>? oldValue,
         ObservableCollection<TaskViewModel> newValue)
@@ -92,23 +66,6 @@ public partial class BaseTasksViewModel : ObservableObject
     }
 
     protected virtual void AllTasks_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        // Do nothing - derived class to override
-    }
-
-    partial void OnLabelsChanged(
-        ObservableCollection<string?>? oldValue,
-        ObservableCollection<string?> newValue)
-    {
-        _logger.Debug("Labels changed");
-
-        if (oldValue != null)
-            oldValue.CollectionChanged -= Labels_CollectionChanged;
-
-        newValue.CollectionChanged += Labels_CollectionChanged;
-    }
-
-    protected virtual void Labels_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         // Do nothing - derived class to override
     }
