@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -11,7 +12,7 @@ using Task = System.Threading.Tasks.Task;
 
 namespace LightList.ViewModels;
 
-public partial class TaskViewModel : ObservableObject, IQueryAttributable
+public partial class TaskViewModel : ObservableValidator, IQueryAttributable
 {
     private readonly ILogger _logger;
     private readonly LoggerContext _loggerContext;
@@ -43,6 +44,7 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
 
     public string Id => _task.Id;
 
+    [MinLength(5, ErrorMessage = "Minimum 5 characters")]
     public string Text
     {
         get => _task.Text;
@@ -55,6 +57,8 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
             }
         }
     }
+
+    [ObservableProperty] private string? _textError;
 
     public DateTime DueAt
     {
@@ -188,15 +192,32 @@ public partial class TaskViewModel : ObservableObject, IQueryAttributable
         _loggerContext.Group = "Save Task";
 
         _logger.Debug($"Saving task (id={_task.Id})");
+        
+        
+        // Validate text field
+        ValidateProperty(nameof(Text), nameof(Text));
 
-        await _tasksService.SaveTask(_task);
+        if (HasErrors)
+        {
+            TextError = GetErrors(nameof(Text)).FirstOrDefault()?.ErrorMessage;
+            return;
+        }
+         
+        // Save
+        try
+        {
+            await _tasksService.SaveTask(_task);
+            _logger.Debug($"Saved task. Sending Message (id={_task.Id})");
+            _messenger.Send(new TaskSavedMessage(_task.Id));
+            await Shell.Current.GoToAsync("..");
+        }
 
-        _logger.Debug($"Saved task. Sending Message (id={_task.Id})");
-
-        _messenger.Send(new TaskSavedMessage(_task.Id));
-
-        await Shell.Current.GoToAsync("..");
-
+        catch (Exception ex)
+        {
+            _logger.Error($"Failed to save task: {ex.GetType()} - {ex.Message}");
+            throw; // TODO: show alert
+        }
+        
         _loggerContext.Reset();
     }
 
