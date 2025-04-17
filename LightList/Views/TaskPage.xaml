@@ -6,23 +6,25 @@
              xmlns:converters="clr-namespace:LightList.Converters"
              x:Class="LightList.Views.TaskPage"
              x:DataType="viewModels:TaskViewModel"
-             Title="Task"
+             Title="{Binding PageTitle}"
              Shell.NavBarIsVisible="True">
     
     <ContentPage.Resources>
-            <converters:StringNotNullOrEmptyConverter x:Key="StringNotNullOrEmptyConverter" />
+        <converters:StringNotNullOrEmptyConverter x:Key="StringNotNullOrEmptyConverter" />
     </ContentPage.Resources>
 
     <VerticalStackLayout Spacing="20" Margin="20" VerticalOptions="Start">
         <VerticalStackLayout HorizontalOptions="Fill" Spacing="5">
-            <Label Text="Description" StyleClass="MenuGroupLabel"/>
+            <Label Text="Description" StyleClass="ConfigGroupLabel"/>
             <Editor Placeholder="Enter your task"
                     Text="{Binding Text}"
-                    HeightRequest="100" />
-            <Label Text="{Binding TextError}" TextColor="Red" IsVisible="{Binding TextError, Converter={StaticResource StringNotNullOrEmptyConverter}}" />
+                    Style="{StaticResource ConfigPageEditor}" />
+            <Label Text="{Binding TextError}"
+                   Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding TextError, Converter={StaticResource StringNotNullOrEmptyConverter}}" />
         </VerticalStackLayout>
         
-        <Border StyleClass="MenuGroup">
+        <Border StyleClass="ConfigGroupCard">
             <VerticalStackLayout HorizontalOptions="Fill" VerticalOptions="Fill" Spacing="2" >
                 <FlexLayout Direction="Row"
                             AlignItems="Center"
@@ -30,14 +32,14 @@
                             HeightRequest="50"
                             Margin="5, 0"
                             Grow="1">
-                    <Label Text="Due Date"/>
+                    <Label Text="Due Date" Style="{StaticResource ConfigItemLabel}"/>
                     <Grid ColumnDefinitions="2*, 1*" ColumnSpacing="5" WidthRequest="180">
                         <DatePicker Date="{Binding DueAt}"/>
                         <TimePicker Time="{Binding DueAt}" Grid.Column="1"/>
                     </Grid>
                 </FlexLayout>
                 
-                <BoxView Style="{StaticResource TaskItemSeparator}" Margin="10, 0, 0, 0"/>
+                <BoxView Style="{StaticResource ConfigItemSeparator}"/>
             
                 <FlexLayout Direction="Row"
                             AlignItems="Center"
@@ -45,7 +47,7 @@
                             HeightRequest="50"
                             Margin="5, 0"
                             Grow="1">
-                    <Label Text="Label"/>
+                    <Label Text="Label" Style="{StaticResource ConfigItemLabel}"/>
                     <Grid ColumnDefinitions="2*, 1*" ColumnSpacing="5" WidthRequest="180">
                         <Picker
                             Title="{OnPlatform 
@@ -56,10 +58,8 @@
                             ItemDisplayBinding="{Binding}"/> <!-- Bug: showing title on MacCatalyst hides picker options -->
                         <ImageButton
                             Grid.Column="1"
-                            Source="{FontImageSource Glyph='&#xf489;', FontFamily='Ionicons', Size='60', Color={StaticResource Gray200}}"
-                            Clicked="OnNewLabelButtonClicked"
-                            HorizontalOptions="Center"
-                            Style="{StaticResource MenuImageButtonStyle}" />
+                            Style="{StaticResource NewLabelImageButton}"
+                            Clicked="OnNewLabelButtonClicked" />
                     </Grid>
                 </FlexLayout>
             </VerticalStackLayout>
@@ -68,7 +68,8 @@
         
         <Grid ColumnDefinitions="*,*" ColumnSpacing="5">
             <Button Text="Delete"
-                    Command="{Binding DeleteCommand}" />
+                    Command="{Binding DeleteCommand}"
+                    IsEnabled="{Binding IsEditing}"/>
             
             <Button Grid.Column="1" 
                     Text="Save"

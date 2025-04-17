@@ -22,6 +22,8 @@ public partial class TaskViewModel : ObservableValidator, IQueryAttributable
     [ObservableProperty] private string? _selectedLabel;
     private Models.Task _task;
     [ObservableProperty] private string? _textError;
+    [ObservableProperty] private bool _isEditing;
+    [ObservableProperty] private string _pageTitle = "Add Task";
 
     public TaskViewModel(
         LoggerContext loggerContext,
@@ -116,13 +118,15 @@ public partial class TaskViewModel : ObservableValidator, IQueryAttributable
         _loggerContext.Group = "Page Load";
         _logger.Debug("Applying query attributes");
 
-        await LoadLabelsAsync();
-
         if (query.TryGetValue("load", out var value))
         {
             _logger.Debug("Loading task");
+            IsEditing = true;
+            PageTitle = "Edit Task";
             await LoadTaskAsync(value.ToString()!);
         }
+        
+        await LoadLabelsAsync();
 
         _loggerContext.Reset();
     }

@@ -444,24 +444,24 @@
     </Style>
 
     <Style TargetType="Shell" ApplyToDerivedTypes="True">
-        <Setter Property="Shell.BackgroundColor"
+        <Setter Property="BackgroundColor"
                 Value="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}" />
-        <Setter Property="Shell.ForegroundColor"
+        <Setter Property="ForegroundColor"
                 Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource SecondaryDarkText}}" />
-        <Setter Property="Shell.TitleColor"
+        <Setter Property="TitleColor"
                 Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource SecondaryDarkText}}" />
-        <Setter Property="Shell.DisabledColor"
+        <Setter Property="DisabledColor"
                 Value="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}" />
-        <Setter Property="Shell.UnselectedColor"
+        <Setter Property="UnselectedColor"
                 Value="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray200}}" />
-        <Setter Property="Shell.NavBarHasShadow" Value="False" />
-        <Setter Property="Shell.TabBarBackgroundColor"
+        <Setter Property="NavBarHasShadow" Value="False" />
+        <Setter Property="TabBarBackgroundColor"
                 Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}" />
-        <Setter Property="Shell.TabBarForegroundColor"
+        <Setter Property="TabBarForegroundColor"
                 Value="{AppThemeBinding Light={StaticResource Magenta}, Dark={StaticResource White}}" />
-        <Setter Property="Shell.TabBarTitleColor"
+        <Setter Property="TabBarTitleColor"
                 Value="{AppThemeBinding Light={StaticResource Magenta}, Dark={StaticResource White}}" />
-        <Setter Property="Shell.TabBarUnselectedColor"
+        <Setter Property="TabBarUnselectedColor"
                 Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray200}}" />
     </Style>
 
@@ -517,37 +517,5 @@
         <Setter Property="TextColor" Value="White" />
         <Setter Property="FontAttributes" Value="Bold" />
     </Style>
-
-    <Style TargetType="Border" Class="MenuGroup">
-        <Setter Property="BackgroundColor" Value="White" />
-        <Setter Property="Padding" Value="0" />
-        <Setter Property="Margin" Value="0" />
-        <Setter Property="Stroke" Value="{StaticResource Gray100}" />
-        <Setter Property="StrokeShape" Value="RoundRectangle 10" />
-        <Setter Property="StrokeThickness" Value="0" />
-    </Style>
-
-    <Style TargetType="Label" Class="MenuGroupLabel">
-        <Setter Property="FontAttributes" Value="Bold" />
-        <Setter Property="FontSize" Value="12" />
-        <Setter Property="TextColor"
-                Value="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray400}}" />
-        <Setter Property="TextTransform" Value="Uppercase" />
-    </Style>
-
-    <Style x:Key="MenuImageButtonStyle" TargetType="ImageButton">
-        <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="Padding" Value="5" />
-        <Setter Property="Margin" Value="0" />
-        <Setter Property="BorderWidth" Value="1" />
-        <Setter Property="BorderColor" Value="{StaticResource Gray200}" />
-        <Setter Property="CornerRadius" Value="15" />
-        <Setter Property="HorizontalOptions" Value="Center" />
-        <Setter Property="VerticalOptions" Value="Center" />
-        <Setter Property="MinimumHeightRequest" Value="30" />
-        <Setter Property="MinimumWidthRequest" Value="30" />
-        <Setter Property="HeightRequest" Value="30" />
-        <Setter Property="WidthRequest" Value="30" />
-    </Style>
-
+    
 </ResourceDictionary>

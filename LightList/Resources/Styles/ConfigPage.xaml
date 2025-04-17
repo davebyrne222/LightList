@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xaml-comp compile="true" ?>
+
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+    
+    <Style TargetType="Label" Class="ConfigGroupLabel">
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontSize" Value="{StaticResource SmallFontSize}" />
+        <Setter Property="TextColor"
+                Value="{AppThemeBinding Light={StaticResource SecondaryText}, Dark={StaticResource White}}" />
+        <Setter Property="TextTransform" Value="Uppercase" />
+    </Style>
+    
+    <Style TargetType="Border" Class="ConfigGroupCard">
+        <Setter Property="BackgroundColor" Value="White" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Stroke" Value="{StaticResource Gray100}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 10" />
+        <Setter Property="StrokeThickness" Value="0" />
+    </Style>
+    
+    <Style x:Key="ConfigItemLabel" TargetType="Label">
+        <Setter Property="FontSize" Value="{StaticResource BodyFontSize}" />
+        <Setter Property="TextColor" Value="{StaticResource PrimaryText}" />        
+    </Style>
+    
+    <Style x:Key="ConfigItemSeparator" TargetType="BoxView">
+        <Setter Property="HeightRequest" Value="0.5" />
+        <Setter Property="MinimumWidthRequest" Value="100" />
+        <Setter Property="Margin" Value="30, 0, 0, 0" />
+        <Setter Property="Color" Value="{StaticResource Gray200}" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+    </Style>
+    
+    <Style x:Key="ErrorLabel" TargetType="Label">
+        <Setter Property="FontSize" Value="{StaticResource SmallFontSize}" />
+        <Setter Property="TextColor" Value="{StaticResource Due}" />
+    </Style>
+    
+    <Style x:Key="NewLabelImageButton" TargetType="ImageButton">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="Padding" Value="5" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="BorderWidth" Value="1" />
+        <Setter Property="BorderColor" Value="{StaticResource Gray400}" />
+        <Setter Property="CornerRadius" Value="15" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="MinimumHeightRequest" Value="30" />
+        <Setter Property="MinimumWidthRequest" Value="30" />
+        <Setter Property="HeightRequest" Value="30" />
+        <Setter Property="WidthRequest" Value="30" />
+        <Setter Property="Source">
+            <Setter.Value>
+                <FontImageSource 
+                    Glyph="&#xf489;"
+                    FontFamily="Ionicons"
+                    Size="60"
+                    Color="{StaticResource Gray400}" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
+    <Style x:Key="ConfigPageEditor" TargetType="Editor">
+        <Setter Property="TextColor"
+                Value="{AppThemeBinding Light={StaticResource PrimaryText}, Dark={StaticResource White}}" />
+        <Setter Property="BackgroundColor"
+                Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}" />
+        <Setter Property="FontFamily" Value="{StaticResource PrimaryFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource BodyFontSize}" />
+        <Setter Property="PlaceholderColor"
+                Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray500}}" />
+        <Setter Property="MinimumHeightRequest" Value="150" />
+        <Setter Property="MinimumWidthRequest" Value="44" />
+    </Style>
+
+</ResourceDictionary>

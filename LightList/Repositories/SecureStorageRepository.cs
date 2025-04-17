@@ -14,6 +14,7 @@ public class SecureStorageRepository : ISecureStorageRepository
     public SecureStorageRepository(ILogger logger)
     {
         _logger = logger;
+        DeleteAuthTokens();
     }
 
     #region Public methods - Auth
