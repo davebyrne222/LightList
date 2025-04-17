@@ -45,22 +45,12 @@
                     </SwipeView.RightItems>
                     <Border Style="{StaticResource TaskItem}">
                         <VerticalStackLayout Spacing="0" HorizontalOptions="Start">
-                            <FlexLayout Direction="Row"
-                                        Grow="1"
-                                        JustifyContent="Start"
-                                        AlignItems="Center"
-                                        HeightRequest="40"
-                                        Margin="0">
+                            <FlexLayout Style="{StaticResource TaskItemDescriptionCntr}">
                                 <Label Text="{Binding Text}"
-                                       Style="{Binding IsComplete, Converter={StaticResource TaskDueTextConverter}}"
-                                       LineBreakMode="TailTruncation"
-                                       MaxLines="1"
-                                       FontSize="20" />
+                                       Style="{Binding IsComplete, Converter={StaticResource TaskDueTextConverter}}" />
                             </FlexLayout>
                             <BoxView Style="{StaticResource TaskItemSeparator}" />
-                            <FlexLayout Direction="Row"
-                                        JustifyContent="SpaceBetween"
-                                        VerticalOptions="Center">
+                            <FlexLayout Style="{StaticResource TaskItemMetaCntr}">
                                 <HorizontalStackLayout
                                     HorizontalOptions="Start"
                                     VerticalOptions="Center"

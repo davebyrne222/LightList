@@ -8,20 +8,17 @@
     <Grid RowDefinitions="Auto, 60, *">
 
         <components:NavBar />
-
-        <FlexLayout Grid.Row="1"
-                    Direction="Row"
-                    AlignItems="Center"
-                    JustifyContent="SpaceBetween"
-                    Grow="1">
-            <Label FontSize="22" Margin="10">Due Date</Label>
+        
+        <FlexLayout Style="{StaticResource PageHeaderCntr}" Grid.Row="1">
+            <Label Style="{StaticResource PageTitleLbl}">Due Date</Label>
             <Picker
                 Title="Choose Date"
                 ItemsSource="{Binding DueDates}"
                 SelectedItem="{Binding SelectedDate}"
-                ItemDisplayBinding="{Binding}" />
+                ItemDisplayBinding="{Binding}"
+                Style="{StaticResource PageFilterPicker}"/>
         </FlexLayout>
-
+        
         <components:TaskListView
             Grid.Row="2"
             Tasks="{Binding TasksFiltered}" />

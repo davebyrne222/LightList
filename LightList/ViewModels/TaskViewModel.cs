@@ -18,9 +18,10 @@ public partial class TaskViewModel : ObservableValidator, IQueryAttributable
     private readonly LoggerContext _loggerContext;
     private readonly IMessenger _messenger;
     private readonly ITasksService _tasksService;
-    private Models.Task _task;
     [ObservableProperty] private ObservableCollection<string?> _labels = new();
     [ObservableProperty] private string? _selectedLabel;
+    private Models.Task _task;
+    [ObservableProperty] private string? _textError;
 
     public TaskViewModel(
         LoggerContext loggerContext,
@@ -57,8 +58,7 @@ public partial class TaskViewModel : ObservableValidator, IQueryAttributable
             }
         }
     }
-    [ObservableProperty] private string? _textError;
-    
+
     public DateTime DueAt
     {
         get => _task.DueAt;
@@ -71,7 +71,7 @@ public partial class TaskViewModel : ObservableValidator, IQueryAttributable
             }
         }
     }
-    
+
     public int NoDaysRemaining => DueAt.Subtract(DateTime.Today).Days;
 
     public string NoDaysRemainingLbl
@@ -83,7 +83,7 @@ public partial class TaskViewModel : ObservableValidator, IQueryAttributable
 
             switch (NoDaysRemaining)
             {
-                case < 0: return "Overdue";
+                case < 0: return "! Overdue";
                 case 0: return "Today";
                 case 1: return "Tomorrow";
                 default: return $"{NoDaysRemaining} Days";
