@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xaml-comp compile="true" ?>
+
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Card -->
+    <Style x:Key="TaskItem" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="White" />
+        <Setter Property="Padding" Value="20, 10" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Stroke" Value="{StaticResource Gray100}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 10" />
+        <Setter Property="StrokeThickness" Value="0.5" />
+    </Style>
+
+    <!-- Description -->
+    <Style x:Key="TaskItemDescriptionCntr" TargetType="FlexLayout">
+        <Setter Property="Direction" Value="Row" />
+        <Setter Property="Grow" Value="1" />
+        <Setter Property="JustifyContent" Value="Start" />
+        <Setter Property="AlignItems" Value="Center" />
+        <Setter Property="HeightRequest" Value="40" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+
+    <Style x:Key="TaskItemDescriptionLbl" TargetType="Label">
+        <Setter Property="TextColor"
+                Value="{AppThemeBinding Light={StaticResource PrimaryText}, Dark={StaticResource White}}" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="FontFamily" Value="OpenSansRegular" />
+        <Setter Property="FontSize" Value="{StaticResource SubtitleFontSize}" />
+        <Setter Property="LineBreakMode" Value="TailTruncation" />
+        <Setter Property="MaxLines" Value="1" />
+    </Style>
+
+    <Style x:Key="TaskItemDescriptionLblDone" TargetType="Label" BasedOn="{StaticResource TaskItemDescriptionLbl}">
+        <Setter Property="TextDecorations" Value="Strikethrough" />
+        <Setter Property="TextColor" Value="{StaticResource SecondaryText}" />
+    </Style>
+
+    <!-- Separator -->
+    <Style x:Key="TaskItemSeparator" TargetType="BoxView">
+        <Setter Property="HeightRequest" Value="0.5" />
+        <Setter Property="WidthRequest" Value="100" />
+        <Setter Property="Margin" Value="0, 10" />
+        <Setter Property="Color" Value="{StaticResource Gray200}" />
+        <Setter Property="HorizontalOptions" Value="Start" />
+    </Style>
+
+    <!-- Lower container: labels etc. -->
+    <Style x:Key="TaskItemMetaCntr" TargetType="FlexLayout">
+        <Setter Property="Direction" Value="Row" />
+        <Setter Property="JustifyContent" Value="SpaceBetween" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <!-- Label / Tag -->
+    <Style x:Key="TaskItemLabelLbl" TargetType="Label">
+        <Setter Property="FontSize" Value="{StaticResource SmallFontSize}" />
+        <Setter Property="TextTransform" Value="Uppercase" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontFamily" Value="{StaticResource BoldFontFamily}"></Setter>
+        <Setter Property="TextColor" Value="{StaticResource SecondaryText}" />
+    </Style>
+
+    <!-- Due date indicator -->
+    <Style x:Key="DueInIndicator" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource Background}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 5" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="Padding" Value="10, 1" />
+    </Style>
+
+    <Style x:Key="DueInIndicatorLate" TargetType="Border" BasedOn="{StaticResource DueInIndicator}">
+        <Setter Property="Background" Value="transparent" />
+        <Setter Property="StrokeThickness" Value="2" />
+        <Setter Property="Stroke" Value="{StaticResource Late}" />
+    </Style>
+
+    <Style x:Key="DueInIndicatorDue" TargetType="Border" BasedOn="{StaticResource DueInIndicator}">
+        <!-- <Setter Property="Background" Value="{StaticResource Due}" /> -->
+    </Style>
+
+    <Style x:Key="DueInIndicatorWarning" TargetType="Border" BasedOn="{StaticResource DueInIndicator}">
+        <!-- <Setter Property="Background" Value="{StaticResource Warning}" /> -->
+    </Style>
+
+    <Style x:Key="DueInIndicatorDone" TargetType="Border" BasedOn="{StaticResource DueInIndicator}">
+        <Setter Property="Opacity" Value="0.5" />
+    </Style>
+
+    <Style x:Key="DueInIndicatorLbl" TargetType="Label">
+        <Setter Property="FontSize" Value="{StaticResource SmallFontSize}" />
+        <Setter Property="TextColor" Value="{StaticResource SecondaryText}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontFamily" Value="{StaticResource BoldFontFamily}"/>
+        <Setter Property="MinimumHeightRequest" Value="20" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0, 1" />
+        <Setter Property="VerticalTextAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="DueInIndicatorLblLate" TargetType="Label" BasedOn="{StaticResource DueInIndicatorLbl}">
+        <Setter Property="TextColor" Value="{StaticResource Late}" />
+    </Style>
+
+    <Style x:Key="DueInIndicatorLblDue" TargetType="Label" BasedOn="{StaticResource DueInIndicatorLbl}">
+        <Setter Property="TextColor" Value="{StaticResource Due}" />
+    </Style>
+
+    <Style x:Key="DueInIndicatorLblWarning" TargetType="Label" BasedOn="{StaticResource DueInIndicatorLbl}">
+        <Setter Property="TextColor" Value="{StaticResource Warning}" />
+    </Style>
+
+    <Style x:Key="DueInIndicatorLblDone" TargetType="Label" BasedOn="{StaticResource DueInIndicatorLbl}">
+    </Style>
+
+</ResourceDictionary>

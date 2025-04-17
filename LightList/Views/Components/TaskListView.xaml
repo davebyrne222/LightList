@@ -31,7 +31,7 @@
                         <SwipeItems>
                             <SwipeItem Text="Delete"
                                        IconImageSource="{FontImageSource Glyph='&#xf4c4;', FontFamily='Ionicons'}"
-                                       BackgroundColor="{StaticResource Red}"
+                                       BackgroundColor="{StaticResource Due}"
                                        Command="{Binding DeleteCommand}" />
                         </SwipeItems>
                     </SwipeView.LeftItems>

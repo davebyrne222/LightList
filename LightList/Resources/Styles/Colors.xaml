@@ -35,7 +35,7 @@
     <Color x:Key="Late">#680500</Color>
     <Color x:Key="Due">#E57373</Color>
     <Color x:Key="Warning">#FFB74D</Color>
-    <Color x:Key="Complete">#00AC6B</Color>
+    <Color x:Key="Complete">#A5D6A7</Color>
 
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}" />
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}" />
