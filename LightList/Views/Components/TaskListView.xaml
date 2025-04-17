@@ -5,26 +5,25 @@
              xmlns:viewModels="clr-namespace:LightList.ViewModels"
              x:Class="LightList.Views.Components.TaskListView"
              x:DataType="components:TaskListView"
-             x:Name="Listview"
-             >
-    
+             x:Name="Listview">
+
     <ContentView.Resources>
-        <converters:TaskLabelHyphenConverter x:Key="EmptyToHyphenConverter"/>
+        <converters:TaskLabelHyphenConverter x:Key="EmptyToHyphenConverter" />
         <converters:TaskDueIndicatorConverter x:Key="TaskDueIndicatorConverter" />
         <converters:TaskDueLblConverter x:Key="TaskDueLblConverter" />
         <converters:TaskDueTextConverter x:Key="TaskDueTextConverter" />
     </ContentView.Resources>
-    
+
     <CollectionView x:Name="TasksCollection"
                     ItemsSource="{Binding Tasks, Source={x:Reference Listview}}"
                     Margin="20, 10"
                     SelectionMode="Single"
                     SelectionChanged="OnTaskSelected">
-    
+
         <CollectionView.ItemsLayout>
             <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
         </CollectionView.ItemsLayout>
-    
+
         <CollectionView.ItemTemplate>
             <DataTemplate x:DataType="viewModels:TaskViewModel">
                 <SwipeView>
@@ -45,15 +44,20 @@
                         </SwipeItems>
                     </SwipeView.RightItems>
                     <Border Style="{StaticResource TaskItem}">
-                        <StackLayout Spacing="20">
-                            <FlexLayout Direction="Column" Grow="1"
+                        <VerticalStackLayout Spacing="0" HorizontalOptions="Start">
+                            <FlexLayout Direction="Row"
+                                        Grow="1"
+                                        JustifyContent="Start"
+                                        AlignItems="Center"
+                                        HeightRequest="40"
                                         Margin="0">
-                                <Label Text="{Binding Text}" FontSize="22"
-                                       Style="{Binding Complete, Converter={StaticResource TaskDueTextConverter}}"
+                                <Label Text="{Binding Text}"
+                                       Style="{Binding IsComplete, Converter={StaticResource TaskDueTextConverter}}"
                                        LineBreakMode="TailTruncation"
-                                       MaxLines="2"/>
+                                       MaxLines="1"
+                                       FontSize="20" />
                             </FlexLayout>
-                            <BoxView Style="{StaticResource TaskItemSeparator}"/>
+                            <BoxView Style="{StaticResource TaskItemSeparator}" />
                             <FlexLayout Direction="Row"
                                         JustifyContent="SpaceBetween"
                                         VerticalOptions="Center">
@@ -61,35 +65,37 @@
                                     HorizontalOptions="Start"
                                     VerticalOptions="Center"
                                     Spacing="10">
+                                    <!-- <Label Text="{Binding DateLabel}" -->
+                                    <!--        Style="{StaticResource TaskItemLabelLbl}" /> -->
                                     <Image BackgroundColor="Transparent" Rotation="270">
                                         <Image.Source>
                                             <FontImageSource Glyph="&#xf48d;"
                                                              Color="{StaticResource Gray200}"
                                                              FontFamily="Ionicons"
-                                                             Size="18"/>
+                                                             Size="16" />
                                         </Image.Source>
                                     </Image>
-                                    <Label Text="{Binding Label, Converter={StaticResource EmptyToHyphenConverter}}" 
-                                           Style="{StaticResource TaskItemLabelLbl}"/>
+                                    <Label Text="{Binding Label, Converter={StaticResource EmptyToHyphenConverter}}"
+                                           Style="{StaticResource TaskItemLabelLbl}" />
                                 </HorizontalStackLayout>
                                 <Border>
                                     <Border.Style>
                                         <MultiBinding Converter="{StaticResource TaskDueIndicatorConverter}">
-                                            <Binding Path="Complete" />
+                                            <Binding Path="IsComplete" />
                                             <Binding Path="NoDaysRemaining" />
                                         </MultiBinding>
                                     </Border.Style>
                                     <Label Text="{Binding NoDaysRemainingLbl}">
                                         <Label.Style>
                                             <MultiBinding Converter="{StaticResource TaskDueLblConverter}">
-                                                <Binding Path="Complete" />
+                                                <Binding Path="IsComplete" />
                                                 <Binding Path="NoDaysRemaining" />
                                             </MultiBinding>
                                         </Label.Style>
                                     </Label>
                                 </Border>
                             </FlexLayout>
-                        </StackLayout>
+                        </VerticalStackLayout>
                     </Border>
                 </SwipeView>
             </DataTemplate>
