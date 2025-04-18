@@ -109,9 +109,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="Data\Scripts\CreateLabelTable.sql" />
-        <EmbeddedResource Include="Data\Scripts\CreateTaskTable.sql" />
-        <EmbeddedResource Include="Data\Scripts\CreateIndexes.sql" />
+        <EmbeddedResource Include="Database\Scripts\CreateLabelTable.sql" />
+        <EmbeddedResource Include="Database\Scripts\CreateTaskTable.sql" />
+        <EmbeddedResource Include="Database\Scripts\CreateIndexes.sql" />
     </ItemGroup>
 
 </Project>

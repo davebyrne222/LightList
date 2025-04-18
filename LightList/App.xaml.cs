@@ -15,8 +15,17 @@ public partial class App : Application
     {
         _logger = logger;
         _logger.Debug("App Init");
-        
-        InitializeComponent();
+
+        try
+        {
+            InitializeComponent();
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Uncaught exception at InitializeComponent: {ex.GetType()} - {ex.InnerException?.Message}");
+            throw;
+        }
+
         _shell = shell;
 #if IOS
         CustomiseDatepicker();

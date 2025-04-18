@@ -60,7 +60,7 @@ public class SyncService : ISyncService
 
         if (items.Count == 0)
         {
-            _logger.Debug("No un-synced tasks found. Skipping push");
+            _logger.Debug("No un-synced items found. Skipping push");
             return;
         }
 
@@ -74,7 +74,7 @@ public class SyncService : ISyncService
             await action(accessToken, task);
         }
 
-        _logger.Debug($"Finished pushing {items.Count} tasks");
+        _logger.Debug($"Finished pushing {items.Count} items");
     }
 
     private async Task<List<T?>> GetUpdatedItemsAsync<T>(Func<AuthTokens, DateTime?, Task<List<T?>>> action, AuthTokens accessToken)

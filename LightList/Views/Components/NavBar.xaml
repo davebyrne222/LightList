@@ -15,10 +15,10 @@
 
         <ImageButton
             Grid.Column="0"
-            Source="{FontImageSource Glyph='&#xf46a;', FontFamily='Ionicons', Color=Black}"
+            Source="{FontImageSource Glyph='&#xf46a;', FontFamily='Ionicons', Color={StaticResource Primary}}"
             Command="{Binding OpenMenuCommand}"
+            Style="{StaticResource NavBarImageButtonStyle}"
             HorizontalOptions="Start"
-            Style="{StaticResource ActionBarButtonStyle}"
             Rotation="90" />
 
         <HorizontalStackLayout
@@ -44,6 +44,6 @@
             Source="{FontImageSource Glyph='&#xf489;', FontFamily='Ionicons', Color=Black}"
             Command="{Binding AddTaskCommand}"
             HorizontalOptions="End"
-            Style="{StaticResource ActionBarButtonStyle}" />
+            Style="{StaticResource NavBarImageButtonStyle}" />
     </Grid>
 </ContentView>

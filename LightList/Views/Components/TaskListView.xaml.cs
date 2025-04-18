@@ -62,7 +62,7 @@ public partial class TaskListView : ContentView
     #endregion
 
     #region Event Handlers
-    
+
     private async void OnTaskSelected(object sender, SelectionChangedEventArgs e)
     {
         _logger.Debug($"Selection count = {e.CurrentSelection.Count}");
@@ -133,6 +133,20 @@ public partial class TaskListView : ContentView
             Tasks.Remove(matchedTask);
     }
 
+    private async void OnDeleteSwipeItemInvoked(object sender, EventArgs e)
+    {
+        if (sender is SwipeItem swipeItem && swipeItem.CommandParameter is TaskViewModel task)
+        {
+            var confirm = await Application.Current!.Windows[0]?.Page?.DisplayAlert(
+                "Delete Task?",
+                "This can not be un-done",
+                "Delete",
+                "Cancel")!;
+
+            if (confirm) task.DeleteCommand.Execute(null);
+        }
+    }
+
     #endregion
 
     #region Utils
@@ -151,13 +165,13 @@ public partial class TaskListView : ContentView
         _logger.Debug("Inserting task");
 
         // Insert before incomplete task with the next due date but
-        var insertBeforeTask = Tasks.FirstOrDefault(t => t.DueAt > dueDate && t.Complete == false);
+        var insertBeforeTask = Tasks.FirstOrDefault(t => t.DueAt > dueDate && t.IsComplete == false);
 
         // If no incomplete tasks with later due date, add before completed tasks
         if (insertBeforeTask == null)
         {
             _logger.Debug("No incomplete task with greater due date found. Searching for complete tasks");
-            insertBeforeTask = Tasks.FirstOrDefault(t => t.Complete);
+            insertBeforeTask = Tasks.FirstOrDefault(t => t.IsComplete);
         }
 
         // if no complete tasks, insert at end

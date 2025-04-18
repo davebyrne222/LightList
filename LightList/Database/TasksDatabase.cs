@@ -2,18 +2,16 @@ using System.Reflection;
 using LightList.Utils;
 using SQLite;
 using Task = System.Threading.Tasks.Task;
-using System.Linq;
 
-
-namespace LightList.Data;
+namespace LightList.Database;
 
 public class TasksDatabase
 {
     private static readonly List<string> Tables =
     [ // N.B: Order is important!
-        "LightList.Data.Scripts.CreateLabelTable.sql",
-        "LightList.Data.Scripts.CreateTaskTable.sql",
-        "LightList.Data.Scripts.CreateIndexes.sql"
+        "LightList.Database.Scripts.CreateLabelTable.sql",
+        "LightList.Database.Scripts.CreateTaskTable.sql",
+        "LightList.Database.Scripts.CreateIndexes.sql"
     ];
 
     private readonly ILogger _logger;
@@ -35,8 +33,8 @@ public class TasksDatabase
         _logger.Debug("Creating tables");
 
         // Enable FKs; SQLite does not enable by default
-        // await Database.ExecuteAsync("DROP TABLE IF EXISTS Task;");
-        // await Database.ExecuteAsync("DROP TABLE IF EXISTS Label;");
+        await Database.ExecuteAsync("DROP TABLE IF EXISTS Task;");
+        await Database.ExecuteAsync("DROP TABLE IF EXISTS Label;");
         await Database.ExecuteAsync("PRAGMA foreign_keys = ON;");
 
         // Create tables:

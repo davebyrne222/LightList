@@ -21,6 +21,9 @@ public partial class TaskViewModel : ObservableValidator, IQueryAttributable
     [ObservableProperty] private ObservableCollection<string?> _labels = new();
     [ObservableProperty] private string? _selectedLabel;
     private Models.Task _task;
+    [ObservableProperty] private string? _textError;
+    [ObservableProperty] private bool _isEditing;
+    [ObservableProperty] private string _pageTitle = "Add Task";
 
     public TaskViewModel(
         LoggerContext loggerContext,
@@ -44,7 +47,7 @@ public partial class TaskViewModel : ObservableValidator, IQueryAttributable
 
     public string Id => _task.Id;
 
-    [MinLength(5, ErrorMessage = "Minimum 5 characters")]
+    [Required(ErrorMessage = "Please add a description")]
     public string Text
     {
         get => _task.Text;
@@ -57,8 +60,6 @@ public partial class TaskViewModel : ObservableValidator, IQueryAttributable
             }
         }
     }
-
-    [ObservableProperty] private string? _textError;
 
     public DateTime DueAt
     {
@@ -79,12 +80,12 @@ public partial class TaskViewModel : ObservableValidator, IQueryAttributable
     {
         get
         {
-            if (Complete)
+            if (IsComplete)
                 return "Done";
 
             switch (NoDaysRemaining)
             {
-                case < 0: return "Overdue";
+                case < 0: return "Overdue !";
                 case 0: return "Today";
                 case 1: return "Tomorrow";
                 default: return $"{NoDaysRemaining} Days";
@@ -94,7 +95,7 @@ public partial class TaskViewModel : ObservableValidator, IQueryAttributable
 
     public string? Label => _task.Label;
 
-    public bool Complete
+    public bool IsComplete
     {
         get => _task.IsCompleted;
         set
@@ -117,13 +118,15 @@ public partial class TaskViewModel : ObservableValidator, IQueryAttributable
         _loggerContext.Group = "Page Load";
         _logger.Debug("Applying query attributes");
 
-        await LoadLabelsAsync();
-
         if (query.TryGetValue("load", out var value))
         {
             _logger.Debug("Loading task");
+            IsEditing = true;
+            PageTitle = "Edit Task";
             await LoadTaskAsync(value.ToString()!);
         }
+        
+        await LoadLabelsAsync();
 
         _loggerContext.Reset();
     }
@@ -178,7 +181,6 @@ public partial class TaskViewModel : ObservableValidator, IQueryAttributable
             await LoadLabelsAsync();
             SelectedLabel = label;
             _messenger.Send(new LabelsSyncedMessage(true));
-
         }
         catch (Exception ex)
         {
@@ -192,17 +194,17 @@ public partial class TaskViewModel : ObservableValidator, IQueryAttributable
         _loggerContext.Group = "Save Task";
 
         _logger.Debug($"Saving task (id={_task.Id})");
-        
-        
+
         // Validate text field
-        ValidateProperty(nameof(Text), nameof(Text));
+        ValidateProperty(Text, nameof(Text));
 
         if (HasErrors)
         {
             TextError = GetErrors(nameof(Text)).FirstOrDefault()?.ErrorMessage;
+            _logger.Debug($"Validation error: {TextError} ({Text.Length})");
             return;
         }
-         
+
         // Save
         try
         {
@@ -217,7 +219,7 @@ public partial class TaskViewModel : ObservableValidator, IQueryAttributable
             _logger.Error($"Failed to save task: {ex.GetType()} - {ex.Message}");
             throw; // TODO: show alert
         }
-        
+
         _loggerContext.Reset();
     }
 
@@ -226,7 +228,7 @@ public partial class TaskViewModel : ObservableValidator, IQueryAttributable
         _loggerContext.Group = "Complete Task";
 
         _logger.Debug($"Completing task id={_task.Id}");
-        Complete = true;
+        IsComplete = true;
         await _tasksService.SaveTask(_task);
 
         _logger.Debug($"Saved task (id={_task.Id})");

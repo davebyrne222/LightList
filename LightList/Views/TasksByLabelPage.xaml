@@ -9,18 +9,14 @@
         
         <components:NavBar/>
         
-        <FlexLayout Grid.Row="1"
-                    Direction="Row"
-                    AlignItems="Center"
-                    JustifyContent="SpaceBetween"
-                    Grow="1">
-            <Label FontSize="22" Margin="10">Label</Label>
+        <FlexLayout Style="{StaticResource PageHeaderCntr}" Grid.Row="1">
+            <Label Style="{StaticResource PageTitleLbl}">Label</Label>
             <Picker
                 Title="Select Label"
                 ItemsSource="{Binding Labels}"
                 SelectedItem="{Binding SelectedLabel}"
                 ItemDisplayBinding="{Binding}"
-                Margin="10"/>
+                Style="{StaticResource PageFilterPicker}"/>
         </FlexLayout>
         
         <components:TaskListView
