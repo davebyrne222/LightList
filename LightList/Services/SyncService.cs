@@ -110,7 +110,7 @@ public class SyncService : ISyncService
         if (!await _authService.IsUserLoggedIn())
         {
             _logger.Debug("Sync skipped: User is not signed in.");
-            return;
+            throw new UnauthorizedAccessException("User is not signed in.");
         }
 
         try

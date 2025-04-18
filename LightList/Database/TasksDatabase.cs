@@ -33,8 +33,8 @@ public class TasksDatabase
         _logger.Debug("Creating tables");
 
         // Enable FKs; SQLite does not enable by default
-        await Database.ExecuteAsync("DROP TABLE IF EXISTS Task;");
-        await Database.ExecuteAsync("DROP TABLE IF EXISTS Label;");
+        // await Database.ExecuteAsync("DROP TABLE IF EXISTS Task;");
+        // await Database.ExecuteAsync("DROP TABLE IF EXISTS Label;");
         await Database.ExecuteAsync("PRAGMA foreign_keys = ON;");
 
         // Create tables:

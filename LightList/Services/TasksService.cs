@@ -69,20 +69,27 @@ public class TasksService : BaseService, ITasksService
     public async Task SaveTask(Models.Task task)
     {
         Logger.Debug($"Saving task (id={task.Id})");
-        await ExecuteWithLogging(async () =>
+        try
         {
-            // save locally
-            task.UpdatedAt = DateTime.Now;
-            task.IsSynced = false;
-            await _localRepository.SaveTask(task);
+            await ExecuteWithLogging(async () =>
+            {
+                // save locally
+                task.UpdatedAt = DateTime.Now;
+                task.IsSynced = false;
+                await _localRepository.SaveTask(task);
 
-            // save remotely
-            await _syncService.PushTasksAsync([task]);
+                // save remotely
+                await _syncService.PushTasksAsync([task]);
 
-            // update sync status
-            task.IsSynced = true;
-            await _localRepository.SaveTask(task);
-        }, "Error saving task");
+                // update sync status
+                task.IsSynced = true;
+                await _localRepository.SaveTask(task);
+            }, "Error saving task");
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            // User not signed in so not synced. Will be synced when user signs in
+        }
     }
 
     public async Task DeleteTask(Models.Task task)
@@ -112,20 +119,27 @@ public class TasksService : BaseService, ITasksService
     {
         Logger.Debug($"Saving label '{label.Name}'");
 
-        await ExecuteWithLogging(async () =>
+        try
         {
-            // save locally
-            label.UpdatedAt = DateTime.Now;
-            label.IsSynced = false;
-            await _localRepository.SaveLabel(label);
+            await ExecuteWithLogging(async () =>
+            {
+                // save locally
+                label.UpdatedAt = DateTime.Now;
+                label.IsSynced = false;
+                await _localRepository.SaveLabel(label);
 
-            // save remotely
-            await _syncService.PushLabelsAsync([label]);
+                // save remotely
+                await _syncService.PushLabelsAsync([label]);
 
-            // update sync status
-            label.IsSynced = true;
-            await _localRepository.SaveLabel(label);
-        }, "Error saving label");
+                // update sync status
+                label.IsSynced = true;
+                await _localRepository.SaveLabel(label);
+            }, "Error saving label");
+        }
+        catch (UnauthorizedAccessException e)
+        {
+            // User not signed in so not synced. Will be synced when user signs in
+        }
     }
 
     public async Task DeleteLabel(Label label)
