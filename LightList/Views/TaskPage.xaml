@@ -68,7 +68,7 @@
         
         <Grid ColumnDefinitions="*,*" ColumnSpacing="5">
             <Button Text="Delete"
-                    Command="{Binding DeleteCommand}"
+                    Clicked="OnDeleteButtonClicked"
                     IsEnabled="{Binding IsEditing}"
                     Style="{StaticResource DeleteBtn}" />
             

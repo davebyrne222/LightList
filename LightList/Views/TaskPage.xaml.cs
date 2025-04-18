@@ -19,4 +19,15 @@ public partial class TaskPage : ContentPage
             vm?.AddLabelAsync(result);
         }
     }
+    
+    private async void OnDeleteButtonClicked(object sender, EventArgs e)
+    {
+        bool answer = await DisplayAlert("Delete Task?", "This can not be un-done", "Delete", "Cancel");
+        
+        if (answer)
+        {
+            var vm = BindingContext as TaskViewModel;
+            vm?.DeleteCommand.Execute(null);
+        }
+    }
 }
