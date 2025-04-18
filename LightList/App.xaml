@@ -12,6 +12,7 @@
                 <ResourceDictionary Source="Resources/Styles/Page.xaml" />
                 <ResourceDictionary Source="Resources/Styles/ConfigPage.xaml" />
                 <ResourceDictionary Source="Resources/Styles/TaskItem.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Buttons.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

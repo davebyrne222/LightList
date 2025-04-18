@@ -69,11 +69,13 @@
         <Grid ColumnDefinitions="*,*" ColumnSpacing="5">
             <Button Text="Delete"
                     Command="{Binding DeleteCommand}"
-                    IsEnabled="{Binding IsEditing}"/>
+                    IsEnabled="{Binding IsEditing}"
+                    Style="{StaticResource DeleteBtn}" />
             
             <Button Grid.Column="1" 
                     Text="Save"
-                    Command="{Binding SaveCommand}" />
+                    Command="{Binding SaveCommand}"
+                    Style="{StaticResource PrimaryBtn}" />
         </Grid>
     </VerticalStackLayout>
 </ContentPage>
