@@ -32,7 +32,8 @@
                             <SwipeItem Text="Delete"
                                        IconImageSource="{FontImageSource Glyph='&#xf4c4;', FontFamily='Ionicons'}"
                                        BackgroundColor="{StaticResource Due}"
-                                       Command="{Binding DeleteCommand}" />
+                                       CommandParameter="{Binding .}"
+                                       Invoked="OnDeleteSwipeItemInvoked" />
                         </SwipeItems>
                     </SwipeView.LeftItems>
                     <SwipeView.RightItems>
@@ -93,7 +94,7 @@
                                                     <Binding Path="IsComplete" />
                                                     <Binding Path="NoDaysRemaining" />
                                                 </MultiBinding>
-                                            </Label.Style> 
+                                            </Label.Style>
                                         </Label>
                                     </HorizontalStackLayout>
                                 </Border>

@@ -133,6 +133,20 @@ public partial class TaskListView : ContentView
             Tasks.Remove(matchedTask);
     }
 
+    private async void OnDeleteSwipeItemInvoked(object sender, EventArgs e)
+    {
+        if (sender is SwipeItem swipeItem && swipeItem.CommandParameter is TaskViewModel task)
+        {
+            var confirm = await Application.Current!.Windows[0]?.Page?.DisplayAlert(
+                "Delete Task?",
+                "This can not be un-done",
+                "Delete",
+                "Cancel")!;
+
+            if (confirm) task.DeleteCommand.Execute(null);
+        }
+    }
+
     #endregion
 
     #region Utils
