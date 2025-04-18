@@ -46,10 +46,7 @@ public class TasksDatabase
     }
 
     #region Public methods - Tasks
-
-    /**
-     * Gets all tasks in database
-     */
+    
     public async Task<List<Models.Task>> GetTasksAsync(bool excludeSynced = false, bool excludeDeleted = true)
     {
         _logger.Debug($"Retrieving all tasks (excludeSynced: {excludeSynced}, excludeDeleted: {excludeDeleted})");
@@ -99,7 +96,7 @@ public class TasksDatabase
         return await Database.DeleteAsync(item);
     }
 
-    public class DueDateWrapper
+    private class DueDateWrapper
     {
         [Column("DueDate")]
         public DateTime DueDate { get; set; }
