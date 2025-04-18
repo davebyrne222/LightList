@@ -60,9 +60,9 @@
                                     <Image BackgroundColor="Transparent" Rotation="270">
                                         <Image.Source>
                                             <FontImageSource Glyph="&#xf48d;"
-                                                             Color="{StaticResource Gray200}"
+                                                             Color="{StaticResource SecondaryText}"
                                                              FontFamily="Ionicons"
-                                                             Size="16" />
+                                                             Size="{StaticResource SmallFontSize}" />
                                         </Image.Source>
                                     </Image>
                                     <Label Text="{Binding Label, Converter={StaticResource EmptyToHyphenConverter}}"
@@ -75,14 +75,27 @@
                                             <Binding Path="NoDaysRemaining" />
                                         </MultiBinding>
                                     </Border.Style>
-                                    <Label Text="{Binding NoDaysRemainingLbl}">
-                                        <Label.Style>
-                                            <MultiBinding Converter="{StaticResource TaskDueLblConverter}">
-                                                <Binding Path="IsComplete" />
-                                                <Binding Path="NoDaysRemaining" />
-                                            </MultiBinding>
-                                        </Label.Style>
-                                    </Label>
+                                    <HorizontalStackLayout
+                                        HorizontalOptions="Start"
+                                        VerticalOptions="Center"
+                                        Spacing="10">
+                                        <Image BackgroundColor="Transparent">
+                                            <Image.Source>
+                                                <FontImageSource Glyph="&#xf117;"
+                                                                 Color="{StaticResource SecondaryText}"
+                                                                 FontFamily="Ionicons"
+                                                                 Size="{StaticResource SmallFontSize}" />
+                                            </Image.Source>
+                                        </Image>
+                                        <Label Text="{Binding NoDaysRemainingLbl}">
+                                            <Label.Style>
+                                                <MultiBinding Converter="{StaticResource TaskDueLblConverter}">
+                                                    <Binding Path="IsComplete" />
+                                                    <Binding Path="NoDaysRemaining" />
+                                                </MultiBinding>
+                                            </Label.Style> 
+                                        </Label>
+                                    </HorizontalStackLayout>
                                 </Border>
                             </FlexLayout>
                         </VerticalStackLayout>

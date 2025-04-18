@@ -85,7 +85,7 @@ public partial class TaskViewModel : ObservableValidator, IQueryAttributable
 
             switch (NoDaysRemaining)
             {
-                case < 0: return "! Overdue";
+                case < 0: return "Overdue !";
                 case 0: return "Today";
                 case 1: return "Tomorrow";
                 default: return $"{NoDaysRemaining} Days";

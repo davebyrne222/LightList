@@ -21,7 +21,7 @@
         <Setter Property="Grow" Value="1" />
         <Setter Property="JustifyContent" Value="Start" />
         <Setter Property="AlignItems" Value="Center" />
-        <Setter Property="HeightRequest" Value="40" />
+        <Setter Property="HeightRequest" Value="30" />
         <Setter Property="Margin" Value="0" />
     </Style>
 
@@ -74,9 +74,9 @@
     </Style>
 
     <Style x:Key="DueInIndicatorLate" TargetType="Border" BasedOn="{StaticResource DueInIndicator}">
-        <Setter Property="Background" Value="transparent" />
-        <Setter Property="StrokeThickness" Value="2" />
-        <Setter Property="Stroke" Value="{StaticResource Late}" />
+        <!-- <Setter Property="Background" Value="transparent" /> -->
+        <!-- <Setter Property="StrokeThickness" Value="1" /> -->
+        <!-- <Setter Property="Stroke" Value="{StaticResource Late}" /> -->
     </Style>
 
     <Style x:Key="DueInIndicatorDue" TargetType="Border" BasedOn="{StaticResource DueInIndicator}">
