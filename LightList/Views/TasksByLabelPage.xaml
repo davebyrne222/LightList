@@ -12,7 +12,9 @@
         <FlexLayout Style="{StaticResource PageHeaderCntr}" Grid.Row="1">
             <Label Style="{StaticResource PageTitleLbl}">Label</Label>
             <Picker
-                Title="Select Label"
+                Title="{OnPlatform 
+                                    iOS='Choose Label', 
+                                    MacCatalyst=''}"
                 ItemsSource="{Binding Labels}"
                 SelectedItem="{Binding SelectedLabel}"
                 ItemDisplayBinding="{Binding}"

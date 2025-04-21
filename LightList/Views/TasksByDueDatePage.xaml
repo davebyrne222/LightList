@@ -12,7 +12,9 @@
         <FlexLayout Style="{StaticResource PageHeaderCntr}" Grid.Row="1">
             <Label Style="{StaticResource PageTitleLbl}">Due Date</Label>
             <Picker
-                Title="Choose Date"
+                Title="{OnPlatform 
+                                    iOS='Choose Date', 
+                                    MacCatalyst=''}"
                 ItemsSource="{Binding DueDates}"
                 SelectedItem="{Binding SelectedDate}"
                 ItemDisplayBinding="{Binding}"
