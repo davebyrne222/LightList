@@ -45,30 +45,37 @@
                         </SwipeItems>
                     </SwipeView.RightItems>
                     <Border Style="{StaticResource TaskItem}">
-                        <VerticalStackLayout Spacing="0" HorizontalOptions="Start">
+                        <VerticalStackLayout Spacing="10" HorizontalOptions="Start">
                             <FlexLayout Style="{StaticResource TaskItemDescriptionCntr}">
                                 <Label Text="{Binding Text}"
                                        Style="{Binding IsComplete, Converter={StaticResource TaskDueTextConverter}}" />
                             </FlexLayout>
-                            <BoxView Style="{StaticResource TaskItemSeparator}" />
                             <FlexLayout Style="{StaticResource TaskItemMetaCntr}">
-                                <HorizontalStackLayout
-                                    HorizontalOptions="Start"
-                                    VerticalOptions="Center"
-                                    Spacing="10">
-                                    <!-- <Label Text="{Binding DateLabel}" -->
-                                    <!--        Style="{StaticResource TaskItemLabelLbl}" /> -->
-                                    <Image BackgroundColor="Transparent" Rotation="270">
-                                        <Image.Source>
-                                            <FontImageSource Glyph="&#xf48d;"
-                                                             Color="{StaticResource SecondaryText}"
-                                                             FontFamily="Ionicons"
-                                                             Size="{StaticResource SmallFontSize}" />
-                                        </Image.Source>
-                                    </Image>
-                                    <Label Text="{Binding Label, Converter={StaticResource EmptyToHyphenConverter}}"
-                                           Style="{StaticResource TaskItemLabelLbl}" />
-                                </HorizontalStackLayout>
+                                <Border>
+                                    <Border.Style>
+                                        <MultiBinding Converter="{StaticResource TaskDueIndicatorConverter}">
+                                            <Binding Path="IsComplete" />
+                                            <Binding Path="NoDaysRemaining" />
+                                        </MultiBinding>
+                                    </Border.Style>
+                                    <HorizontalStackLayout
+                                        HorizontalOptions="Start"
+                                        VerticalOptions="Center"
+                                        Spacing="10">
+                                        <!-- <Label Text="{Binding DateLabel}" -->
+                                        <!--        Style="{StaticResource TaskItemLabelLbl}" /> -->
+                                        <Image BackgroundColor="Transparent" Rotation="270">
+                                            <Image.Source>
+                                                <FontImageSource Glyph="&#xf48d;"
+                                                                 Color="{StaticResource SecondaryText}"
+                                                                 FontFamily="Ionicons"
+                                                                 Size="{StaticResource SmallFontSize}" />
+                                            </Image.Source>
+                                        </Image>
+                                        <Label Text="{Binding Label, Converter={StaticResource EmptyToHyphenConverter}}"
+                                               Style="{StaticResource TaskItemLabelLbl}" />
+                                    </HorizontalStackLayout>
+                                </Border>
                                 <Border>
                                     <Border.Style>
                                         <MultiBinding Converter="{StaticResource TaskDueIndicatorConverter}">

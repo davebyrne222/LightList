@@ -103,6 +103,7 @@
     <Style x:Key="DueInIndicatorLbl" TargetType="Label">
         <Setter Property="FontSize" Value="{StaticResource SmallFontSize}" />
         <Setter Property="TextColor" Value="{StaticResource SecondaryText}" />
+        <Setter Property="TextTransform" Value="Uppercase" />
         <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="FontFamily" Value="{StaticResource BoldFontFamily}"/>
         <Setter Property="MinimumHeightRequest" Value="20" />
