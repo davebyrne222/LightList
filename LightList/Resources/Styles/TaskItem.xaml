@@ -9,10 +9,19 @@
     <Style x:Key="TaskItem" TargetType="Border">
         <Setter Property="BackgroundColor" Value="White" />
         <Setter Property="Padding" Value="20, 10" />
-        <Setter Property="Margin" Value="0" />
+        <Setter Property="Margin" Value="0, 0, 0, 5" />
         <Setter Property="Stroke" Value="{StaticResource Gray100}" />
         <Setter Property="StrokeShape" Value="RoundRectangle 10" />
         <Setter Property="StrokeThickness" Value="0.5" />
+        <Setter Property="Shadow">
+            <Setter.Value>
+                <Shadow 
+                    Brush="{StaticResource Secondary}"
+                    Opacity="1"
+                    Offset="0,2"
+                    Radius="5" />
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- Description -->
